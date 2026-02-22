@@ -1,0 +1,32 @@
+Package: selecta
+Type: Package
+Title: EQUATOR-Style Enrollment Diagrams for Clinical Studies
+Version: 0.1.0
+Authors@R: c(
+    person(
+        given = c("Paul", "Hsin-ti"), 
+        family = "McClelland", 
+        role = c("aut", "cre", "cph"), 
+        email = "PaulHMcClelland@protonmail.com",
+        comment = c(ORCID = "0000-0002-3119-6531")
+    ))
+Description: Build EQUATOR-style flowcharts for clinical studies by
+    sequentially defining inclusion and exclusion criteria, study arms, and
+    endpoints. Diagrams are constructed with a pipe-friendly API and
+    rendered via grid graphics. Supports both data-driven (automatic) and 
+    manual-count modes.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+URL: https://phmcc.github.io/selecta/, https://github.com/phmcc/selecta
+BugReports: https://github.com/phmcc/selecta/issues
+RoxygenNote: 7.3.3
+Depends:
+    R (>= 4.1.0)
+Imports:
+    data.table,
+    grid
+Suggests:
+    knitr,
+    tinytest
+VignetteBuilder: knitr
