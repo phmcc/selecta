@@ -28,44 +28,64 @@ draw_grid(
 \arguments{
 \item{graph}{A laid-out graph (output of \code{layout_nodes()}).}
 
-\item{cex}{Numeric. Font size for main box text. Default 0.85.}
+\item{cex}{Numeric. Font size multiplier for main box text. Default 0.85.}
 
-\item{cex_side}{Numeric. Font size for side box text. Default same as cex.}
+\item{cex_side}{Numeric. Font size multiplier for side box text. Defaults
+to the value of \code{cex}.}
 
-\item{cex_phase}{Numeric. Font size for phase labels.}
+\item{cex_phase}{Numeric. Font size multiplier for phase labels.
+Default 0.9.}
 
-\item{box_fill, side_fill}{Character. Fill colors.}
+\item{box_fill}{Character. Fill colour for main boxes. Default \code{"white"}.}
 
-\item{border_col, arrow_col}{Character. Border and arrow colors.}
+\item{side_fill}{Character. Fill colour for side (exclusion) boxes.
+Default \code{"white"}.}
 
-\item{phase_fill, phase_text_col}{Character. Phase box colors.}
+\item{border_col}{Character. Border colour for all boxes.
+Default \code{"black"}.}
 
-\item{lwd}{Numeric. Line width.}
+\item{arrow_col}{Character. Colour for arrows and connector lines.
+Default \code{"black"}.}
 
-\item{count_first}{Logical. Count before label in side boxes.}
+\item{phase_fill}{Character. Background colour for phase label boxes.
+Default \code{"black"}.}
 
-\item{newpage}{Logical. Call \code{grid.newpage()} before drawing?}
+\item{phase_text_col}{Character. Text colour for phase labels.
+Default \code{"white"}.}
 
-\item{vpad}{Numeric. Vertical padding between elements in inches.
-This is the single tunable factor that controls the uniform vertical
-spacing between any box edge and the next adjacent element. Default 0.25.}
+\item{lwd}{Numeric. Line width for borders and arrows. Default 1.}
 
-\item{pad}{Numeric. Padding inside boxes in inches. Default 0.08.}
+\item{count_first}{Logical. If \code{TRUE}, side-box labels are rendered
+as \code{"214  Discontinued"} (bold count before label) rather than the
+default \code{"Discontinued (n = 214)"}. Default \code{FALSE}.}
 
-\item{line_height}{Numeric. Line spacing in inches. Controls box heights
-for both main and side boxes. Default 0.20.}
+\item{newpage}{Logical. If \code{TRUE}, calls \code{grid.newpage()} before
+drawing. Default \code{TRUE}.}
 
-\item{margin}{Numeric. Fixed margin on all four sides in inches.
+\item{vpad}{Numeric. Vertical spacing between elements in inches. Controls
+the uniform gap between any box edge and the next adjacent element.
 Default 0.25.}
+
+\item{pad}{Numeric. Internal padding within boxes in inches. Default 0.08.}
+
+\item{line_height}{Numeric. Vertical line spacing in inches, controlling
+box heights for both main and side boxes. Scales proportionally with
+\code{cex}. Default 0.20.}
+
+\item{margin}{Numeric. Fixed margin on all four sides of the canvas in
+inches. Default 0.25.}
 
 \item{phase_width}{Numeric. Width of phase label boxes in inches.
 Default 0.22.}
 }
 \value{
-Invisibly returns the graph.
+Invisibly returns the graph, augmented with computed layout
+  dimensions (\code{diagram_width_in}, \code{diagram_height_in}).
 }
 \description{
 Computes all layout in inches using physical text measurements, then
-renders. Use \code{autodiagram()} to auto-size the output device.
+renders the diagram within a fixed-margin viewport. Intended to be called
+by \code{\link{flowchart}} or \code{\link{autoflow}} rather than
+directly.
 }
 \keyword{internal}

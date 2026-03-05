@@ -11,47 +11,68 @@ exclude(
   n = NULL,
   reasons = NULL,
   show_zero = FALSE,
-  remaining_label = NULL
+  show_count = FALSE,
+  included_label = NULL
 )
 }
 \arguments{
 \item{.flow}{A \code{selecta} object (piped from \code{enroll()} or a
 previous step).}
 
-\item{label}{Character string. Human-readable description for the side box
-(e.g., \code{"Excluded"} or \code{"Lost to follow-up"}).}
+\item{label}{Character. Human-readable description for the side box
+(\emph{e.g.,} \code{"Excluded"} or \code{"Lost to follow-up"}).
+After \code{stratify()}, may be a character vector with one label
+per arm (\emph{e.g.,} \code{c("Treatment discontinued", "Initiated treatment")}).}
 
 \item{expr}{An unquoted expression evaluated against the data. Should
 evaluate to \code{TRUE} for rows to be \strong{removed}. (Data-driven
 mode only.)}
 
 \item{n}{Integer (manual mode). Number of participants removed at this step.
-After an \code{allocate()} step, supply a vector with one value per arm.}
+After a \code{stratify()} step, supply a vector with one value per arm.}
 
 \item{reasons}{Exclusion sub-reasons. Accepts three forms:
 \itemize{
   \item A \strong{named integer vector} (manual mode): counts per reason,
-    e.g. \code{c("Disease progression" = 12, "Declined" = 8)}.
+    \emph{e.g.,} \code{c("Disease progression" = 12, "Declined" = 8)}.
   \item A \strong{character string} (data-driven mode): column name whose
     values are tabulated automatically.
-  \item A \strong{list} of named vectors (manual mode after \code{allocate()}):
+  \item A \strong{list} of named vectors (manual mode after \code{stratify()}):
     one vector per arm.
 }}
 
 \item{show_zero}{Logical. If \code{FALSE} (default), sub-reasons with a
 count of zero are hidden. Set to \code{TRUE} to display all pre-specified
 reason categories, including those with zero participants.}
+
+\item{show_count}{Logical. If \code{FALSE} (default), the intermediate
+count box is suppressed -- the count still updates internally but no box
+is rendered. Set to \code{TRUE} to force a count box. Overridden by
+\code{included_label}: providing any \code{included_label} always
+creates a count box regardless of \code{show_count}. Also automatically
+suppressed when the next step is \code{stratify()}, \code{endpoint()},
+or \code{allocate()}.}
+
+\item{included_label}{Character string (or vector). Optional text for the
+box showing the count remaining after exclusion. When provided, a
+count box is always rendered regardless of \code{show_count}. After
+\code{stratify()}, may be a character vector with one label per arm.}
 }
 \value{
-The updated \code{selecta} object.
+The updated \code{selecta} object with an exclusion step appended.
 }
 \description{
 Appends an exclusion step to the enrollment flow. Participants matching the
 criterion are removed and shown in a side box. Optionally, itemized
 sub-reasons can be displayed below the total.
 }
+\details{
+After a \code{stratify()} step, both \code{label} and
+\code{included_label} accept character vectors (one element per arm)
+for per-arm labelling -- useful in observational designs where
+attrition mechanisms differ across strata.
+}
 \examples{
-# Simple exclusion
 enroll(n = 500) |>
   exclude("Ineligible", n = 65)
 
@@ -63,4 +84,27 @@ enroll(n = 500) |>
                 "Declined surgery" = 15,
                 "Lost to follow-up" = 10))
 
+# Show intermediate count box (opt-in)
+enroll(n = 500) |>
+  exclude("Ineligible", n = 65, show_count = TRUE) |>
+  exclude("Declined", n = 20) |>
+  endpoint("Final")
+
+# Or use included_label (always shows count box)
+enroll(n = 500) |>
+  exclude("Ineligible", n = 65,
+          included_label = "Eligible") |>
+  endpoint("Final")
+
+# Per-arm labels (observational)
+enroll(n = 1000) |>
+  stratify(labels = c("Exposed", "Unexposed"), n = c(500, 500),
+           label = "Classified by exposure") |>
+  exclude(c("Treatment discontinued", "Initiated treatment"),
+          n = c(45, 52))
+
+}
+\seealso{
+\code{\link{assess}} for assessment/procedure steps (STARD),
+  \code{\link{enroll}} for initialising a flow
 }

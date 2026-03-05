@@ -7,34 +7,56 @@
 enroll(data = NULL, id = NULL, n = NULL, label = "Study Population")
 }
 \arguments{
-\item{data}{A \code{data.frame} or \code{data.table}. Each row represents
-one participant. If supplied, expressions in \code{exclude()} are
-evaluated against this data to compute counts automatically.}
+\item{data}{A \code{data.frame} or \code{data.table} in which each row
+represents one participant. When supplied, exclusion expressions passed
+to \code{\link{exclude}} are evaluated against this data to compute
+counts automatically. If \code{NULL} (default), the flow operates in
+manual mode.}
 
 \item{id}{Character string naming the participant ID column in \code{data}.
-Defaults to the first column.}
+Defaults to the first column. Ignored in manual mode.}
 
-\item{n}{Integer. Starting population count for manual mode. Ignored when
-\code{data} is supplied.}
+\item{n}{Integer. Starting population count for manual mode. Must be a
+non-negative scalar. Ignored when \code{data} is supplied.}
 
-\item{label}{Character string for the top-level box. Defaults to
-\code{"Assessed for eligibility"}.}
+\item{label}{Character string for the top-level box in the diagram.
+Default is \code{"Study Population"}.}
 }
 \value{
-An object of class \code{"selecta"}.
+An object of class \code{"selecta"} containing the data (if
+  supplied), mode, starting count, label, and an empty step list.
+  Subsequent pipeline functions (\code{\link{exclude}},
+  \code{\link{stratify}}, \code{\link{endpoint}}, \emph{etc.}) append
+  steps to this object.
 }
 \description{
-Entry point for building a CONSORT-style enrollment diagram. Supply either
-a \code{data.frame} (for data-driven mode where counts are computed
-automatically) or a starting count \code{n} (for manual mode).
+Entry point for building an EQUATOR-style enrollment diagram from a single
+starting population. Accepts either a \code{data.frame} (data-driven mode,
+where counts are computed automatically from exclusion expressions) or a
+starting count \code{n} (manual mode, where counts are supplied explicitly
+at each step).
+}
+\details{
+For flows that begin with multiple parallel identification streams
+(\emph{e.g.,} PRISMA 2020 systematic reviews), use \code{\link{sources}}
+instead.
 }
 \examples{
 # Manual mode
-enroll(n = 500, label = "Records identified")
+enroll(n = 500, label = "Assessed for eligibility")
 
-# Data-driven
-\dontrun{
-enroll(trial_data, id = "patient_id")
+# Data-driven mode
+enroll(rctselect2, id = "patient_id", label = "Study Population")
+
+# Minimal CONSORT pipeline
+enroll(n = 500) |>
+  exclude("Ineligible", n = 65) |>
+  allocate(labels = c("Treatment", "Control"), n = c(218, 217)) |>
+  endpoint("Analysed")
+
 }
-
+\seealso{
+\code{\link{sources}} for multi-source entry,
+  \code{\link{exclude}} for adding exclusion criteria,
+  \code{\link{flowchart}} for rendering
 }

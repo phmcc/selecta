@@ -6,7 +6,7 @@
 \alias{selecta-package}
 \title{selecta: EQUATOR-Style Enrollment Diagrams for Clinical Studies}
 \description{
-Build EQUATOR-style flowcharts for clinical studies by sequentially defining inclusion and exclusion criteria, study arms, and endpoints. Diagrams are constructed with a pipe-friendly API and rendered via grid graphics. Supports both data-driven (automatic) and manual-count modes.
+Build EQUATOR-style flowcharts for clinical studies by sequentially defining inclusion and exclusion criteria, study arms, and endpoints. The pipe-friendly API supports CONSORT (randomized trials), STROBE (observational cohorts), STARD (diagnostic accuracy), and PRISMA (systematic reviews) diagram layouts, with multi-source entry, convergence, cross-classification grids, and per-arm labelling. Diagrams are rendered via 'grid' graphics in both data-driven (automatic counting) and manual-count modes.
 }
 \seealso{
 Useful links:

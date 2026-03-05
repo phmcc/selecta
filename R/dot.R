@@ -1,60 +1,50 @@
 #' Convert Graph to Graphviz DOT String
 #'
-#' @param graph A laid-out graph from \code{layout_nodes()}.
-#' @return A character string containing the DOT specification.
+#' @param graph A computed and laid-out graph.
+#' @return A character string in DOT format.
 #' @keywords internal
 to_dot <- function(graph) {
 
   nodes <- graph$nodes
   edges <- graph$edges
 
-  ## ---- Header ----
+  lines <- character()
+  lines <- c(lines, "digraph selecta {")
+  lines <- c(lines, '  rankdir=TB;')
+  lines <- c(lines, '  node [shape=box, style=filled, fontname="Helvetica"];')
 
-  header <- c(
-    "digraph selecta {",
-    "  graph [rankdir=TB, splines=ortho, nodesep=0.5, ranksep=0.6];",
-    "  node [shape=box, style=filled, fontsize=10, fontname=Helvetica, margin=\"0.15,0.08\"];",
-    "  edge [arrowsize=0.7];",
-    ""
-  )
-
-  ## ---- Nodes (vectorized) ----
-
-  ## Build display labels from structured text + n columns
-  labs <- fifelse(
-    nodes$role == "side",
-    sprintf("%s (n = %s)", nodes$text, fmt_n(nodes$n)),
-    fifelse(
-      nchar(nodes$text) > 0L,
-      sprintf("%s\\n(n = %s)", nodes$text, fmt_n(nodes$n)),
-      sprintf("(n = %s)", fmt_n(nodes$n))
-    )
-  )
-  labs <- gsub('"', '\\\\"', labs)
-  fills <- fifelse(nodes$role == "side", "#f7f7f7", "#ffffff")
-  node_lines <- sprintf('  n%d [label="%s", fillcolor="%s"];',
-                        nodes$node_id, labs, fills)
-
-  ## ---- Rank alignment (vectorized per phase) ----
-
-  phase_ids <- split(nodes$node_id, nodes$phase)
-  rank_lines <- vapply(phase_ids, function(ids) {
-    if (length(ids) > 1L) {
-      sprintf("  { rank=same; %s }",
-              paste(sprintf("n%d", ids), collapse = "; "))
+  for (i in seq_len(nrow(nodes))) {
+    nd <- nodes[i]
+    lbl <- if (nchar(nd$text) > 0L) {
+      sprintf("%s\\nn = %s", nd$text, fmt_n(nd$n))
     } else {
-      NA_character_
+      sprintf("n = %s", fmt_n(nd$n))
     }
-  }, character(1L))
-  rank_lines <- rank_lines[!is.na(rank_lines)]
 
-  ## ---- Edges (vectorized) ----
+    fill <- switch(nd$role,
+      side          = "#f0f0f0",
+      source        = "#e8f4e8",
+      source_header = "#d4e8d4",
+      cell          = "#e8e8f4",
+      alloc         = "#ffffff",
+      "#ffffff"
+    )
 
-  styles <- fifelse(edges$edge_type == "exclude", " [style=dashed]", "")
-  edge_lines <- sprintf("  n%d -> n%d%s;", edges$from, edges$to, styles)
+    lines <- c(lines, sprintf('  n%d [label="%s", fillcolor="%s"];',
+                               nd$node_id, lbl, fill))
+  }
 
-  ## ---- Assemble ----
+  for (i in seq_len(nrow(edges))) {
+    e <- edges[i]
+    style <- switch(e$edge_type,
+      exclude  = ' [style=dashed]',
+      converge = ' [style=bold]',
+      classify = ' [arrowhead=normal]',
+      ''
+    )
+    lines <- c(lines, sprintf("  n%d -> n%d%s;", e$from, e$to, style))
+  }
 
-  paste(c(header, node_lines, "", rank_lines, "", edge_lines, "}"),
-        collapse = "\n")
+  lines <- c(lines, "}")
+  paste(lines, collapse = "\n")
 }

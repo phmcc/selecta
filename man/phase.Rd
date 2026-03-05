@@ -9,29 +9,33 @@ phase(.flow, label)
 \arguments{
 \item{.flow}{A \code{selecta} object.}
 
-\item{label}{Character string. The phase label, rendered as vertical text
-on the left margin.}
+\item{label}{Character string. The phase label, rendered as rotated
+text on the left margin.}
 }
 \value{
-The updated \code{selecta} object.
+The updated \code{selecta} object with a phase marker
+  appended.
 }
 \description{
-Adds a vertical phase label to the left margin of the diagram (e.g.,
-\code{"Enrollment"}, \code{"Allocation"}, \code{"Follow-up"},
-\code{"Analysis"}). Phase labels span all subsequent steps until the next
-\code{phase()} call or the end of the flow.
+Adds a vertical phase label to the left margin of the diagram
+(\emph{e.g.,} \code{"Enrollment"}, \code{"Allocation"},
+\code{"Follow-up"}, \code{"Analysis"}). Phase labels span all
+subsequent steps until the next \code{phase()} call or the end of
+the flow.
 }
 \examples{
 enroll(n = 1200, label = "Records identified") |>
   phase("Enrollment") |>
   exclude("Duplicates", n = 84) |>
-  exclude("Age criteria", n = 63) |>
   phase("Allocation") |>
-  allocate(labels = c("Drug A", "Placebo"), n = c(520, 533)) |>
+  stratify(labels = c("Drug A", "Placebo"), n = c(520, 533)) |>
   phase("Follow-up") |>
   exclude("Lost to follow-up", n = c(23, 31)) |>
   phase("Analysis") |>
   endpoint("Final Analysis") |>
   flowchart()
 
+}
+\seealso{
+\code{\link{flowchart}} for rendering with phase labels
 }

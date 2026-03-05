@@ -12,9 +12,19 @@
 \item{...}{Ignored.}
 }
 \value{
-A \code{data.table} with columns: \code{phase}, \code{role},
-  \code{arm}, \code{text}, \code{n}.
+A \code{data.table} with columns \code{phase}, \code{role},
+  \code{arm}, \code{text}, and \code{n}. Each row corresponds to one
+  node in the computed diagram.
 }
 \description{
-Computes all counts and returns a \code{data.table} summarizing each node.
+Computes all counts from the pipeline and returns a \code{data.table}
+summarising each node in the diagram.
+}
+\examples{
+flow <- enroll(n = 500) |>
+  exclude("Ineligible", n = 65) |>
+  allocate(labels = c("Drug A", "Placebo"), n = c(218, 217)) |>
+  endpoint("Analysed")
+summary(flow)
+
 }

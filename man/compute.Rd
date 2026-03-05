@@ -10,9 +10,13 @@ compute(x)
 \item{x}{A \code{selecta} object.}
 }
 \value{
-A list with \code{nodes}, \code{edges}, and \code{phases} data.tables.
+A list with components \code{nodes}, \code{edges}, and
+  \code{phases}, each a \code{data.table}.
 }
 \description{
-Compute Enrollment Counts
+Walks the step list and resolves all counts, producing a graph of
+nodes, edges, and phases. Maintains a generalised stream model where
+parallel tracks (from \code{sources()} or \code{stratify()}) are
+stored as a list of active streams.
 }
 \keyword{internal}

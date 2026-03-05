@@ -10,30 +10,37 @@ flowchart(.flow, engine = c("grid", "dot"), count_first = FALSE, ...)
 \method{plot}{selecta}(x, engine = c("grid", "dot"), ...)
 }
 \arguments{
-\item{.flow}{A \code{selecta} object.}
+\item{.flow}{A \code{selecta} object created by \code{\link{enroll}} or
+\code{\link{sources}} and populated with pipeline steps.}
 
 \item{engine}{Character. Rendering engine: \code{"grid"} (default) for
 base grid graphics, or \code{"dot"} to return a Graphviz DOT string
 (for use with \pkg{DiagrammeR}).}
 
 \item{count_first}{Logical. If \code{TRUE}, side-box labels are rendered
-as \code{"214  Discontinued"} (count bolded before label) rather than
-the default \code{"Discontinued (n = 214)"}. Default \code{FALSE}.}
+as \code{"214  Discontinued"} (bold count before label) rather than the
+default \code{"Discontinued (n = 214)"}. Applies to all box types.
+Default \code{FALSE}.}
 
-\item{...}{Additional arguments passed to the rendering function (e.g.,
-\code{cex}, \code{cex_side}, \code{box_fill}, \code{phase_fill}).}
+\item{...}{Additional arguments passed to the rendering function
+(\emph{e.g.,} \code{cex}, \code{cex_side}, \code{cex_phase},
+\code{box_fill}, \code{phase_fill}, \code{vpad}, \code{margin}).}
 
 \item{x}{A \code{selecta} object.}
 }
 \value{
-For \code{"grid"}: invisibly returns the computed graph structure.
-  For \code{"dot"}: returns a DOT string.
+For \code{engine = "grid"}: invisibly returns the computed graph
+  structure (a list of \code{nodes}, \code{edges}, and \code{phases}
+  data.tables). For \code{engine = "dot"}: returns a DOT-language string.
 }
 \description{
-Computes counts, lays out nodes, and renders the CONSORT-style diagram.
-This is the primary rendering function for \code{selecta} objects.
+Computes counts from the pipeline, lays out nodes, and draws an
+EQUATOR-style enrollment diagram. This is the primary rendering
+function for interactive use; for saving to file with auto-sized
+dimensions, see \code{\link{autoflow}}.
 }
 \examples{
+# Minimal CONSORT diagram
 enroll(n = 500) |>
   exclude("Age < 18", n = 45) |>
   exclude("Missing consent", n = 12) |>
@@ -56,4 +63,9 @@ enroll(n = 1200) |>
   endpoint("Final Analysis") |>
   flowchart()
 
+}
+\seealso{
+\code{\link{autoflow}} for saving to file,
+  \code{\link{suggest_size}} for dimension recommendations,
+  \code{\link{plot.selecta}} for S3 plot method
 }

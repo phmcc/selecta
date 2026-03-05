@@ -1,47 +1,37 @@
 #' Extract the Final Cohort
 #'
 #' Returns the dataset remaining after all exclusion criteria have been
-#' applied. If arms have been defined, returns either a single combined
-#' \code{data.table} or a named list of per-arm \code{data.table}s.
+#' applied. When arms are defined via \code{\link{stratify}}, the result
+#' is either a single combined \code{data.table} or a named list of
+#' per-arm \code{data.table}s. Data-driven mode only.
 #'
-#' This enables a seamless analysis workflow — define your enrollment flow,
-#' render it, and immediately pass the resulting cohort into your analysis:
+#' This supports a seamless modelling workflow: define the enrollment
+#' flow, render it with \code{\link{flowchart}}, and immediately pass the
+#' resulting cohort into downstream analysis.
 #'
-#' \preformatted{
-#' flow <- enroll(trial_data, id = "patient_id") |>
-#'   exclude("Under 18", expr = age < 18) |>
-#'   exclude("No consent", expr = is.na(consent_date)) |>
-#'   allocate("treatment") |>
-#'   exclude("Lost to follow-up", expr = ltfu == 1) |>
-#'   endpoint("Final Analysis")
-#'
-#' flowchart(flow)
-#' cohort(flow)                    # combined data.table
-#' cohort(flow, split = TRUE)     # list by arm
-#' cohort(flow, arm = "Drug A")   # single arm
-#' }
-#'
-#' @param .flow A \code{selecta} object.
+#' @param .flow A \code{selecta} object created in data-driven mode
+#'   (\code{data} supplied to \code{\link{enroll}}).
 #' @param split Logical. If \code{TRUE} and arms are defined, return a named
 #'   list of \code{data.table}s (one per arm). Default \code{FALSE} returns a
 #'   single combined \code{data.table}.
 #' @param arm Character. Name of a specific arm to extract. If supplied,
-#'   returns only that arm's data.
+#'   returns only that arm's \code{data.table}.
 #'
-#' @return A \code{data.table} (or named list of \code{data.table}s when
-#'   \code{split = TRUE}).
+#' @return A \code{data.table} containing the participants remaining after
+#'   all exclusion criteria. When \code{split = TRUE}, a named list of
+#'   \code{data.table}s (one per arm). When \code{arm} is specified, a
+#'   single-arm \code{data.table}.
+#'
+#' @seealso \code{\link{cohorts}} for stage-by-stage snapshots,
+#'   \code{\link{enroll}} for initialising a data-driven flow
 #'
 #' @examples
-#' \dontrun{
-#' flow <- enroll(trial_data, id = "patient_id") |>
-#'   exclude("Under 18", expr = age < 18) |>
-#'   allocate("treatment") |>
-#'   endpoint("Final Analysis")
+#' flow <- enroll(rctselect2, id = "patient_id") |>
+#'   exclude("Ineligible", expr = eligible == FALSE) |>
+#'   endpoint("Final")
 #'
 #' final <- cohort(flow)
-#' by_arm <- cohort(flow, split = TRUE)
-#' drug_a <- cohort(flow, arm = "Drug A")
-#' }
+#' nrow(final)
 #'
 #' @export
 cohort <- function(.flow, split = FALSE, arm = NULL) {
@@ -78,9 +68,10 @@ cohort <- function(.flow, split = FALSE, arm = NULL) {
 
 #' Extract Cohorts at Every Stage
 #'
-#' Returns a named list of datasets at each step of the enrollment flow. This
-#' enables cross-cohort comparisons — e.g., examining characteristics of
-#' participants excluded by a specific exclusion.
+#' Returns a named list of datasets at each step of the enrollment flow,
+#' enabling cross-cohort comparisons (\emph{e.g.,} examining characteristics
+#' of participants removed by a specific exclusion criterion).
+#' Data-driven mode only.
 #'
 #' Each element of the returned list is itself a list with:
 #' \describe{
@@ -93,25 +84,23 @@ cohort <- function(.flow, split = FALSE, arm = NULL) {
 #'     \code{NA}).}
 #' }
 #'
-#' @param .flow A \code{selecta} object.
+#' @param .flow A \code{selecta} object created in data-driven mode
+#'   (\code{data} supplied to \code{\link{enroll}}).
 #'
-#' @return A named list of cohort snapshots keyed by step label.
+#' @return A named list of cohort snapshots, keyed by step label. Each
+#'   snapshot contains \code{remaining}, \code{excluded},
+#'   \code{n_remaining}, and \code{n_excluded} as described above.
+#'
+#' @seealso \code{\link{cohort}} for extracting only the final cohort
 #'
 #' @examples
-#' \dontrun{
-#' flow <- enroll(trial_data, id = "patient_id") |>
-#'   exclude("Under 18", expr = age < 18) |>
-#'   exclude("No consent", expr = is.na(consent_date)) |>
-#'   endpoint("Final Analysis")
+#' flow <- enroll(rctselect2, id = "patient_id") |>
+#'   exclude("Ineligible", expr = eligible == FALSE) |>
+#'   endpoint("Final")
 #'
 #' stages <- cohorts(flow)
-#'
-#' ## Who was excluded for being under 18?
-#' stages[["Under 18"]]$excluded
-#'
-#' ## Dataset after first exclusion but before second
-#' stages[["Under 18"]]$remaining
-#' }
+#' names(stages)
+#' stages[["Ineligible"]]$n_excluded
 #'
 #' @export
 cohorts <- function(.flow) {
@@ -163,7 +152,6 @@ compute_snapshots <- function(x) {
                      enclos = parent.frame(2L))
         mask[is.na(mask)] <- FALSE
 
-        ## which()-based subsetting avoids double logical scan
         idx_excl <- which(mask)
         idx_keep <- which(!mask)
         excluded  <- current_data$.all[idx_excl]
@@ -204,7 +192,7 @@ compute_snapshots <- function(x) {
         )
       }
 
-    } else if (step$type == "allocate") {
+    } else if (step$type == "stratify") {
       in_arms <- TRUE
 
       ## Reuse the shared split helper

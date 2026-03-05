@@ -12,23 +12,55 @@ suggest_size(
   count_first = FALSE,
   cex = 0.85,
   cex_side = NULL,
-  margin = 0.25
+  cex_phase = 0.9,
+  phase_width = 0.22,
+  margin = 0.25,
+  .return_graph = FALSE
 )
 }
 \arguments{
 \item{x}{A \code{selecta} object.}
 
-\item{vpad}{Numeric. Vertical padding between elements in inches. Default 0.15.}
+\item{vpad}{Numeric. Vertical spacing between elements in inches.
+Default 0.25.}
 
-\item{pad}{Numeric. Padding inside boxes in inches. Default 0.08.}
+\item{pad}{Numeric. Internal padding within boxes in inches.
+Default 0.08.}
 
-\item{cex}{Numeric. Font size. Default 0.85.}
+\item{line_height}{Numeric. Vertical line spacing in inches.
+Default 0.20.}
+
+\item{count_first}{Logical. If \code{TRUE}, measure using the
+count-first label layout. Default \code{FALSE}.}
+
+\item{cex}{Numeric. Font size multiplier for main text. Default 0.85.}
+
+\item{cex_side}{Numeric. Font size multiplier for side box text.
+Defaults to the value of \code{cex}.}
+
+\item{cex_phase}{Numeric. Font size multiplier for phase labels.
+Default 0.9.}
+
+\item{phase_width}{Numeric. Width of phase label boxes in inches.
+Default 0.22.}
+
+\item{margin}{Numeric. Fixed margin on all four sides in inches.
+Default 0.25.}
+
+\item{.return_graph}{Logical. If \code{TRUE}, attach the pre-computed
+graph as an attribute for reuse by \code{\link{autoflow}}.
+Default \code{FALSE}. Internal use only.}
 }
 \value{
-A named numeric vector with \code{width} and \code{height}.
+A named numeric vector with elements \code{width} and
+  \code{height} (in inches), rounded up to the nearest tenth.
 }
 \description{
-Computes recommended width and height in inches based on diagram content.
-Height is computed additively from row heights, gaps, and side box sizes.
-Width is based on the number of arms.
+Computes recommended width and height in inches based on diagram
+content. A throwaway PDF device is opened to obtain accurate text
+measurements, then closed immediately.
+}
+\seealso{
+\code{\link{autoflow}} for saving to file,
+  \code{\link{flowchart}} for interactive rendering
 }

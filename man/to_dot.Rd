@@ -7,10 +7,10 @@
 to_dot(graph)
 }
 \arguments{
-\item{graph}{A laid-out graph from \code{layout_nodes()}.}
+\item{graph}{A computed and laid-out graph.}
 }
 \value{
-A character string containing the DOT specification.
+A character string in DOT format.
 }
 \description{
 Convert Graph to Graphviz DOT String

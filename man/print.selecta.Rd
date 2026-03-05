@@ -11,6 +11,20 @@
 
 \item{...}{Ignored.}
 }
+\value{
+Invisibly returns \code{x}.
+}
 \description{
-Print an Enrollment Flow Summary
+Displays a concise text summary of the pipeline steps and their
+parameters. Intended for interactive inspection of a \code{selecta}
+object before rendering.
+}
+\examples{
+flow <- enroll(n = 500) |>
+  exclude("Ineligible", n = 65,
+    reasons = c("No consent" = 30, "Under 18" = 35)) |>
+  allocate(labels = c("Drug A", "Placebo"), n = c(218, 217)) |>
+  endpoint("Analysed")
+flow
+
 }

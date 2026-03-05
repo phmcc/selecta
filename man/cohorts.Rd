@@ -7,15 +7,19 @@
 cohorts(.flow)
 }
 \arguments{
-\item{.flow}{A \code{selecta} object.}
+\item{.flow}{A \code{selecta} object created in data-driven mode
+(\code{data} supplied to \code{\link{enroll}}).}
 }
 \value{
-A named list of cohort snapshots keyed by step label.
+A named list of cohort snapshots, keyed by step label. Each
+  snapshot contains \code{remaining}, \code{excluded},
+  \code{n_remaining}, and \code{n_excluded} as described above.
 }
 \description{
-Returns a named list of datasets at each step of the enrollment flow. This
-enables cross-cohort comparisons — e.g., examining characteristics of
-participants excluded by a specific exclusion.
+Returns a named list of datasets at each step of the enrollment flow,
+enabling cross-cohort comparisons (\emph{e.g.,} examining characteristics
+of participants removed by a specific exclusion criterion).
+Data-driven mode only.
 }
 \details{
 Each element of the returned list is itself a list with:
@@ -30,19 +34,15 @@ Each element of the returned list is itself a list with:
 }
 }
 \examples{
-\dontrun{
-flow <- enroll(trial_data, id = "patient_id") |>
-  exclude("Under 18", expr = age < 18) |>
-  exclude("No consent", expr = is.na(consent_date)) |>
-  endpoint("Final Analysis")
+flow <- enroll(rctselect2, id = "patient_id") |>
+  exclude("Ineligible", expr = eligible == FALSE) |>
+  endpoint("Final")
 
 stages <- cohorts(flow)
+names(stages)
+stages[["Ineligible"]]$n_excluded
 
-## Who was excluded for being under 18?
-stages[["Under 18"]]$excluded
-
-## Dataset after first exclusion but before second
-stages[["Under 18"]]$remaining
 }
-
+\seealso{
+\code{\link{cohort}} for extracting only the final cohort
 }

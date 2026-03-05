@@ -13,6 +13,8 @@ layout_nodes(graph)
 The graph with \code{x} and \code{row} columns on \code{nodes}.
 }
 \description{
-Layout Nodes for Grid Rendering
+Assigns row (vertical position) and preliminary x (horizontal) positions
+to all nodes. Handles multi-source streams (from \code{sources()}),
+arm splits (from \code{stratify()}), and classification grids.
 }
 \keyword{internal}

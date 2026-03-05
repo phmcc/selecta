@@ -7,52 +7,43 @@
 cohort(.flow, split = FALSE, arm = NULL)
 }
 \arguments{
-\item{.flow}{A \code{selecta} object.}
+\item{.flow}{A \code{selecta} object created in data-driven mode
+(\code{data} supplied to \code{\link{enroll}}).}
 
 \item{split}{Logical. If \code{TRUE} and arms are defined, return a named
 list of \code{data.table}s (one per arm). Default \code{FALSE} returns a
 single combined \code{data.table}.}
 
 \item{arm}{Character. Name of a specific arm to extract. If supplied,
-returns only that arm's data.}
+returns only that arm's \code{data.table}.}
 }
 \value{
-A \code{data.table} (or named list of \code{data.table}s when
-  \code{split = TRUE}).
+A \code{data.table} containing the participants remaining after
+  all exclusion criteria. When \code{split = TRUE}, a named list of
+  \code{data.table}s (one per arm). When \code{arm} is specified, a
+  single-arm \code{data.table}.
 }
 \description{
 Returns the dataset remaining after all exclusion criteria have been
-applied. If arms have been defined, returns either a single combined
-\code{data.table} or a named list of per-arm \code{data.table}s.
+applied. When arms are defined via \code{\link{stratify}}, the result
+is either a single combined \code{data.table} or a named list of
+per-arm \code{data.table}s. Data-driven mode only.
 }
 \details{
-This enables a seamless analysis workflow — define your enrollment flow,
-render it, and immediately pass the resulting cohort into your analysis:
-
-\preformatted{
-flow <- enroll(trial_data, id = "patient_id") |>
-  exclude("Under 18", expr = age < 18) |>
-  exclude("No consent", expr = is.na(consent_date)) |>
-  allocate("treatment") |>
-  exclude("Lost to follow-up", expr = ltfu == 1) |>
-  endpoint("Final Analysis")
-
-flowchart(flow)
-cohort(flow)                    # combined data.table
-cohort(flow, split = TRUE)     # list by arm
-cohort(flow, arm = "Drug A")   # single arm
-}
+This supports a seamless modelling workflow: define the enrollment
+flow, render it with \code{\link{flowchart}}, and immediately pass the
+resulting cohort into downstream analysis.
 }
 \examples{
-\dontrun{
-flow <- enroll(trial_data, id = "patient_id") |>
-  exclude("Under 18", expr = age < 18) |>
-  allocate("treatment") |>
-  endpoint("Final Analysis")
+flow <- enroll(rctselect2, id = "patient_id") |>
+  exclude("Ineligible", expr = eligible == FALSE) |>
+  endpoint("Final")
 
 final <- cohort(flow)
-by_arm <- cohort(flow, split = TRUE)
-drug_a <- cohort(flow, arm = "Drug A")
-}
+nrow(final)
 
+}
+\seealso{
+\code{\link{cohorts}} for stage-by-stage snapshots,
+  \code{\link{enroll}} for initialising a data-driven flow
 }

@@ -2,25 +2,44 @@
 % Please edit documentation in R/core.R
 \name{endpoint}
 \alias{endpoint}
-\title{Define the Endpoint}
+\title{Mark the Final Analysis Endpoint}
 \usage{
-endpoint(.flow, label = "Final Analysis")
+endpoint(.flow, label = "Final Analysis", reasons = NULL)
 }
 \arguments{
 \item{.flow}{A \code{selecta} object.}
 
-\item{label}{Character string for the final box. Defaults to
+\item{label}{Character string for the final box. Default
 \code{"Final Analysis"}.}
+
+\item{reasons}{Optional named numeric vector (or list of vectors for
+per-arm endpoints) giving sub-item counts displayed below the total.
+Useful for STARD-style final diagnosis boxes, \emph{e.g.,}
+\code{reasons = c("Target condition +" = 160, "Target condition -" = 20)}.}
 }
 \value{
-The updated \code{selecta} object.
+The updated \code{selecta} object with an endpoint step
+  appended.
 }
 \description{
-Adds a terminal node to the enrollment flow.
+Adds the terminal node(s) to the enrollment flow. If arms have been
+defined via \code{\link{stratify}}, one endpoint box appears per arm.
 }
 \examples{
 enroll(n = 300) |>
   exclude("Excluded", n = 40) |>
   endpoint("Included in analysis")
 
+# STARD-style per-arm endpoint with sub-items
+enroll(n = 500) |>
+  stratify(labels = c("Positive", "Negative"), n = c(200, 300),
+           label = "Index test result") |>
+  endpoint("Final diagnosis",
+           reasons = list(c("Target +" = 160, "Target -" = 40),
+                          c("Target +" = 25, "Target -" = 275)))
+
+}
+\seealso{
+\code{\link{classify}} for cross-classification terminal grids,
+  \code{\link{flowchart}} for rendering
 }
