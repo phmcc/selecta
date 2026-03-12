@@ -75,7 +75,7 @@ Functions for building the enrollment flow. Each returns a modified `selecta` ob
 |:---------|:--------|
 | `flowchart()` | Render the diagram (grid graphics or Graphviz DOT) |
 | `plot()` | S3 alias for `flowchart()` |
-| `autodiagram()` | Save to file (PDF, PNG, SVG, TIFF) with auto-computed dimensions |
+| `autoflow()` | Save to file (PDF, PNG, SVG, TIFF) with auto-computed dimensions |
 | `suggest_size()` | Compute recommended figure dimensions from diagram content |
 
 #### Data extraction
@@ -94,7 +94,7 @@ Functions for building the enrollment flow. Each returns a modified `selecta` ob
 
 ### Supported Guidelines
 
-`selecta` provides dedicated functions for each guideline's specific structural requirements, all composable within the same pipe-friendly framework:
+`selecta` provides dedicated functions for each guideline's specific structural requirements, all composable within the same pipe-oriented framework:
 
 | Guideline | Study type | Key functions |
 |:----------|:-----------|:-------------|
@@ -108,197 +108,13 @@ Functions for building the enrollment flow. Each returns a modified `selecta` ob
 
 `selecta` supports two modes, selected automatically by the arguments passed to `enroll()`:
 
-| | Data-driven mode | Manual mode |
+| Workflow | Data-driven mode | Manual mode |
 |:---|:---|:---|
 | **Initialization** | `enroll(data, id = "patient_id")` | `enroll(n = 1200)` |
 | **Exclusions** | `exclude("Label", expr = <condition>)` | `exclude("Label", n = 50)` |
 | **Arms** | `allocate("treatment_column")` | `allocate(labels = c("A", "B"), n = c(300, 300))` |
 | **Sub-reasons** | Tabulated from a column (`reasons_var`) | Supplied as a named vector (`reasons`) |
 | **Cohort extraction** | Available via `cohort()` | Not applicable |
-
-## Usage
-
-### CONSORT — Randomized Trial
-
-When exact counts are known, manual mode accepts integers directly:
-
-```r
-library(selecta)
-
-enroll(n = 1200, label = "Records identified") |>
-  phase("Enrollment") |>
-  exclude("Duplicates removed", n = 84) |>
-  exclude("Age < 18 or > 85", n = 63) |>
-  exclude("Missing staging data", n = 41) |>
-  phase("Allocation") |>
-  allocate(labels = c("Neoadjuvant therapy", "Upfront surgery"),
-      n = c(498, 514)) |>
-  phase("Follow-up") |>
-  exclude("Lost to follow-up", n = c(23, 31)) |>
-  exclude("Incomplete data", n = c(12, 8)) |>
-  phase("Analysis") |>
-  endpoint("Included in analysis") |>
-  flowchart()
-```
-
-When the study dataset is available, `selecta` computes all counts by evaluating exclusion expressions against the data. This ensures that the diagram and the analysis derive from the same source:
-
-```r
-flow <- enroll(rctselect2, id = "id") |>
-  phase("Screening") |>
-  exclude("Failed eligibility", expr = eligible == FALSE,
-          reasons = "exclusion_reason") |>
-  phase("Allocation") |>
-  allocate("treatment") |>
-  phase("Follow-up") |>
-  exclude("Discontinued", expr = discontinued == TRUE) |>
-  phase("Analysis") |>
-  endpoint("Completed study")
-
-flowchart(flow)
-```
-
-### STROBE — Observational Cohort
-
-```r
-enroll(n = 3860, label = "Identified from registry") |>
-  exclude("Excluded", n = 420,
-    reasons = c("Missing exposure data" = 215,
-                "Prior diagnosis" = 140,
-                "Lost to follow-up" = 65)) |>
-  stratify(labels = c("Exposed", "Unexposed"), n = c(1680, 1760),
-           label = "Classified by exposure status") |>
-  exclude(c("Treatment discontinued", "Initiated treatment"),
-          n = c(85, 92)) |>
-  endpoint("Included in analysis") |>
-  flowchart()
-```
-
-### STARD — Diagnostic Accuracy Study
-
-```r
-enroll(n = 520, label = "Eligible patients") |>
-  assess("Index test", not_received = 22,
-         reasons = c("Refused" = 12, "Contraindicated" = 10)) |>
-  assess("Reference standard", not_received = 18,
-         reasons = c("Lost to follow-up" = 11, "Inconclusive" = 7)) |>
-  classify(
-    rows = c("Target condition present", "Target condition absent"),
-    cols = c("Index test +", "Index test \u2212"),
-    n = matrix(c(285, 15, 20, 160), nrow = 2)
-  ) |>
-  flowchart()
-```
-
-### PRISMA — Systematic Review
-
-```r
-sources(
-  previous  = c("Previous review" = 92),
-  databases = c("PubMed" = 1234, "Embase" = 567, "CENTRAL" = 89),
-  other     = c("Citation search" = 55, "Grey literature" = 34),
-  headers   = c(previous  = "Previous studies",
-                databases = "Databases and registers",
-                other     = "Other methods")
-) |>
-  combine("Records after deduplication", n = 1450) |>
-  exclude("Records removed before screening", n = 352,
-          reasons = c("Duplicates" = 340, "Automation" = 12)) |>
-  exclude("Records excluded at title/abstract", n = 820) |>
-  exclude("Reports not retrieved", n = 45) |>
-  exclude("Reports excluded at full text", n = 178,
-          reasons = c("Wrong population" = 65,
-                      "Wrong intervention" = 52,
-                      "Wrong outcome" = 38,
-                      "Wrong study design" = 23)) |>
-  endpoint("Studies included in review") |>
-  flowchart()
-```
-
-### Exclusion Reasons
-
-Side boxes can itemize why participants were excluded. These appear as indented lines beneath the total count.
-
-In manual mode, sub-reasons are supplied as a named integer vector:
-
-```r
-enroll(n = 800, label = "Assessed for eligibility") |>
-  exclude("Excluded", n = 150,
-    reasons = c("Progressive disease" = 55,
-                "Unacceptable comorbidities" = 48,
-                "Declined surgery" = 32,
-                "Lost to follow-up" = 15)) |>
-  allocate(labels = c("Arm A", "Arm B"), n = c(325, 325)) |>
-  endpoint("Final Analysis") |>
-  flowchart()
-```
-
-In data-driven mode, reasons are tabulated automatically from a column in the dataset via the `reasons` argument. Zero-count categories are suppressed by default; set `show_zero = TRUE` to display all pre-specified categories (as may be required for protocol-mandated complete reporting).
-
-### Cohort Extraction
-
-The diagram is not merely a figure — `selecta` maintains the dataset state at every step, allowing direct extraction of the analysis-ready cohort:
-
-```r
-# The final cohort
-final <- cohort(flow)
-
-# Split by arm
-by_arm <- cohort(flow, split = TRUE)
-
-# A single arm
-drug_a <- cohort(flow, arm = "Drug A")
-```
-
-Every intermediate stage is accessible via `cohorts()`, enabling inspection of participants removed at each step:
-
-```r
-stages <- cohorts(flow)
-
-# Participants excluded for failing eligibility
-stages[["Failed eligibility"]]$excluded
-
-# Dataset remaining after the eligibility exclusion
-stages[["Failed eligibility"]]$remaining
-```
-
-### Export
-
-Diagrams can be saved to file with dimensions computed automatically from diagram content:
-
-```r
-autodiagram(flow, "consort.pdf")
-autodiagram(flow, "consort.png", width = 8, height = 10, res = 300)
-
-# Inspect recommended dimensions without saving
-suggest_size(flow)
-```
-
-### Graphviz Output
-
-For integration with HTML documents or external layout tools, diagrams can be rendered as Graphviz DOT strings:
-
-```r
-dot_string <- enroll(n = 500) |>
-  exclude("Excluded", n = 60) |>
-  endpoint("Analyzed") |>
-  flowchart(engine = "dot")
-
-# Render via DiagrammeR
-DiagrammeR::grViz(dot_string)
-```
-
-## Dependencies
-
-**Required:**
-
-- `data.table` — data manipulation
-- `grid` — rendering (part of base R)
-
-**Optional:**
-
-- `DiagrammeR` — for Graphviz rendering via `flowchart(engine = "dot")`
-- `testthat` (>= 3.0.0) — for running the test suite
 
 ## Comparison with Related Packages
 
@@ -323,20 +139,81 @@ The R ecosystem includes several packages for generating CONSORT diagrams. The f
 
 <sub>✓ Full support | ◐ Partial support | — Not available</sub>
 
+A detailed feature comparison is available in the [package documentation](https://phmcc.github.io/selecta/articles/feature_comparison.html).
+
+## Illustrative Example
+
+The `rctselect*` datasets included with this package provide simulated clinical trial selection cohorts with various inclusion/exclusion criteria, as well as different arm allocation criteria. The following example demonstrates how `selecta` functions can be used to generate a CONSORT diagram from the two-armed dataset `rctselect2`, using data-driven counts, count-first formatting, and automatic subcohort extraction.
+
+### **Step 0:** Data Preparation
+
+Prior to analysis, load the package and the dataset:
+
+``` r
+library(selecta)
+
+# Load example data
+data("rctselect2")
+```
+
+### **Step 1:** Flowchart Creation
+
+Use a pipe-based workflow to sequentially string together the various elements of the flowchart, from top to bottom. The `exclude()` function pares down the dataset based on criteria set in the `expr` parameter, whereas `allocate()`/`stratify()` sets arms. Export the output using the `autoflow()` function.
+
+``` r
+flow <- enroll(rctselect2, id = "patient_id") |>
+    phase("Screening") |>
+    exclude("Duplicate records", expr = is_duplicate == TRUE,
+            included_label = "Unique records") |>
+    exclude("Failed eligibility", expr = eligible == FALSE,
+            reasons = "exclusion_reason",
+            included_label = "Eligible cohort") |>
+    phase("Allocation") |>
+    allocate("treatment") |>
+    phase("Follow-up") |>
+    exclude("Discontinued", expr = discontinued == TRUE,
+            reasons = "discontinuation_reason") |>
+    phase("Study") |>
+    endpoint("Analysis cohort")
+
+autoflow(flow, "consort.pdf", count_first = TRUE)
+```
+
+<img src="man/figures/README_CONSORT_2arm.png" alt="Two-arm CONSORT diagram" width="100%">
+
+### **Step 2:** Cohort Extraction
+
+The diagram is not merely a figure—`selecta` maintains the dataset state at every step, allowing direct extraction of the analysis-ready cohort:
+
+```r
+# The final cohort
+final <- cohort(flow)
+
+# Split by arm
+by_arm <- cohort(flow, split = TRUE)
+
+# A single arm
+drug_a <- cohort(flow, arm = "Drug A")
+```
+
+Moreover, every intermediate stage is accessible via `cohorts()`, enabling inspection of participants removed at each step:
+
+```r
+stages <- cohorts(flow)
+
+# Participants excluded for failing eligibility
+stages[["Failed eligibility"]]$excluded
+
+# Dataset remaining after the eligibility exclusion
+stages[["Failed eligibility"]]$remaining
+```
+
 ## Development
 
 ### Repository
 
 - **Primary development**: [codeberg.org/phmcc/selecta](https://codeberg.org/phmcc/selecta)
 - **GitHub releases**: [github.com/phmcc/selecta](https://github.com/phmcc/selecta)
-
-### Testing
-
-The package includes a comprehensive `testthat` suite with 117 tests covering core pipeline functions, the stream model, the compute engine, rendering output, and S3 methods. Run the tests with:
-
-```r
-devtools::test()
-```
 
 ### Contributing
 

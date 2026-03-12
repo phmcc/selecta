@@ -24,9 +24,12 @@ previous step).}
 After \code{stratify()}, may be a character vector with one label
 per arm (\emph{e.g.,} \code{c("Treatment discontinued", "Initiated treatment")}).}
 
-\item{expr}{An unquoted expression evaluated against the data. Should
-evaluate to \code{TRUE} for rows to be \strong{removed}. (Data-driven
-mode only.)}
+\item{expr}{An unquoted logical expression evaluated against the data.
+Should evaluate to \code{TRUE} for rows to be \strong{removed}.
+Compound conditions are supported using the vectorised operators
+\code{&} (and), \code{|} (or), and \code{!} (not). Do not use the
+scalar short-circuit operators \code{&&} or \code{||}, which evaluate
+only the first element of each vector. (Data-driven mode only.)}
 
 \item{n}{Integer (manual mode). Number of participants removed at this step.
 After a \code{stratify()} step, supply a vector with one value per arm.}
@@ -102,6 +105,22 @@ enroll(n = 1000) |>
            label = "Classified by exposure") |>
   exclude(c("Treatment discontinued", "Initiated treatment"),
           n = c(45, 52))
+
+# Per-arm reasons (list of named vectors)
+enroll(n = 900) |>
+  allocate(labels = c("Drug A", "Placebo"), n = c(450, 450)) |>
+  exclude("Discontinued", n = c(30, 25),
+          reasons = list(
+              c("Adverse event" = 18, "Withdrew consent" = 12),
+              c("Adverse event" = 10, "Lost to follow-up" = 15)
+          )) |>
+  endpoint("Analysed")
+
+# Compound expression (data-driven)
+data(rctselect2)
+enroll(rctselect2, id = "patient_id") |>
+  exclude("Ineligible or duplicate",
+          expr = eligible == FALSE | is_duplicate == TRUE)
 
 }
 \seealso{

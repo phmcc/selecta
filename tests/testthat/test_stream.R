@@ -193,13 +193,13 @@ test_that("flat PRISMA pipeline (1-column) builds without error", {
 })
 
 
-test_that("MOOSE grey-literature pipeline builds without error", {
+test_that("MOOSE gray-literature pipeline builds without error", {
 
     flow <- sources(
         databases = c("MEDLINE" = 2500, "Embase" = 1800),
-        grey      = c("Dissertations" = 45, "Conference" = 120),
+        gray      = c("Dissertations" = 45, "Conference" = 120),
         headers   = c(databases = "Electronic databases",
-                      grey      = "Grey literature")) |>
+                      gray      = "Gray literature")) |>
         combine("Total records") |>
         exclude("Duplicates", n = 1200, included_label = "Unique records") |>
         exclude("Excluded on title/abstract", n = 2800) |>

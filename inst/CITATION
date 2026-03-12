@@ -1,0 +1,10 @@
+citHeader("To cite selecta in publications, use:")
+
+bibentry(
+    bibtype  = "Manual",
+    title    = "selecta: EQUATOR-Style Enrollment Diagrams for Clinical Studies",
+    author   = c(person(given = c("Paul", "Hsin-ti"), family = "McClelland")),
+    year     = format(Sys.Date(), "%Y"),
+    note     = sprintf("R package version %s", meta$Version),
+    url      = "https://phmcc.github.io/selecta/"
+)

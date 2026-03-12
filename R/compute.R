@@ -265,37 +265,64 @@ compute <- function(x) {
           )
         })
 
-        for (i in seq_len(n_streams)) {
-          res <- results[[i]]
+          ## Harmonize reason ordering across arms so that the same
+          ## categories appear in the same position in every side box.
+          ## Order is determined by total count across all arms (descending).
+          has_any_reasons <- any(vapply(results,
+                                        function(r) !is.null(r$reasons), logical(1L)))
+          if (has_any_reasons) {
+              ## Collect all reason names and sum counts across arms
+              all_names <- unique(unlist(lapply(results,
+                                                function(r) names(r$reasons))))
+              totals <- vapply(all_names, function(nm) {
+                  sum(vapply(results, function(r) {
+                      rv <- r$reasons[nm]
+                      if (is.na(rv)) 0L else as.integer(rv)
+                  }, integer(1L)))
+              }, integer(1L))
+              global_order <- all_names[order(totals, decreasing = TRUE)]
 
-          ## Per-arm side box label
-          s_lbl <- if (length(side_labels) >= i) side_labels[i] else side_labels[1L]
-
-          side_id <- add_node(
-            text = s_lbl, n = res$n_excluded, role = "side",
-            reasons = res$reasons, arm_id = i, phase = diagram_phase
-          )
-          add_edge(streams[[i]]$last_node, side_id, edge_type = "exclude")
-
-          if (!skip_count_node) {
-            ## Per-arm included label
-            rlbl <- if (!is.null(incl_labels)) {
-              if (length(incl_labels) >= i) incl_labels[i] else incl_labels[1L]
-            } else ""
-            main_id <- add_node(
-              text = rlbl, n = res$n_remaining, role = "main",
-              arm_id = i, phase = diagram_phase
-            )
-            add_edge(streams[[i]]$last_node, main_id, edge_type = "flow")
-            streams[[i]]$last_node <- main_id
+              ## Reorder each arm's reasons to match
+              for (ri in seq_along(results)) {
+                  r <- results[[ri]]$reasons
+                  if (!is.null(r)) {
+                      ordered <- r[intersect(global_order, names(r))]
+                      results[[ri]]$reasons <- ordered
+                  }
+              }
           }
 
-          if (x$mode == "data") {
-            current_data[[arm_labels[i]]] <- res$remaining_data
-          } else {
-            streams[[i]]$n <- res$n_remaining
+          for (i in seq_len(n_streams)) {
+              res <- results[[i]]
+
+              ## Per-arm side box label
+              s_lbl <- if (length(side_labels) >= i) side_labels[i] else side_labels[1L]
+
+              side_id <- add_node(
+                  text = s_lbl, n = res$n_excluded, role = "side",
+                  reasons = res$reasons, arm_id = i, phase = diagram_phase
+              )
+              add_edge(streams[[i]]$last_node, side_id, edge_type = "exclude")
+
+              if (!skip_count_node) {
+                  ## Per-arm included label
+                  rlbl <- if (!is.null(incl_labels)) {
+                              if (length(incl_labels) >= i) incl_labels[i] else incl_labels[1L]
+                          } else ""
+                  main_id <- add_node(
+                      text = rlbl, n = res$n_remaining, role = "main",
+                      arm_id = i, phase = diagram_phase
+                  )
+                  add_edge(streams[[i]]$last_node, main_id, edge_type = "flow")
+                  streams[[i]]$last_node <- main_id
+              }
+
+              if (x$mode == "data") {
+                  current_data[[arm_labels[i]]] <- res$remaining_data
+              } else {
+                  streams[[i]]$n <- res$n_remaining
+              }
           }
-        }
       }
     }
 

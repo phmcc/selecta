@@ -193,7 +193,7 @@ test_that("DOT edges use dashed style for exclusions", {
     expect_match(dot, "style=dashed")
 })
 
-test_that("DOT exclude side boxes use light grey fill", {
+test_that("DOT exclude side boxes use light gray fill", {
     dot <- flowchart(flow_0arm, engine = "dot")
     expect_match(dot, "#f0f0f0")
 })

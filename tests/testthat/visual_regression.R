@@ -258,13 +258,13 @@ autoflow(flow_prisma1, file.path(outdir, "prisma_1col.pdf"))
 autoflow(flow_prisma1, file.path(outdir, "prisma_1col_cf.pdf"),
             count_first = TRUE)
 
-## ** MOOSE (grey literature variant)
+## ** MOOSE (gray literature variant)
 
 flow_moose <- sources(
     databases = c("MEDLINE" = 2500, "Embase" = 1800, "PsycINFO" = 400),
-    grey      = c("Dissertations" = 45, "Conference proceedings" = 120),
+    gray      = c("Dissertations" = 45, "Conference proceedings" = 120),
     headers   = c(databases = "Electronic databases",
-                  grey      = "Grey literature")) |>
+                  gray      = "Gray literature")) |>
     phase("Identification") |>
     combine("Total records") |>
     exclude("Duplicates removed", n = 1200,
