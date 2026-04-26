@@ -24,7 +24,7 @@ flow <- enroll(n = 500) |>
   exclude("Ineligible", n = 65,
     reasons = c("No consent" = 30, "Under 18" = 35)) |>
   allocate(labels = c("Drug A", "Placebo"), n = c(218, 217)) |>
-  endpoint("Analysed")
+  endpoint("Analyzed")
 flow
 
 }

@@ -52,7 +52,7 @@ enroll(rctselect2, id = "patient_id", label = "Study Population")
 enroll(n = 500) |>
   exclude("Ineligible", n = 65) |>
   allocate(labels = c("Treatment", "Control"), n = c(218, 217)) |>
-  endpoint("Analysed")
+  endpoint("Analyzed")
 
 }
 \seealso{

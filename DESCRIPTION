@@ -1,7 +1,7 @@
 Package: selecta
 Type: Package
 Title: EQUATOR-Style Enrollment Diagrams for Clinical Studies
-Version: 0.2.1
+Version: 0.3.0
 Authors@R: c(
     person(
         given = c("Paul", "Hsin-ti"), 

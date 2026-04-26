@@ -1,3 +1,11 @@
+# *selecta* 0.3.0 (2026-03-14)
+
+* Add "split-and-recombine" functionality
+* Exclusion box formatting edits
+* Enhancements to `classify()` to ensure proper alignment
+* Mock datasets reorganization and documentation
+* Update documentation headers
+
 # *selecta* 0.2.1 (2026-03-12)
 
 * Refinements to reason ordering

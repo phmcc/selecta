@@ -18,7 +18,7 @@ draw_grid(
   lwd = 1,
   count_first = FALSE,
   newpage = TRUE,
-  vpad = 0.25,
+  vpad = getOption("selecta.vpad", 0.25),
   pad = 0.08,
   line_height = 0.2,
   margin = 0.25,
@@ -36,21 +36,21 @@ to the value of \code{cex}.}
 \item{cex_phase}{Numeric. Font size multiplier for phase labels.
 Default 0.9.}
 
-\item{box_fill}{Character. Fill colour for main boxes. Default \code{"white"}.}
+\item{box_fill}{Character. Fill color for main boxes. Default \code{"white"}.}
 
-\item{side_fill}{Character. Fill colour for side (exclusion) boxes.
+\item{side_fill}{Character. Fill color for side (exclusion) boxes.
 Default \code{"white"}.}
 
-\item{border_col}{Character. Border colour for all boxes.
+\item{border_col}{Character. Border color for all boxes.
 Default \code{"black"}.}
 
-\item{arrow_col}{Character. Colour for arrows and connector lines.
+\item{arrow_col}{Character. Color for arrows and connector lines.
 Default \code{"black"}.}
 
-\item{phase_fill}{Character. Background colour for phase label boxes.
+\item{phase_fill}{Character. Background color for phase label boxes.
 Default \code{"black"}.}
 
-\item{phase_text_col}{Character. Text colour for phase labels.
+\item{phase_text_col}{Character. Text color for phase labels.
 Default \code{"white"}.}
 
 \item{lwd}{Numeric. Line width for borders and arrows. Default 1.}
@@ -64,7 +64,8 @@ drawing. Default \code{TRUE}.}
 
 \item{vpad}{Numeric. Vertical spacing between elements in inches. Controls
 the uniform gap between any box edge and the next adjacent element.
-Default 0.25.}
+Default 0.25; override globally with
+\code{options(selecta.vpad = 0.35)}.}
 
 \item{pad}{Numeric. Internal padding within boxes in inches. Default 0.08.}
 

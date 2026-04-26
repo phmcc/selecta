@@ -33,7 +33,7 @@ box, mirroring the format of exclusion reasons.
 }
 \details{
 Up to three columns are supported, matching the PRISMA 2020 structure:
-previous studies (left), databases and registers (centre), and other
+previous studies (left), databases and registers (center), and other
 methods (right). Use \code{\link{combine}} downstream to merge the
 parallel streams into a single flow.
 }

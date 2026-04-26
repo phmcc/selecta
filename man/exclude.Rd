@@ -114,7 +114,7 @@ enroll(n = 900) |>
               c("Adverse event" = 18, "Withdrew consent" = 12),
               c("Adverse event" = 10, "Lost to follow-up" = 15)
           )) |>
-  endpoint("Analysed")
+  endpoint("Analyzed")
 
 # Compound expression (data-driven)
 data(rctselect2)

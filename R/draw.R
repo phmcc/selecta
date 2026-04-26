@@ -11,16 +11,16 @@
 #'   to the value of \code{cex}.
 #' @param cex_phase Numeric. Font size multiplier for phase labels.
 #'   Default 0.9.
-#' @param box_fill Character. Fill colour for main boxes. Default \code{"white"}.
-#' @param side_fill Character. Fill colour for side (exclusion) boxes.
+#' @param box_fill Character. Fill color for main boxes. Default \code{"white"}.
+#' @param side_fill Character. Fill color for side (exclusion) boxes.
 #'   Default \code{"white"}.
-#' @param border_col Character. Border colour for all boxes.
+#' @param border_col Character. Border color for all boxes.
 #'   Default \code{"black"}.
-#' @param arrow_col Character. Colour for arrows and connector lines.
+#' @param arrow_col Character. Color for arrows and connector lines.
 #'   Default \code{"black"}.
-#' @param phase_fill Character. Background colour for phase label boxes.
+#' @param phase_fill Character. Background color for phase label boxes.
 #'   Default \code{"black"}.
-#' @param phase_text_col Character. Text colour for phase labels.
+#' @param phase_text_col Character. Text color for phase labels.
 #'   Default \code{"white"}.
 #' @param lwd Numeric. Line width for borders and arrows. Default 1.
 #' @param count_first Logical. If \code{TRUE}, side-box labels are rendered
@@ -30,7 +30,8 @@
 #'   drawing. Default \code{TRUE}.
 #' @param vpad Numeric. Vertical spacing between elements in inches. Controls
 #'   the uniform gap between any box edge and the next adjacent element.
-#'   Default 0.25.
+#'   Default 0.25; override globally with
+#'   \code{options(selecta.vpad = 0.35)}.
 #' @param pad Numeric. Internal padding within boxes in inches. Default 0.08.
 #' @param line_height Numeric. Vertical line spacing in inches, controlling
 #'   box heights for both main and side boxes. Scales proportionally with
@@ -56,7 +57,7 @@ draw_grid <- function(graph,
                       lwd            = 1,
                       count_first    = FALSE,
                       newpage        = TRUE,
-                      vpad           = 0.25,
+                      vpad           = getOption("selecta.vpad", 0.25),
                       pad            = 0.08,
                       line_height    = 0.20,
                       margin         = 0.25,
@@ -153,6 +154,7 @@ draw_grid <- function(graph,
     if (!"grid_row" %in% names(nodes)) nodes[, grid_row := NA_integer_]
     if (!"grid_col" %in% names(nodes)) nodes[, grid_col := NA_integer_]
     if (!"stream_group" %in% names(nodes)) nodes[, stream_group := NA_character_]
+    if (!"sublabel" %in% names(nodes)) nodes[, sublabel := NA_character_]
 
     nodes[, n_reason := lengths(reasons)]
 
@@ -263,11 +265,11 @@ draw_grid <- function(graph,
                 ## Sub-reasons: indented, italic count + italic label
                 all_reas_nums <- vapply(nd_reas, fmt_n, character(1L))
                 reas_num_w <- max(vapply(all_reas_nums,
-                    function(s) tw_in(s, gp_reas), numeric(1L)))
+                                         function(s) tw_in(s, gp_reas), numeric(1L)))
                 max_reas_w <- 0
                 for (ri in seq_len(nreas)) {
                     rw <- indent_in + reas_num_w + gap_side_in +
-                          tw_in(names(nd_reas)[ri], gp_reas)
+                        tw_in(names(nd_reas)[ri], gp_reas)
                     max_reas_w <- max(max_reas_w, rw)
                 }
             } else {
@@ -290,18 +292,33 @@ draw_grid <- function(graph,
 
         } else {
             has_lab <- nchar(nd_text) > 0L
+            nd_sublabel <- nodes$sublabel[i]
+            has_sub <- !is.na(nd_sublabel) && nchar(nd_sublabel) > 0L
             if (count_first && has_lab) {
-                ## Single line: bold count + gap + label
                 cnt_str <- fmt_n(nd_n)
                 cnt_w <- tw_in(cnt_str, gp_main_bold)
-                txt_w <- tw_in(nd_text, gp_main)
-                bw_in[i] <- cnt_w + gap_main_in + txt_w + 2 * pad_h
-                bh_in[i] <- 1 * lh + 2 * pad_v
+                if (has_sub) {
+                    ## Two lines: bold title centered (top),
+                    ##            count + sublabel left-aligned (bottom)
+                    title_w    <- tw_in(nd_text, gp_main_bold)
+                    sub_line_w <- cnt_w + gap_main_in + tw_in(nd_sublabel, gp_main)
+                    max_w   <- max(title_w, sub_line_w)
+                    n_lines <- 2L
+                } else {
+                    ## Single line: bold count + gap + label
+                    txt_w <- tw_in(nd_text, gp_main)
+                    max_w   <- cnt_w + gap_main_in + txt_w
+                    n_lines <- 1L
+                }
+                bw_in[i] <- max_w + 2 * pad_h
+                bh_in[i] <- n_lines * lh + 2 * pad_v
             } else {
                 txt_w <- if (has_lab) tw_in(nd_text, gp_main_bold) else 0
                 cnt_w <- tw_in(paste0("N = ", fmt_n(nd_n)), gp_main)
-                bw_in[i] <- max(txt_w, cnt_w) + 2 * pad_h
+                sub_w <- if (has_sub) tw_in(nd_sublabel, gp_main) else 0
+                bw_in[i] <- max(txt_w, cnt_w, sub_w) + 2 * pad_h
                 n_lines <- if (has_lab) 2L else 1L
+                if (has_sub) n_lines <- n_lines + 1L
                 bh_in[i] <- n_lines * lh + 2 * pad_v
             }
         }
@@ -361,7 +378,7 @@ draw_grid <- function(graph,
             left_of_center  <- max(src_mid, pre_main_w / 2)
             right_of_center <- max(src_mid,
                                    pre_main_w / 2 + ifelse(pre_side_w > 0,
-                                       hpad_in + pre_side_w, 0))
+                                                           hpad_in + pre_side_w, 0))
             total_content_w <- left_of_center + right_of_center
 
             ## main_x at center
@@ -375,7 +392,7 @@ draw_grid <- function(graph,
                 g_center <- cursor + g$max_w / 2
                 src_group_centers[gi] <- g_center
                 gi_idx <- nodes$stream_group == g$group &
-                          nodes$role %chin% c("source", "source_header")
+                    nodes$role %chin% c("source", "source_header")
                 gi_idx[is.na(gi_idx)] <- FALSE
                 set(nodes, i = which(gi_idx), j = "x_in", value = g_center)
                 set(nodes, i = which(gi_idx), j = "bw_inches", value = g$max_w)
@@ -421,12 +438,16 @@ draw_grid <- function(graph,
         if (n_arms == 2L) {
             left_tail  <- if (arm_side_w[1] > 0) arm_side_w[1] + hpad_in else 0
             right_tail <- if (arm_side_w[2] > 0) hpad_in + arm_side_w[2] else 0
-            inner_w    <- arm_main_w[1] + hpad_in + arm_main_w[2]
 
-            ## Position everything relative to arm_mid = 0
-            ## Arm section spans: [-inner_w/2 - left_tail, inner_w/2 + right_tail]
-            left_main_rel  <- -inner_w / 2 + arm_main_w[1] / 2
-            right_main_rel <-  inner_w / 2 - arm_main_w[2] / 2
+            ## Use the widest arm main box for BOTH arms so that
+            ## split/combine arrows fan out symmetrically.
+            max_main_w <- max(arm_main_w)
+            inner_w    <- 2 * max_main_w + hpad_in
+
+            ## Arm centers are at equal distances from arm_mid = 0
+            half_span      <- (max_main_w + hpad_in) / 2
+            left_main_rel  <- -half_span
+                right_main_rel <-  half_span
 
             ## Pre-section centered on arm_mid = 0
             pre_right_ext <- pre_main_w / 2 +
@@ -469,7 +490,7 @@ draw_grid <- function(graph,
                 }
             }
 
-            ## Pre-split section: centered on arm_mid
+            ## Pre-split and post-combine sections: centered on arm_mid
             pre_main_x <- arm_mid_x
             pre_side_left <- pre_main_x + pre_main_w / 2 + hpad_in
             nodes[is.na(arm_id) & role %chin% c("main", "alloc", "endpoint"), x_in := pre_main_x]
@@ -480,8 +501,12 @@ draw_grid <- function(graph,
             }
 
         } else {
-            arm_col_w <- arm_main_w + ifelse(arm_side_w > 0, hpad_in + arm_side_w, 0)
-            arm_section_w <- sum(arm_col_w) + hpad_in * (n_arms - 1L)
+            ## Use uniform column widths so split/combine arrows are centered.
+            ## Each column gets the width of the widest arm column.
+            max_main_w <- max(arm_main_w)
+            max_side_w <- max(c(arm_side_w, 0))
+            col_w <- max_main_w + ifelse(max_side_w > 0, hpad_in + max_side_w, 0)
+            arm_section_w <- n_arms * col_w + hpad_in * (n_arms - 1L)
 
             total_content_w <- max(pre_section_w, arm_section_w, src_section_w)
 
@@ -490,18 +515,18 @@ draw_grid <- function(graph,
             arm_main_centers <- numeric(n_arms)
             for (k in seq_along(arm_ids)) {
                 a <- arm_ids[k]
-                arm_center <- cursor + arm_main_w[k] / 2
+                arm_center <- cursor + max_main_w / 2
                 arm_main_centers[k] <- arm_center
                 nodes[arm_id == a & role != "side", x_in := arm_center]
                 if (arm_side_w[k] > 0) {
-                    arm_side_left <- cursor + arm_main_w[k] + hpad_in
+                    arm_side_left <- cursor + max_main_w + hpad_in
                     arm_side_idx <- which(nodes$arm_id == a & nodes$role == "side")
                     for (si in arm_side_idx) {
                         set(nodes, i = si, j = "x_in",
                             value = arm_side_left + nodes$bw_inches[si] / 2)
                     }
                 }
-                cursor <- cursor + arm_col_w[k] + hpad_in
+                cursor <- cursor + col_w + hpad_in
             }
 
             arm_mid_x <- (arm_main_centers[1] + arm_main_centers[n_arms]) / 2
@@ -642,7 +667,7 @@ draw_grid <- function(graph,
         ## Per-parent-row max needed
         ee_max <- ee[, .(needed = max(needed)), by = from_row]
         pair_gap_in[ee_max$from_row] <- pmax(pair_gap_in[ee_max$from_row],
-                                              ee_max$needed)
+                                             ee_max$needed)
 
         ## Stacked side boxes: parents with >1 exclude edge
         stack_dt <- ee[, .(n_sides = .N,
@@ -657,12 +682,25 @@ draw_grid <- function(graph,
         }
     }
 
-    ## Double gap after allocation rows and source rows (convergence arrows)
+    ## Double gap after allocation rows and source rows (split fan-out needs space)
     alloc_rows  <- unique(nodes[role == "alloc", row])
     source_rows <- unique(nodes[role == "source", row])
     double_rows <- unique(c(alloc_rows, source_rows))
     if (length(double_rows) > 0L) {
         pair_gap_in[double_rows] <- pmax(pair_gap_in[double_rows], 2 * vpad_in)
+    }
+
+    ## Extra gap for converge source rows: the inverted-Y bar needs space
+    ## BELOW side boxes.  Add vpad so the bar has the same clearance as
+    ## the split bar (which sits in a 2*vpad gap = vpad above + vpad below).
+    conv_from_rows <- integer(0L)
+    if (nrow(edges[edge_type == "converge"]) > 0L) {
+        ce <- edges[edge_type == "converge"]
+        ce[nodes, on = .(from = node_id), fr := i.row]
+        conv_from_rows <- unique(ce$fr)
+    }
+    if (length(conv_from_rows) > 0L) {
+        pair_gap_in[conv_from_rows] <- pair_gap_in[conv_from_rows] + vpad_in
     }
 
     ## Content height in inches
@@ -714,8 +752,8 @@ draw_grid <- function(graph,
         ## Drop between consecutive row centers:
         ##   half-height of row r  +  gap below row r  +  half-height of row r+1
         deltas <- row_h[seq_len(n_rows - 1L)] / 2 +
-                  gap_npc[seq_len(n_rows - 1L)] +
-                  row_h[2:n_rows] / 2
+            gap_npc[seq_len(n_rows - 1L)] +
+            row_h[2:n_rows] / 2
         row_y[2:n_rows] <- row_y[1L] - cumsum(deltas)
     }
 
@@ -830,11 +868,11 @@ draw_grid <- function(graph,
             ext <- ph_ext[[idx]]
             if (is.na(ext$top)) next
             y_hi <- if (idx == 1L) all_top else {
-                (ph_ext[[idx - 1L]]$bot + ext$top) / 2 - ph_gap_npc / 2
-            }
+                                               (ph_ext[[idx - 1L]]$bot + ext$top) / 2 - ph_gap_npc / 2
+                                           }
             y_lo <- if (idx == n_ph) all_bot else {
-                (ext$bot + ph_ext[[idx + 1L]]$top) / 2 + ph_gap_npc / 2
-            }
+                                                 (ext$bot + ph_ext[[idx + 1L]]$top) / 2 + ph_gap_npc / 2
+                                             }
             ym <- (y_hi + y_lo) / 2
             ht <- max(y_hi - y_lo, 0.015)
             grid.rect(x = unit(ph_x_npc, "npc"), y = unit(ym, "npc"),
@@ -843,7 +881,7 @@ draw_grid <- function(graph,
                       gp = gp_ph_box)
             grid.text(phases$label[idx],
                       x = unit(ph_x_npc, "npc"), y = unit(ym, "npc"),
-                      rot = 90, gp = gp_ph_text, just = "centre")
+                      rot = 90, gp = gp_ph_text, just = "center")
         }
     }
 
@@ -851,19 +889,47 @@ draw_grid <- function(graph,
 
     gp_edge <- gpar(col = arrow_col, lwd = lwd, fill = arrow_col)
 
-    ## Shared horizontal bar Y for converge edges
+    ## Shared horizontal bar Y for converge edges.
+    ## For post-stratify convergence the bar must clear any side boxes
+    ## hanging from the arm columns, producing a symmetric inverted-Y.
+    ## In resplit flows (stratify -> combine -> stratify), arm_ids are
+    ## reused, so we restrict the side-box search to nodes whose row
+    ## falls between the from-node rows and the to-node row.
     converge_bar_y <- NULL
     conv_idx <- which(edges$edge_type == "converge")
     if (length(conv_idx) > 0L) {
         conv_edges <- edges[conv_idx]
-        ## Join from/to node positions
+        ## Join from/to node positions and rows
         conv_edges[nodes, on = .(from = node_id),
-                   from_bot := i.y - i.box_h / 2]
+                   `:=`(from_bot  = i.y - i.box_h / 2,
+                        from_arm  = i.arm_id,
+                        from_row  = i.row)]
         conv_edges[nodes, on = .(to = node_id),
-                   to_top := i.y + i.box_h / 2]
-        ## Bar at midpoint between lowest source bottom and merge top
-        bar_dt <- conv_edges[, .(bar_y = (min(from_bot) + to_top[1L]) / 2),
-                             by = to]
+                   `:=`(to_top = i.y + i.box_h / 2,
+                        to_row = i.row)]
+
+        bar_dt <- conv_edges[, {
+            lowest <- min(from_bot)
+            row_lo <- min(from_row)
+            row_hi <- to_row[1L]
+
+            ## Only consider side boxes in the same arm columns AND
+            ## within the row range of this split-combine span
+            from_arm_ids <- unique(from_arm)
+            from_arm_ids <- from_arm_ids[!is.na(from_arm_ids)]
+            if (length(from_arm_ids) > 0L) {
+                arm_sides <- nodes[role == "side" &
+                                   arm_id %in% from_arm_ids &
+                                   row >= row_lo & row <= row_hi]
+                if (nrow(arm_sides) > 0L) {
+                    side_bots <- arm_sides$y - arm_sides$box_h / 2
+                    lowest <- min(lowest, side_bots)
+                }
+            }
+
+            .(bar_y = (lowest + to_top[1L]) / 2)
+        }, by = to]
+
         converge_bar_y <- setNames(bar_dt$bar_y, as.character(bar_dt$to))
     }
 
@@ -925,7 +991,7 @@ draw_grid <- function(graph,
     ## ---- Boxes ----
 
     nodes[, fill_col := fifelse(role == "side", side_fill,
-                         fifelse(role == "source_header", "#d0d0d0", box_fill))]
+                                fifelse(role == "source_header", "#d0d0d0", box_fill))]
 
     for (fc in unique(nodes$fill_col)) {
         batch <- nodes[fill_col == fc]
@@ -946,6 +1012,7 @@ draw_grid <- function(graph,
         nd_n    <- nodes$n[i]
         nd_reas <- nodes$reasons[[i]]
         nd_id   <- nodes$node_id[i]
+        nd_sublabel <- nodes$sublabel[i]
 
         if (nd_role == "side") {
             left_x <- nd_x - nd_bw / 2 + pad_h_npc
@@ -966,17 +1033,17 @@ draw_grid <- function(graph,
                 cs <- fmt_n(nd_n)
                 grid.text(cs, x = unit(left_x + num_col_npc, "npc"),
                           y = unit(top_y, "npc"),
-                          gp = gp_side_bold, just = c("right", "centre"))
+                          gp = gp_side_bold, just = c("right", "center"))
                 grid.text(nd_text, x = unit(text_x, "npc"),
                           y = unit(top_y, "npc"),
-                          gp = gp_side, just = c("left", "centre"))
+                          gp = gp_side, just = c("left", "center"))
             } else {
                 grid.text(nd_text, x = unit(left_x, "npc"), y = unit(top_y, "npc"),
-                          gp = gp_side_bold, just = c("left", "centre"))
+                          gp = gp_side_bold, just = c("left", "center"))
                 lbl_npc <- tw_npc(paste0(nd_text, " "), gp_side_bold)
                 grid.text(bquote("(" * italic("n") ~ "=" ~ .(fmt_n(nd_n)) * ")"),
                           x = unit(left_x + lbl_npc, "npc"), y = unit(top_y, "npc"),
-                          gp = gp_side, just = c("left", "centre"))
+                          gp = gp_side, just = c("left", "center"))
             }
 
             if (n_reas > 0L) {
@@ -987,22 +1054,22 @@ draw_grid <- function(graph,
                         grid.text(rc,
                                   x = unit(left_x + indent_npc + num_col_npc, "npc"),
                                   y = unit(ry, "npc"),
-                                  gp = gp_side_bold, just = c("right", "centre"))
+                                  gp = gp_side_bold, just = c("right", "center"))
                         grid.text(names(nd_reas)[j],
                                   x = unit(left_x + indent_npc + num_col_npc + gap_side_npc, "npc"),
                                   y = unit(ry, "npc"),
-                                  gp = gp_side, just = c("left", "centre"))
+                                  gp = gp_side, just = c("left", "center"))
                     } else {
                         grid.text(names(nd_reas)[j],
                                   x = unit(left_x + indent_npc, "npc"),
                                   y = unit(ry, "npc"),
-                                  gp = gp_side, just = c("left", "centre"))
+                                  gp = gp_side, just = c("left", "center"))
                         rn_npc <- tw_npc(paste0(names(nd_reas)[j], " "), gp_side)
                         grid.text(
                             bquote("(" * italic("n") ~ "=" ~ .(fmt_n(nd_reas[j])) * ")"),
                             x = unit(left_x + indent_npc + rn_npc, "npc"),
                             y = unit(ry, "npc"),
-                            gp = gp_side, just = c("left", "centre"))
+                            gp = gp_side, just = c("left", "center"))
                     }
                 }
             }
@@ -1014,27 +1081,27 @@ draw_grid <- function(graph,
                 cnt_npc <- tw_npc(cnt_str, gp_main_bold)
                 grid.text(cnt_str, x = unit(left_x + cnt_npc, "npc"),
                           y = unit(nd_y, "npc"),
-                          gp = gp_main_bold, just = c("right", "centre"))
+                          gp = gp_main_bold, just = c("right", "center"))
                 grid.text(nd_text, x = unit(left_x + cnt_npc + gap_main_npc, "npc"),
                           y = unit(nd_y, "npc"),
-                          gp = gp_main, just = c("left", "centre"))
+                          gp = gp_main, just = c("left", "center"))
             } else {
                 sep <- lh_npc * 0.55
                 grid.text(nd_text, x = unit(nd_x, "npc"),
-                          y = unit(nd_y + sep, "npc"), gp = gp_main_bold, just = "centre")
+                          y = unit(nd_y + sep, "npc"), gp = gp_main_bold, just = "center")
                 grid.text(bquote(italic("n") ~ "=" ~ .(fmt_n(nd_n))),
                           x = unit(nd_x, "npc"),
-                          y = unit(nd_y - sep, "npc"), gp = gp_main, just = "centre")
+                          y = unit(nd_y - sep, "npc"), gp = gp_main, just = "center")
             }
 
         } else if (nd_role == "cell") {
             ## Classification grid cell
             sep <- lh_npc * 0.55
             grid.text(nd_text, x = unit(nd_x, "npc"),
-                      y = unit(nd_y + sep, "npc"), gp = gp_main_bold, just = "centre")
+                      y = unit(nd_y + sep, "npc"), gp = gp_main_bold, just = "center")
             grid.text(bquote(italic("n") ~ "=" ~ .(fmt_n(nd_n))),
                       x = unit(nd_x, "npc"),
-                      y = unit(nd_y - sep, "npc"), gp = gp_main, just = "centre")
+                      y = unit(nd_y - sep, "npc"), gp = gp_main, just = "center")
 
         } else if (nd_role == "source") {
             ## Consolidated source box: header line + indented sub-items
@@ -1056,11 +1123,11 @@ draw_grid <- function(graph,
                 grid.text(fmt_n(nd_n),
                           x = unit(left_x + num_col_npc_s, "npc"),
                           y = unit(top_y, "npc"),
-                          gp = gp_main_bold, just = c("right", "centre"))
+                          gp = gp_main_bold, just = c("right", "center"))
                 grid.text(nd_text,
                           x = unit(left_x + num_col_npc_s + gap_main_npc, "npc"),
                           y = unit(top_y, "npc"),
-                          gp = gp_main, just = c("left", "centre"))
+                          gp = gp_main, just = c("left", "center"))
 
                 ## Indented sub-items
                 if (n_reas > 0L) {
@@ -1069,23 +1136,23 @@ draw_grid <- function(graph,
                         grid.text(fmt_n(nd_reas[j]),
                                   x = unit(left_x + indent_npc + num_col_npc_s, "npc"),
                                   y = unit(ry, "npc"),
-                                  gp = gp_main_bold, just = c("right", "centre"))
+                                  gp = gp_main_bold, just = c("right", "center"))
                         grid.text(names(nd_reas)[j],
                                   x = unit(left_x + indent_npc + num_col_npc_s + gap_main_npc, "npc"),
                                   y = unit(ry, "npc"),
-                                  gp = gp_main, just = c("left", "centre"))
+                                  gp = gp_main, just = c("left", "center"))
                     }
                 }
             } else {
                 ## Standard: "Records identified (n = X)" + indented sources
                 grid.text(nd_text,
                           x = unit(left_x, "npc"), y = unit(top_y, "npc"),
-                          gp = gp_main_bold, just = c("left", "centre"))
+                          gp = gp_main_bold, just = c("left", "center"))
                 lbl_npc <- tw_npc(paste0(nd_text, " "), gp_main_bold)
                 grid.text(
                     bquote("(" * italic("n") ~ "=" ~ .(fmt_n(nd_n)) * ")"),
                     x = unit(left_x + lbl_npc, "npc"), y = unit(top_y, "npc"),
-                    gp = gp_main, just = c("left", "centre"))
+                    gp = gp_main, just = c("left", "center"))
 
                 ## Indented sub-items
                 if (n_reas > 0L) {
@@ -1094,13 +1161,13 @@ draw_grid <- function(graph,
                         grid.text(names(nd_reas)[j],
                                   x = unit(left_x + indent_npc, "npc"),
                                   y = unit(ry, "npc"),
-                                  gp = gp_main, just = c("left", "centre"))
+                                  gp = gp_main, just = c("left", "center"))
                         rn_npc <- tw_npc(paste0(names(nd_reas)[j], " "), gp_main)
                         grid.text(
                             bquote("(" * italic("n") ~ "=" ~ .(fmt_n(nd_reas[j])) * ")"),
                             x = unit(left_x + indent_npc + rn_npc, "npc"),
                             y = unit(ry, "npc"),
-                            gp = gp_main, just = c("left", "centre"))
+                            gp = gp_main, just = c("left", "center"))
                     }
                 }
             }
@@ -1108,7 +1175,7 @@ draw_grid <- function(graph,
         } else if (nd_role == "source_header") {
             ## Column header: bold centered text, distinct background
             grid.text(nd_text, x = unit(nd_x, "npc"), y = unit(nd_y, "npc"),
-                      gp = gp_main_bold, just = "centre")
+                      gp = gp_main_bold, just = "center")
 
         } else if (nd_role == "endpoint" && !is.null(nd_reas) && length(nd_reas) > 0L) {
             ## Endpoint with sub-items (STARD final diagnosis)
@@ -1125,16 +1192,16 @@ draw_grid <- function(graph,
                 cnt_npc <- tw_npc(cnt_str, gp_main_bold)
                 grid.text(cnt_str, x = unit(left_x + cnt_npc, "npc"),
                           y = unit(top_y, "npc"),
-                          gp = gp_main_bold, just = c("right", "centre"))
+                          gp = gp_main_bold, just = c("right", "center"))
                 grid.text(nd_text, x = unit(left_x + cnt_npc + gap_main_npc, "npc"),
                           y = unit(top_y, "npc"),
-                          gp = gp_main, just = c("left", "centre"))
+                          gp = gp_main, just = c("left", "center"))
             } else {
                 grid.text(nd_text, x = unit(nd_x, "npc"), y = unit(top_y, "npc"),
-                          gp = gp_main_bold, just = "centre")
+                          gp = gp_main_bold, just = "center")
                 grid.text(bquote(italic("n") ~ "=" ~ .(fmt_n(nd_n))),
                           x = unit(nd_x, "npc"), y = unit(top_y - lh_npc, "npc"),
-                          gp = gp_main, just = "centre")
+                          gp = gp_main, just = "center")
             }
 
             ## Sub-reasons: smaller italic font
@@ -1142,19 +1209,19 @@ draw_grid <- function(graph,
                 ## Indented, right-aligned italic count + italic label
                 all_reas_nums <- vapply(nd_reas, fmt_n, character(1L))
                 reas_num_npc <- max(vapply(all_reas_nums,
-                    function(s) tw_npc(s, gp_reas), numeric(1L)))
+                                           function(s) tw_npc(s, gp_reas), numeric(1L)))
                 for (j in seq_len(n_reas)) {
                     ry <- top_y - (n_hdr_lines - 1 + j) * lh_npc
                     rc <- fmt_n(nd_reas[j])
                     grid.text(rc,
                               x = unit(left_x + indent_npc + reas_num_npc, "npc"),
                               y = unit(ry, "npc"),
-                              gp = gp_reas, just = c("right", "centre"))
+                              gp = gp_reas, just = c("right", "center"))
                     grid.text(names(nd_reas)[j],
                               x = unit(left_x + indent_npc + reas_num_npc +
                                        gap_side_npc, "npc"),
                               y = unit(ry, "npc"),
-                              gp = gp_reas, just = c("left", "centre"))
+                              gp = gp_reas, just = c("left", "center"))
                 }
             } else {
                 ## Centered italic
@@ -1165,37 +1232,70 @@ draw_grid <- function(graph,
                     rstr <- paste0(rn, " (n = ", rv, ")")
                     grid.text(rstr,
                               x = unit(nd_x, "npc"), y = unit(ry, "npc"),
-                              gp = gp_reas, just = "centre")
+                              gp = gp_reas, just = "center")
                 }
             }
 
         } else {
             has_lab <- nchar(nd_text) > 0L
+            has_sub <- !is.na(nd_sublabel) && nchar(nd_sublabel) > 0L
             n_let <- if (nd_id == 1L && nd_role != "source") "N" else "n"
 
             if (count_first && has_lab) {
-                ## Single line: bold count left, non-bold label right
-                left_x <- nd_x - nd_bw / 2 + pad_h_npc
-                cnt_str <- fmt_n(nd_n)
-                cnt_npc <- tw_npc(cnt_str, gp_main_bold)
-                grid.text(cnt_str, x = unit(left_x + cnt_npc, "npc"),
-                          y = unit(nd_y, "npc"),
-                          gp = gp_main_bold, just = c("right", "centre"))
-                grid.text(nd_text, x = unit(left_x + cnt_npc + gap_main_npc, "npc"),
-                          y = unit(nd_y, "npc"),
-                          gp = gp_main, just = c("left", "centre"))
-            } else {
-                sep <- lh_npc * 0.55
-                if (has_lab) {
+                if (has_sub) {
+                    ## Two lines: bold title centered (top),
+                    ##            count + sublabel left-aligned (bottom)
+                    sep <- lh_npc * 0.55
                     grid.text(nd_text, x = unit(nd_x, "npc"),
-                              y = unit(nd_y + sep, "npc"), gp = gp_main_bold, just = "centre")
+                              y = unit(nd_y + sep, "npc"),
+                              gp = gp_main_bold, just = "center")
+                    left_x <- nd_x - nd_bw / 2 + pad_h_npc
+                    cnt_str <- fmt_n(nd_n)
+                    cnt_npc <- tw_npc(cnt_str, gp_main_bold)
+                    grid.text(cnt_str, x = unit(left_x + cnt_npc, "npc"),
+                              y = unit(nd_y - sep, "npc"),
+                              gp = gp_main_bold, just = c("right", "center"))
+                    grid.text(nd_sublabel,
+                              x = unit(left_x + cnt_npc + gap_main_npc, "npc"),
+                              y = unit(nd_y - sep, "npc"),
+                              gp = gp_main, just = c("left", "center"))
+                } else {
+                    ## Single line: bold count left, non-bold label right
+                    left_x <- nd_x - nd_bw / 2 + pad_h_npc
+                    cnt_str <- fmt_n(nd_n)
+                    cnt_npc <- tw_npc(cnt_str, gp_main_bold)
+                    grid.text(cnt_str, x = unit(left_x + cnt_npc, "npc"),
+                              y = unit(nd_y, "npc"),
+                              gp = gp_main_bold, just = c("right", "center"))
+                    grid.text(nd_text, x = unit(left_x + cnt_npc + gap_main_npc, "npc"),
+                              y = unit(nd_y, "npc"),
+                              gp = gp_main, just = c("left", "center"))
+                }
+            } else {
+                if (has_lab && has_sub) {
+                    ## Three lines: label (top), sublabel (middle), count (bottom)
+                    sep <- lh_npc * 0.55
+                    grid.text(nd_text, x = unit(nd_x, "npc"),
+                              y = unit(nd_y + lh_npc, "npc"),
+                              gp = gp_main_bold, just = "center")
+                    grid.text(nd_sublabel, x = unit(nd_x, "npc"),
+                              y = unit(nd_y, "npc"),
+                              gp = gp_main, just = "center")
                     grid.text(bquote(italic(.(n_let)) ~ "=" ~ .(fmt_n(nd_n))),
                               x = unit(nd_x, "npc"),
-                              y = unit(nd_y - sep, "npc"), gp = gp_main, just = "centre")
+                              y = unit(nd_y - lh_npc, "npc"),
+                              gp = gp_main, just = "center")
+                } else if (has_lab) {
+                    sep <- lh_npc * 0.55
+                    grid.text(nd_text, x = unit(nd_x, "npc"),
+                              y = unit(nd_y + sep, "npc"), gp = gp_main_bold, just = "center")
+                    grid.text(bquote(italic(.(n_let)) ~ "=" ~ .(fmt_n(nd_n))),
+                              x = unit(nd_x, "npc"),
+                              y = unit(nd_y - sep, "npc"), gp = gp_main, just = "center")
                 } else {
                     grid.text(bquote(italic(.(n_let)) ~ "=" ~ .(fmt_n(nd_n))),
                               x = unit(nd_x, "npc"), y = unit(nd_y, "npc"),
-                              gp = gp_main, just = "centre")
+                              gp = gp_main, just = "center")
                 }
             }
         }

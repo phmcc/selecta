@@ -24,7 +24,7 @@ summarising each node in the diagram.
 flow <- enroll(n = 500) |>
   exclude("Ineligible", n = 65) |>
   allocate(labels = c("Drug A", "Placebo"), n = c(218, 217)) |>
-  endpoint("Analysed")
+  endpoint("Analyzed")
 summary(flow)
 
 }

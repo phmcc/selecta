@@ -96,7 +96,7 @@ plot.selecta <- function(x, engine = c("grid", "dot"), ...) {
 #'   exclude("Ineligible", n = 65,
 #'     reasons = c("No consent" = 30, "Under 18" = 35)) |>
 #'   allocate(labels = c("Drug A", "Placebo"), n = c(218, 217)) |>
-#'   endpoint("Analysed")
+#'   endpoint("Analyzed")
 #' flow
 #'
 #' @export
@@ -131,14 +131,16 @@ print.selecta <- function(x, ...) {
         } else if (s$type == "combine") {
             n_text <- if (!is.null(s$n)) sprintf(" (n = %s)", fmt_n(s$n)) else ""
             cat(sprintf("  [%d] combine: \"%s\"%s\n", i, s$label, n_text))
+            if (!is.null(s$sublabel))
+                cat(sprintf("         \"%s\"\n", s$sublabel))
 
         } else if (s$type == "exclude") {
             n_text <- if (!is.null(s$n)) sprintf(" (n = %s)", fmt_n(sum(s$n))) else ""
             lbl_text <- if (length(s$label) > 1L) {
-                paste(sprintf("\"%s\"", s$label), collapse = " / ")
-            } else {
-                sprintf("\"%s\"", s$label)
-            }
+                            paste(sprintf("\"%s\"", s$label), collapse = " / ")
+                        } else {
+                            sprintf("\"%s\"", s$label)
+                        }
             cat(sprintf("  [%d] exclude: %s%s\n", i, lbl_text, n_text))
             ## Print sub-reasons
             if (!is.null(s$reasons) && !is.list(s$reasons)) {
@@ -200,7 +202,7 @@ print.selecta <- function(x, ...) {
 #' flow <- enroll(n = 500) |>
 #'   exclude("Ineligible", n = 65) |>
 #'   allocate(labels = c("Drug A", "Placebo"), n = c(218, 217)) |>
-#'   endpoint("Analysed")
+#'   endpoint("Analyzed")
 #' summary(flow)
 #'
 #' @export
@@ -220,7 +222,8 @@ summary.selecta <- function(object, ...) {
 #'
 #' @param x A \code{selecta} object.
 #' @param vpad Numeric. Vertical spacing between elements in inches.
-#'   Default 0.25.
+#'   Default 0.25; override globally with
+#'   \code{options(selecta.vpad = 0.35)}.
 #' @param pad Numeric. Internal padding within boxes in inches.
 #'   Default 0.08.
 #' @param line_height Numeric. Vertical line spacing in inches.
@@ -247,7 +250,8 @@ summary.selecta <- function(object, ...) {
 #'   \code{\link{flowchart}} for interactive rendering
 #'
 #' @export
-suggest_size <- function(x, vpad = 0.25, pad = 0.08, line_height = 0.20,
+suggest_size <- function(x, vpad = getOption("selecta.vpad", 0.25),
+                         pad = 0.08, line_height = 0.20,
                          count_first = FALSE, cex = 0.85, cex_side = NULL,
                          cex_phase = 0.9, phase_width = 0.22, margin = 0.25,
                          .return_graph = FALSE) {
@@ -321,46 +325,46 @@ suggest_size <- function(x, vpad = 0.25, pad = 0.08, line_height = 0.20,
 #'
 #' @export
 autoflow <- function(x, file, width = NULL, height = NULL,
-                        res = 300, ...) {
+                     res = 300, ...) {
 
-  if (!inherits(x, "selecta"))
-    stop("'x' must be a selecta object", call. = FALSE)
+    if (!inherits(x, "selecta"))
+        stop("'x' must be a selecta object", call. = FALSE)
 
-  dots <- list(...)
-  cached_graph <- NULL
+    dots <- list(...)
+    cached_graph <- NULL
 
-  if (is.null(width) || is.null(height)) {
-    ## Forward layout parameters to suggest_size for consistent canvas sizing.
-    ## Request pre-computed graph to reuse the compute() + layout_nodes() result.
-    sz_args <- list(x = x, .return_graph = TRUE)
-    for (p in c("vpad", "pad", "line_height", "count_first", "cex", "cex_side",
-                 "cex_phase", "phase_width", "margin"))
-      if (!is.null(dots[[p]])) sz_args[[p]] <- dots[[p]]
-    sz <- do.call(suggest_size, sz_args)
-    if (is.null(width))  width  <- sz["width"]
-    if (is.null(height)) height <- sz["height"]
-    cached_graph <- attr(sz, "graph")
-  }
+    if (is.null(width) || is.null(height)) {
+        ## Forward layout parameters to suggest_size for consistent canvas sizing.
+        ## Request pre-computed graph to reuse the compute() + layout_nodes() result.
+        sz_args <- list(x = x, .return_graph = TRUE)
+        for (p in c("vpad", "pad", "line_height", "count_first", "cex", "cex_side",
+                    "cex_phase", "phase_width", "margin"))
+            if (!is.null(dots[[p]])) sz_args[[p]] <- dots[[p]]
+        sz <- do.call(suggest_size, sz_args)
+        if (is.null(width))  width  <- sz["width"]
+        if (is.null(height)) height <- sz["height"]
+        cached_graph <- attr(sz, "graph")
+    }
 
-  ext <- tolower(tools::file_ext(file))
+    ext <- tolower(tools::file_ext(file))
 
-  switch(ext,
-    pdf  = pdf(file, width = width, height = height),
-    png  = png(file, width = width, height = height, units = "in",
-               res = res, type = "cairo"),
-    svg  = svg(file, width = width, height = height),
-    tiff =, tif = tiff(file, width = width, height = height, units = "in",
-                        res = res, type = "cairo"),
-    stop(sprintf("Unsupported format: '%s'", ext), call. = FALSE)
-  )
-  on.exit(dev.off())
+    switch(ext,
+           pdf  = pdf(file, width = width, height = height),
+           png  = png(file, width = width, height = height, units = "in",
+                      res = res, type = "cairo"),
+           svg  = svg(file, width = width, height = height),
+           tiff =, tif = tiff(file, width = width, height = height, units = "in",
+                              res = res, type = "cairo"),
+           stop(sprintf("Unsupported format: '%s'", ext), call. = FALSE)
+           )
+    on.exit(dev.off())
 
-  ## Reuse cached graph (compute + layout are device-agnostic);
-  ## draw_grid re-measures text on the real device
-  graph <- if (!is.null(cached_graph)) cached_graph else {
-    layout_nodes(compute(x))
-  }
-  draw_grid(graph, newpage = TRUE, ...)
+    ## Reuse cached graph (compute + layout are device-agnostic);
+    ## draw_grid re-measures text on the real device
+    graph <- if (!is.null(cached_graph)) cached_graph else {
+                                                          layout_nodes(compute(x))
+                                                      }
+    draw_grid(graph, newpage = TRUE, ...)
 
-  invisible(file)
+    invisible(file)
 }

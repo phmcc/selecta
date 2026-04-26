@@ -15,7 +15,7 @@ A list with components \code{nodes}, \code{edges}, and
 }
 \description{
 Walks the step list and resolves all counts, producing a graph of
-nodes, edges, and phases. Maintains a generalised stream model where
+nodes, edges, and phases. Maintains a generalized stream model where
 parallel tracks (from \code{sources()} or \code{stratify()}) are
 stored as a list of active streams.
 }

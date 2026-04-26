@@ -4,34 +4,64 @@
 \alias{combine}
 \title{Merge Parallel Streams}
 \usage{
-combine(.flow, label, n = NULL)
+combine(.flow, label, sublabel = NULL, n = NULL, reasons = NULL)
 }
 \arguments{
-\item{.flow}{A \code{selecta} object with active parallel streams.}
+\item{.flow}{A \code{selecta} object with active parallel streams
+(from \code{\link{sources}} or \code{\link{stratify}}).}
 
 \item{label}{Character string for the merged node.}
 
+\item{sublabel}{Optional character string rendered below \code{label}
+inside the same box. Useful for describing the recombined cohort.}
+
 \item{n}{Integer. Explicit post-merge count (manual mode). If omitted,
-computed as the sum of all source counts.}
+computed as the sum of all active stream counts.}
+
+\item{reasons}{Optional named integer vector of sub-items displayed
+below the count (\emph{e.g.,} outcome categories).}
 }
 \value{
 The updated \code{selecta} object with a combine step
   appended. All subsequent steps operate on the single merged stream.
 }
 \description{
-Converges all active parallel streams (from \code{\link{sources}}) into
-a single flow. The merged node displays the total count across all
-streams. Use \code{\link{exclude}} with \code{show_count = FALSE}
-immediately after to show items removed during the merge (\emph{e.g.,}
-duplicate removal).
+Converges all active parallel streams into a single flow. This handles
+two topologies:
+}
+\details{
+\enumerate{
+  \item \strong{PRISMA source convergence.} After \code{\link{sources}},
+    merges multiple identification streams into one record pool.
+  \item \strong{Split-and-recombine.} After \code{\link{stratify}},
+    recombines strata that were characterized independently back into
+    a unified downstream flow.
+}
+
+The merged node displays the total count across all streams. An optional
+\code{sublabel} is rendered below the main label (useful for describing
+the recombined cohort, \emph{e.g.,} \code{"Women with confirmed
+diagnosis of ILC"}).
 }
 \examples{
+# PRISMA: merge identification sources
 sources(PubMed = 1234, Embase = 567) |>
   combine("Records after deduplication") |>
   exclude("Records removed", n = 352, show_count = FALSE,
           reasons = c("Duplicates" = 340, "Automation" = 12))
 
+# Split-and-recombine: stratify, then combine
+enroll(n = 158) |>
+  stratify(labels = c("Not screened", "Screened"), n = c(82, 76),
+           label = "Breast MRI screening") |>
+  exclude("Women without ILC", n = c(44, 66)) |>
+  combine("ILC Cohort",
+          sublabel = "Women with confirmed diagnosis of ILC") |>
+  exclude("Without pathology reports", n = 7) |>
+  endpoint("Final cohort")
+
 }
 \seealso{
-\code{\link{sources}} for creating parallel streams
+\code{\link{sources}} for multi-source entry,
+  \code{\link{stratify}} for split-and-recombine flows
 }

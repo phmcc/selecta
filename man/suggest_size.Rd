@@ -6,7 +6,7 @@
 \usage{
 suggest_size(
   x,
-  vpad = 0.25,
+  vpad = getOption("selecta.vpad", 0.25),
   pad = 0.08,
   line_height = 0.2,
   count_first = FALSE,
@@ -22,7 +22,8 @@ suggest_size(
 \item{x}{A \code{selecta} object.}
 
 \item{vpad}{Numeric. Vertical spacing between elements in inches.
-Default 0.25.}
+Default 0.25; override globally with
+\code{options(selecta.vpad = 0.35)}.}
 
 \item{pad}{Numeric. Internal padding within boxes in inches.
 Default 0.08.}
