@@ -7,6 +7,14 @@
 #' @importFrom stats setNames
 NULL
 
+
+## Null-coalescing operator. Returns `y` when `x` is NULL, otherwise `x`.
+## Defined internally so the package does not depend on the base R `%||%`
+## operator, which was only added in R 4.4.0. With this definition the
+## minimum supported R version is governed solely by the native pipe (R 4.1.0).
+#' @noRd
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
 ## Suppress R CMD check notes for data.table NSE column references
 ## and join column prefixes used throughout the package.
 utils::globalVariables(c(

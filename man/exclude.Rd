@@ -7,7 +7,7 @@
 exclude(
   .flow,
   label,
-  expr,
+  criteria,
   n = NULL,
   reasons = NULL,
   show_zero = FALSE,
@@ -24,12 +24,12 @@ previous step).}
 After \code{stratify()}, may be a character vector with one label
 per arm (\emph{e.g.,} \code{c("Treatment discontinued", "Initiated treatment")}).}
 
-\item{expr}{An unquoted logical expression evaluated against the data.
-Should evaluate to \code{TRUE} for rows to be \strong{removed}.
-Compound conditions are supported using the vectorised operators
+\item{criteria}{An unquoted logical expression evaluated against the
+data. Should evaluate to \code{TRUE} for rows to be \strong{removed}.
+Compound conditions are supported using the vectorized operators
 \code{&} (and), \code{|} (or), and \code{!} (not). Do not use the
 scalar short-circuit operators \code{&&} or \code{||}, which evaluate
-only the first element of each vector. (Data-driven mode only.)}
+only the first element of each vector. (Data mode only.)}
 
 \item{n}{Integer (manual mode). Number of participants removed at this step.
 After a \code{stratify()} step, supply a vector with one value per arm.}
@@ -38,7 +38,7 @@ After a \code{stratify()} step, supply a vector with one value per arm.}
 \itemize{
   \item A \strong{named integer vector} (manual mode): counts per reason,
     \emph{e.g.,} \code{c("Disease progression" = 12, "Declined" = 8)}.
-  \item A \strong{character string} (data-driven mode): column name whose
+  \item A \strong{character string} (data mode): column name whose
     values are tabulated automatically.
   \item A \strong{list} of named vectors (manual mode after \code{stratify()}):
     one vector per arm.
@@ -72,7 +72,7 @@ sub-reasons can be displayed below the total.
 \details{
 After a \code{stratify()} step, both \code{label} and
 \code{included_label} accept character vectors (one element per arm)
-for per-arm labelling -- useful in observational designs where
+for per-arm labeling -- useful in observational designs where
 attrition mechanisms differ across strata.
 }
 \examples{
@@ -82,9 +82,9 @@ enroll(n = 500) |>
 # With sub-reasons (manual)
 enroll(n = 500) |>
   exclude("Excluded", n = 65,
-    reasons = c("Progressive disease" = 22,
-                "Unacceptable comorbidities" = 18,
-                "Declined surgery" = 15,
+    reasons = c("Did not meet criteria" = 22,
+                "Ineligible comorbidities" = 18,
+                "Declined to participate" = 15,
                 "Lost to follow-up" = 10))
 
 # Show intermediate count box (opt-in)
@@ -116,14 +116,14 @@ enroll(n = 900) |>
           )) |>
   endpoint("Analyzed")
 
-# Compound expression (data-driven)
+# Compound expression (data mode)
 data(rctselect2)
 enroll(rctselect2, id = "patient_id") |>
   exclude("Ineligible or duplicate",
-          expr = eligible == FALSE | is_duplicate == TRUE)
+          criteria = eligible == FALSE | is_duplicate == TRUE)
 
 }
 \seealso{
 \code{\link{assess}} for assessment/procedure steps (STARD),
-  \code{\link{enroll}} for initialising a flow
+  \code{\link{enroll}} for initializing a flow
 }

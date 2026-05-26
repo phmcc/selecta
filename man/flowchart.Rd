@@ -24,7 +24,25 @@ Default \code{FALSE}.}
 
 \item{...}{Additional arguments passed to the rendering function
 (\emph{e.g.,} \code{cex}, \code{cex_side}, \code{cex_phase},
-\code{box_fill}, \code{phase_fill}, \code{vpad}, \code{margin}).}
+\code{box_fill}, \code{phase_fill}, \code{vpad}, \code{margin},
+\code{font_family}, \code{number_format}). For
+\code{engine = "dot"}, the supported arguments are
+\code{formatting}, \code{number_format}, \code{count_first},
+\code{ortho}, \code{font_family}, \code{padding_pt},
+\code{padding_adjust}, \code{box_fill}, \code{side_fill},
+\code{border_col}, \code{arrow_col}, \code{source_fill},
+\code{source_header_fill}, \code{source_header_text}. The grid
+engine's \code{phase_fill} and \code{phase_text_col} have no DOT
+equivalent because the DOT engine does not render phase labels.
+The DOT engine's \code{formatting} argument selects label markup:
+\code{"plain"} (default) emits plain DOT labels for robust,
+pixel-accurate centering across all fonts; \code{"rich"} emits
+HTML-like labels with inline bold and italic, matching the grid
+engine's typographic conventions at the cost of small residual
+centering drift on non-Helvetica fonts. The DOT engine's
+\code{font_family} defaults to \code{"Helvetica"} and
+\code{padding_pt} to 14 (uniform horizontal padding in points
+around each label).}
 
 \item{x}{A \code{selecta} object.}
 }
@@ -37,35 +55,46 @@ For \code{engine = "grid"}: invisibly returns the computed graph
 Computes counts from the pipeline, lays out nodes, and draws an
 EQUATOR-style enrollment diagram. This is the primary rendering
 function for interactive use; for saving to file with auto-sized
-dimensions, see \code{\link{autoflow}}.
+dimensions, see \code{\link{flowsave}}.
 }
 \examples{
-# Minimal CONSORT diagram
-enroll(n = 500) |>
-  exclude("Age < 18", n = 45) |>
-  exclude("Missing consent", n = 12) |>
-  allocate(labels = c("Drug A", "Placebo"), n = c(220, 223)) |>
-  exclude("Lost to follow-up", n = c(10, 15)) |>
-  endpoint("Final Analysis") |>
-  flowchart()
-
-# With phases and sub-reasons
-enroll(n = 1200) |>
+# Build a flow once, then render it. Most of the package's pipeline
+# functions are modular and intended to be composed like this rather
+# than run in isolation; see the vignettes for fuller treatments.
+flow <- enroll(n = 1200) |>
   phase("Enrollment") |>
   exclude("Excluded", n = 150,
-    reasons = c("Progressive disease" = 55,
-                "Declined" = 48,
-                "Unresectable" = 47)) |>
+    reasons = c("Did not meet criteria" = 55,
+                "Declined to participate" = 48,
+                "Other reasons" = 47)) |>
   phase("Allocation") |>
-  allocate(labels = c("Neoadjuvant", "Upfront surgery"),
-      n = c(520, 530)) |>
+  allocate(labels = c("Treatment", "Control"),
+           n = c(520, 530)) |>
   phase("Analysis") |>
-  endpoint("Final Analysis") |>
-  flowchart()
+  endpoint("Final Analysis")
+
+# The "dot" engine returns a Graphviz DOT string and draws nothing,
+# so it runs anywhere without opening a graphics device.
+dot <- flowchart(flow, engine = "dot")
+substr(dot, 1, 50)
+
+\donttest{
+# The "grid" engine draws to the active graphics device.
+flowchart(flow)
+
+# plot() is a thin wrapper around flowchart().
+plot(flow)
+
+# Locale-aware counts: a European thousands separator.
+enroll(n = 12500) |>
+  exclude("Excluded", n = 1450) |>
+  endpoint("Analyzed") |>
+  flowchart(number_format = "eu")
+}
 
 }
 \seealso{
-\code{\link{autoflow}} for saving to file,
-  \code{\link{suggest_size}} for dimension recommendations,
+\code{\link{flowsave}} for saving to file,
+  \code{\link{recdims}} for dimension recommendations,
   \code{\link{plot.selecta}} for S3 plot method
 }

@@ -1,7 +1,7 @@
 #' Initialize an Enrollment Flow
 #'
 #' Entry point for building an EQUATOR-style enrollment diagram from a single
-#' starting population. Accepts either a \code{data.frame} (data-driven mode,
+#' starting population. Accepts either a \code{data.frame} (data mode,
 #' where counts are computed automatically from exclusion expressions) or a
 #' starting count \code{n} (manual mode, where counts are supplied explicitly
 #' at each step).
@@ -36,7 +36,7 @@
 #' # Manual mode
 #' enroll(n = 500, label = "Assessed for eligibility")
 #'
-#' # Data-driven mode
+#' # Data mode
 #' enroll(rctselect2, id = "patient_id", label = "Study Population")
 #'
 #' # Minimal CONSORT pipeline
@@ -49,36 +49,36 @@
 enroll <- function(data = NULL, id = NULL, n = NULL,
                    label = "Study Population") {
 
-    mode <- if (!is.null(data)) "data" else "manual"
+  mode <- if (!is.null(data)) "data" else "manual"
 
-    if (mode == "data") {
-        if (!is.data.frame(data))
-            stop("'data' must be a data.frame or data.table", call. = FALSE)
-        if (!is.data.table(data)) data <- as.data.table(data)
-        if (is.null(id)) id <- names(data)[1L]
-        if (!id %chin% names(data))
-            stop(sprintf("Column '%s' not found in data", id), call. = FALSE)
-        starting_n <- nrow(data)
-    } else {
-        if (is.null(n) || !is.numeric(n) || length(n) != 1L || n < 0)
-            stop("Supply a non-negative integer 'n' for manual mode", call. = FALSE)
-        n <- as.integer(n)
-        starting_n <- n
-        data <- NULL
-        id <- NULL
-    }
+  if (mode == "data") {
+    if (!is.data.frame(data))
+      stop("'data' must be a data.frame or data.table", call. = FALSE)
+    if (!is.data.table(data)) data <- as.data.table(data)
+    if (is.null(id)) id <- names(data)[1L]
+    if (!id %chin% names(data))
+      stop(sprintf("Column '%s' not found in data", id), call. = FALSE)
+    starting_n <- nrow(data)
+  } else {
+    if (is.null(n) || !is.numeric(n) || length(n) != 1L || n < 0)
+      stop("Supply a non-negative integer 'n' for manual mode", call. = FALSE)
+    n <- as.integer(n)
+    starting_n <- n
+    data <- NULL
+    id <- NULL
+  }
 
-    structure(
-        list(
-            data    = data,
-            id      = id,
-            mode    = mode,
-            steps   = list(),
-            label   = label,
-            n_start = starting_n
-        ),
-        class = "selecta"
-    )
+  structure(
+    list(
+      data    = data,
+      id      = id,
+      mode    = mode,
+      steps   = list(),
+      label   = label,
+      n_start = starting_n
+    ),
+    class = "selecta"
+  )
 }
 
 
@@ -140,79 +140,79 @@ enroll <- function(data = NULL, id = NULL, n = NULL,
 #' @export
 sources <- function(..., headers = NULL) {
 
-    args <- list(...)
+  args <- list(...)
 
-    if (length(args) == 0L)
-        stop("Supply at least one named source", call. = FALSE)
-    if (length(args) > 3L)
-        stop("At most 3 source groups are supported", call. = FALSE)
+  if (length(args) == 0L)
+    stop("Supply at least one named source", call. = FALSE)
+  if (length(args) > 3L)
+    stop("At most 3 source groups are supported", call. = FALSE)
 
-    ## Detect grouped vs flat argument pattern
-    is_grouped <- any(vapply(args, function(a) {
-        is.numeric(a) && (length(a) > 1L || !is.null(names(a)))
-    }, logical(1L)))
+  ## Detect grouped vs flat argument pattern
+  is_grouped <- any(vapply(args, function(a) {
+    is.numeric(a) && (length(a) > 1L || !is.null(names(a)))
+  }, logical(1L)))
 
-    if (is_grouped) {
-        ## Grouped mode: each argument is a group
-        groups <- lapply(seq_along(args), function(i) {
-            a <- args[[i]]
-            group_label <- names(args)[i]
-            if (is.null(group_label) || group_label == "")
-                stop("All arguments to sources() must be named when using grouped sources",
-                     call. = FALSE)
-            if (is.null(names(a)))
-                stop(sprintf("Group '%s' must be a named numeric vector", group_label),
-                     call. = FALSE)
-            if (!is.numeric(a) || any(a < 0))
-                stop(sprintf("Group '%s' must have non-negative numeric counts",
-                             group_label), call. = FALSE)
-            hdr <- if (!is.null(headers) && group_label %in% names(headers)) {
-                       headers[[group_label]]
-                   } else if (group_label != "_default") {
-                       ## Default header: title-case the group name
-                       gsub("(^|\\s)(\\w)", "\\1\\U\\2", group_label, perl = TRUE)
-                   } else {
-                       NULL
-                   }
-            list(group = group_label, header = hdr,
-                 labels = names(a), counts = as.integer(a))
-        })
-    } else {
-        ## Flat mode: all sources in one group
-        if (is.null(names(args)) || any(names(args) == ""))
-            stop("All arguments to sources() must be named", call. = FALSE)
-        flat_vals <- unlist(args)
-        if (!is.numeric(flat_vals) || any(flat_vals < 0))
-            stop("All source counts must be non-negative", call. = FALSE)
-        groups <- list(list(
-            group  = "_default",
-            header = NULL,
-            labels = names(args),
-            counts = as.integer(flat_vals)
-        ))
-    }
+  if (is_grouped) {
+    ## Grouped mode: each argument is a group
+    groups <- lapply(seq_along(args), function(i) {
+      a <- args[[i]]
+      group_label <- names(args)[i]
+      if (is.null(group_label) || group_label == "")
+        stop("All arguments to sources() must be named when using grouped sources",
+             call. = FALSE)
+      if (is.null(names(a)))
+        stop(sprintf("Group '%s' must be a named numeric vector", group_label),
+             call. = FALSE)
+      if (!is.numeric(a) || any(a < 0))
+        stop(sprintf("Group '%s' must have non-negative numeric counts",
+                     group_label), call. = FALSE)
+          hdr <- if (!is.null(headers) && group_label %in% names(headers)) {
+        headers[[group_label]]
+      } else if (group_label != "_default") {
+        ## Default header: title-case the group name
+        gsub("(^|\\s)(\\w)", "\\1\\U\\2", group_label, perl = TRUE)
+      } else {
+        NULL
+      }
+      list(group = group_label, header = hdr,
+           labels = names(a), counts = as.integer(a))
+    })
+  } else {
+    ## Flat mode: all sources in one group
+    if (is.null(names(args)) || any(names(args) == ""))
+      stop("All arguments to sources() must be named", call. = FALSE)
+    flat_vals <- unlist(args)
+    if (!is.numeric(flat_vals) || any(flat_vals < 0))
+      stop("All source counts must be non-negative", call. = FALSE)
+    groups <- list(list(
+      group  = "_default",
+      header = NULL,
+      labels = names(args),
+      counts = as.integer(flat_vals)
+    ))
+  }
 
-    total_n <- sum(vapply(groups, function(g) sum(g$counts), integer(1L)))
+  total_n <- sum(vapply(groups, function(g) sum(g$counts), integer(1L)))
 
-    obj <- structure(
-        list(
-            data    = NULL,
-            id      = NULL,
-            mode    = "manual",
-            steps   = list(),
-            label   = NULL,
-            n_start = total_n
-        ),
-        class = "selecta"
-    )
+  obj <- structure(
+    list(
+      data    = NULL,
+      id      = NULL,
+      mode    = "manual",
+      steps   = list(),
+      label   = NULL,
+      n_start = total_n
+    ),
+    class = "selecta"
+  )
 
-    step <- list(
-        type   = "sources",
-        groups = groups
-    )
+  step <- list(
+    type   = "sources",
+    groups = groups
+  )
 
-    obj$steps <- list(step)
-    obj
+  obj$steps <- list(step)
+  obj
 }
 
 
@@ -224,7 +224,7 @@ sources <- function(..., headers = NULL) {
 #'
 #' After a \code{stratify()} step, both \code{label} and
 #' \code{included_label} accept character vectors (one element per arm)
-#' for per-arm labelling -- useful in observational designs where
+#' for per-arm labeling -- useful in observational designs where
 #' attrition mechanisms differ across strata.
 #'
 #' @param .flow A \code{selecta} object (piped from \code{enroll()} or a
@@ -233,19 +233,19 @@ sources <- function(..., headers = NULL) {
 #'   (\emph{e.g.,} \code{"Excluded"} or \code{"Lost to follow-up"}).
 #'   After \code{stratify()}, may be a character vector with one label
 #'   per arm (\emph{e.g.,} \code{c("Treatment discontinued", "Initiated treatment")}).
-#' @param expr An unquoted logical expression evaluated against the data.
-#'   Should evaluate to \code{TRUE} for rows to be \strong{removed}.
-#'   Compound conditions are supported using the vectorised operators
+#' @param criteria An unquoted logical expression evaluated against the
+#'   data. Should evaluate to \code{TRUE} for rows to be \strong{removed}.
+#'   Compound conditions are supported using the vectorized operators
 #'   \code{&} (and), \code{|} (or), and \code{!} (not). Do not use the
 #'   scalar short-circuit operators \code{&&} or \code{||}, which evaluate
-#'   only the first element of each vector. (Data-driven mode only.)
+#'   only the first element of each vector. (Data mode only.)
 #' @param n Integer (manual mode). Number of participants removed at this step.
 #'   After a \code{stratify()} step, supply a vector with one value per arm.
 #' @param reasons Exclusion sub-reasons. Accepts three forms:
 #'   \itemize{
 #'     \item A \strong{named integer vector} (manual mode): counts per reason,
 #'       \emph{e.g.,} \code{c("Disease progression" = 12, "Declined" = 8)}.
-#'     \item A \strong{character string} (data-driven mode): column name whose
+#'     \item A \strong{character string} (data mode): column name whose
 #'       values are tabulated automatically.
 #'     \item A \strong{list} of named vectors (manual mode after \code{stratify()}):
 #'       one vector per arm.
@@ -268,7 +268,7 @@ sources <- function(..., headers = NULL) {
 #' @return The updated \code{selecta} object with an exclusion step appended.
 #'
 #' @seealso \code{\link{assess}} for assessment/procedure steps (STARD),
-#'   \code{\link{enroll}} for initialising a flow
+#'   \code{\link{enroll}} for initializing a flow
 #'
 #' @examples
 #' enroll(n = 500) |>
@@ -277,9 +277,9 @@ sources <- function(..., headers = NULL) {
 #' # With sub-reasons (manual)
 #' enroll(n = 500) |>
 #'   exclude("Excluded", n = 65,
-#'     reasons = c("Progressive disease" = 22,
-#'                 "Unacceptable comorbidities" = 18,
-#'                 "Declined surgery" = 15,
+#'     reasons = c("Did not meet criteria" = 22,
+#'                 "Ineligible comorbidities" = 18,
+#'                 "Declined to participate" = 15,
 #'                 "Lost to follow-up" = 10))
 #'
 #' # Show intermediate count box (opt-in)
@@ -311,60 +311,60 @@ sources <- function(..., headers = NULL) {
 #'           )) |>
 #'   endpoint("Analyzed")
 #'
-#' # Compound expression (data-driven)
+#' # Compound expression (data mode)
 #' data(rctselect2)
 #' enroll(rctselect2, id = "patient_id") |>
 #'   exclude("Ineligible or duplicate",
-#'           expr = eligible == FALSE | is_duplicate == TRUE)
+#'           criteria = eligible == FALSE | is_duplicate == TRUE)
 #'
 #' @export
-exclude <- function(.flow, label, expr, n = NULL, reasons = NULL,
+exclude <- function(.flow, label, criteria, n = NULL, reasons = NULL,
                     show_zero = FALSE, show_count = FALSE,
                     included_label = NULL) {
 
-    if (!inherits(.flow, "selecta"))
-        stop("'.flow' must be a selecta object", call. = FALSE)
+  if (!inherits(.flow, "selecta"))
+    stop("'.flow' must be a selecta object", call. = FALSE)
 
-    expr_call <- substitute(expr)
-    has_expr <- !missing(expr)
+  expr_call <- substitute(criteria)
+  has_expr <- !missing(criteria)
 
-    if (.flow$mode == "data" && !has_expr)
-        stop("Supply 'expr' in data-driven mode", call. = FALSE)
-    if (.flow$mode == "manual" && is.null(n))
-        stop("Supply 'n' in manual mode", call. = FALSE)
+  if (.flow$mode == "data" && !has_expr)
+    stop("Supply 'criteria' in data mode", call. = FALSE)
+  if (.flow$mode == "manual" && is.null(n))
+    stop("Supply 'n' in manual mode", call. = FALSE)
 
-    ## Classify reasons argument
-    reasons_var <- NULL
-    reasons_manual <- NULL
+  ## Classify reasons argument
+  reasons_var <- NULL
+  reasons_manual <- NULL
 
-    if (!is.null(reasons)) {
-        if (is.character(reasons) && length(reasons) == 1L &&
-            is.null(names(reasons))) {
-            if (.flow$mode != "data")
-                stop("Column-name 'reasons' only works in data-driven mode", call. = FALSE)
-            reasons_var <- reasons
-        } else {
-            if (!is.list(reasons) && is.null(names(reasons)))
-                stop("'reasons' must be a named vector, a column name, or a list",
-                     call. = FALSE)
-            reasons_manual <- reasons
-        }
+  if (!is.null(reasons)) {
+    if (is.character(reasons) && length(reasons) == 1L &&
+        is.null(names(reasons))) {
+      if (.flow$mode != "data")
+        stop("Column-name 'reasons' only works in data mode", call. = FALSE)
+      reasons_var <- reasons
+    } else {
+      if (!is.list(reasons) && is.null(names(reasons)))
+        stop("'reasons' must be a named vector, a column name, or a list",
+             call. = FALSE)
+      reasons_manual <- reasons
     }
+  }
 
-    step <- list(
-        type           = "exclude",
-        label          = label,
-        expr_call      = if (has_expr) expr_call else NULL,
-        n              = n,
-        reasons        = reasons_manual,
-        reasons_var    = reasons_var,
-        show_zero      = show_zero,
-        show_count     = show_count,
-        included_label = included_label
-    )
+  step <- list(
+    type           = "exclude",
+    label          = label,
+    expr_call      = if (has_expr) expr_call else NULL,
+    n              = n,
+    reasons        = reasons_manual,
+    reasons_var    = reasons_var,
+    show_zero      = show_zero,
+    show_count     = show_count,
+    included_label = included_label
+  )
 
-    .flow$steps <- c(.flow$steps, list(step))
-    .flow
+  .flow$steps <- c(.flow$steps, list(step))
+  .flow
 }
 
 
@@ -383,8 +383,9 @@ exclude <- function(.flow, label, expr, n = NULL, reasons = NULL,
 #' @param .flow A \code{selecta} object.
 #' @param label Character string naming the test or procedure
 #'   (\emph{e.g.,} \code{"Index test"}, \code{"Reference standard"}).
-#' @param expr An unquoted expression that evaluates to \code{TRUE} for
-#'   rows that did \strong{not} receive the test. Data-driven mode only.
+#' @param criteria An unquoted logical expression that evaluates to
+#'   \code{TRUE} for rows that did \strong{not} receive the test. Data
+#'   mode only.
 #' @param not_received Integer (manual mode). Number of participants who
 #'   did not receive this test.
 #' @param reasons Named integer vector of reasons for non-receipt
@@ -411,52 +412,52 @@ exclude <- function(.flow, label, expr, n = NULL, reasons = NULL,
 #'                                       c("Index +", "Index -"))))
 #'
 #' @export
-assess <- function(.flow, label, expr, not_received = NULL,
+assess <- function(.flow, label, criteria, not_received = NULL,
                    reasons = NULL, show_zero = FALSE) {
 
-    if (!inherits(.flow, "selecta"))
-        stop("'.flow' must be a selecta object", call. = FALSE)
+  if (!inherits(.flow, "selecta"))
+    stop("'.flow' must be a selecta object", call. = FALSE)
 
-    has_expr <- !missing(expr)
+  has_expr <- !missing(criteria)
 
-    if (.flow$mode == "data" && !has_expr)
-        stop("Supply 'expr' in data-driven mode", call. = FALSE)
-    if (.flow$mode == "manual" && is.null(not_received))
-        stop("Supply 'not_received' in manual mode", call. = FALSE)
+  if (.flow$mode == "data" && !has_expr)
+    stop("Supply 'criteria' in data mode", call. = FALSE)
+  if (.flow$mode == "manual" && is.null(not_received))
+    stop("Supply 'not_received' in manual mode", call. = FALSE)
 
-    ## Construct exclusion step with inverted label semantics
-    side_label <- paste("Did not receive", tolower(label))
-    remaining  <- paste("Received", tolower(label))
+  ## Construct exclusion step with inverted label semantics
+  side_label <- paste("Did not receive", tolower(label))
+  remaining  <- paste("Received", tolower(label))
 
-    expr_call <- if (has_expr) substitute(expr) else NULL
+  expr_call <- if (has_expr) substitute(criteria) else NULL
 
-    ## Classify reasons argument
-    reasons_var <- NULL
-    reasons_manual <- NULL
-    if (!is.null(reasons)) {
-        if (is.character(reasons) && length(reasons) == 1L) {
-            if (.flow$mode != "data")
-                stop("Column-name 'reasons' only works in data-driven mode", call. = FALSE)
-            reasons_var <- reasons
-        } else {
-            reasons_manual <- reasons
-        }
+  ## Classify reasons argument
+  reasons_var <- NULL
+  reasons_manual <- NULL
+  if (!is.null(reasons)) {
+    if (is.character(reasons) && length(reasons) == 1L) {
+      if (.flow$mode != "data")
+        stop("Column-name 'reasons' only works in data mode", call. = FALSE)
+      reasons_var <- reasons
+    } else {
+      reasons_manual <- reasons
     }
+  }
 
-    step <- list(
-        type           = "exclude",
-        label          = side_label,
-        expr_call      = expr_call,
-        n              = not_received,
-        reasons        = reasons_manual,
-        reasons_var    = reasons_var,
-        show_zero      = show_zero,
-        show_count     = TRUE,
-        included_label = remaining
-    )
+  step <- list(
+    type           = "exclude",
+    label          = side_label,
+    expr_call      = expr_call,
+    n              = not_received,
+    reasons        = reasons_manual,
+    reasons_var    = reasons_var,
+    show_zero      = show_zero,
+    show_count     = TRUE,
+    included_label = remaining
+  )
 
-    .flow$steps <- c(.flow$steps, list(step))
-    .flow
+  .flow$steps <- c(.flow$steps, list(step))
+  .flow
 }
 
 
@@ -478,6 +479,8 @@ assess <- function(.flow, label, expr, not_received = NULL,
 #' @seealso \code{\link{flowchart}} for rendering with phase labels
 #'
 #' @examples
+#' # Phase labels divide a flow into labeled stages. The printed summary
+#' # marks each phase with a "--- label ---" banner.
 #' enroll(n = 1200, label = "Records identified") |>
 #'   phase("Enrollment") |>
 #'   exclude("Duplicates", n = 84) |>
@@ -486,22 +489,21 @@ assess <- function(.flow, label, expr, not_received = NULL,
 #'   phase("Follow-up") |>
 #'   exclude("Lost to follow-up", n = c(23, 31)) |>
 #'   phase("Analysis") |>
-#'   endpoint("Final Analysis") |>
-#'   flowchart()
+#'   endpoint("Final Analysis")
 #'
 #' @export
 phase <- function(.flow, label) {
 
-    if (!inherits(.flow, "selecta"))
-        stop("'.flow' must be a selecta object", call. = FALSE)
+  if (!inherits(.flow, "selecta"))
+    stop("'.flow' must be a selecta object", call. = FALSE)
 
-    step <- list(
-        type  = "phase",
-        label = label
-    )
+  step <- list(
+    type  = "phase",
+    label = label
+  )
 
-    .flow$steps <- c(.flow$steps, list(step))
-    .flow
+  .flow$steps <- c(.flow$steps, list(step))
+  .flow
 }
 
 
@@ -517,8 +519,8 @@ phase <- function(.flow, label) {
 #'
 #' @param .flow A \code{selecta} object.
 #' @param variable Character string naming the column that defines the arms
-#'   (data-driven mode). Ignored in manual mode.
-#' @param labels A character vector of arm labels. In data-driven mode, this
+#'   (data mode). Ignored in manual mode.
+#' @param labels A character vector of arm labels. In data mode, this
 #'   can be a named vector to relabel factor levels (\emph{e.g.,}
 #'   \code{c(A = "Drug A", B = "Placebo")}). In manual mode, these are the
 #'   arm names.
@@ -549,36 +551,36 @@ phase <- function(.flow, label) {
 stratify <- function(.flow, variable = NULL, labels = NULL, n = NULL,
                      label = "Stratified") {
 
-    if (!inherits(.flow, "selecta"))
-        stop("'.flow' must be a selecta object", call. = FALSE)
+  if (!inherits(.flow, "selecta"))
+    stop("'.flow' must be a selecta object", call. = FALSE)
 
-    ## Check for an active (uncombined) split
-    has_active_split <- FALSE
-    for (s in .flow$steps) {
-        if (s$type == "stratify") has_active_split <- TRUE
-        if (s$type == "combine")  has_active_split <- FALSE
-    }
-    if (has_active_split)
-        stop("Only one uncombined stratify()/allocate() split is allowed at a time; ",
-             "use combine() to recombine before splitting again", call. = FALSE)
+  ## Check for an active (uncombined) split
+  has_active_split <- FALSE
+  for (s in .flow$steps) {
+    if (s$type == "stratify") has_active_split <- TRUE
+    if (s$type == "combine")  has_active_split <- FALSE
+  }
+  if (has_active_split)
+    stop("Only one uncombined stratify()/allocate() split is allowed at a time; ",
+         "use combine() to recombine before splitting again", call. = FALSE)
 
-    if (.flow$mode == "data" && is.null(variable))
-        stop("Supply 'variable' in data-driven mode", call. = FALSE)
-    if (.flow$mode == "manual" && (is.null(labels) || is.null(n)))
-        stop("Supply 'labels' and 'n' in manual mode", call. = FALSE)
-    if (.flow$mode == "manual" && length(labels) != length(n))
-        stop("'labels' and 'n' must have the same length", call. = FALSE)
+  if (.flow$mode == "data" && is.null(variable))
+    stop("Supply 'variable' in data mode", call. = FALSE)
+  if (.flow$mode == "manual" && (is.null(labels) || is.null(n)))
+    stop("Supply 'labels' and 'n' in manual mode", call. = FALSE)
+  if (.flow$mode == "manual" && length(labels) != length(n))
+    stop("'labels' and 'n' must have the same length", call. = FALSE)
 
-    step <- list(
-        type     = "stratify",
-        variable = variable,
-        labels   = labels,
-        n        = n,
-        label    = label
-    )
+  step <- list(
+    type     = "stratify",
+    variable = variable,
+    labels   = labels,
+    n        = n,
+    label    = label
+  )
 
-    .flow$steps <- c(.flow$steps, list(step))
-    .flow
+  .flow$steps <- c(.flow$steps, list(step))
+  .flow
 }
 
 
@@ -586,7 +588,7 @@ stratify <- function(.flow, variable = NULL, labels = NULL, n = NULL,
 #' @export
 allocate <- function(.flow, variable = NULL, labels = NULL, n = NULL,
                      label = "Randomized") {
-    stratify(.flow, variable = variable, labels = labels, n = n, label = label)
+  stratify(.flow, variable = variable, labels = labels, n = n, label = label)
 }
 
 
@@ -605,8 +607,8 @@ allocate <- function(.flow, variable = NULL, labels = NULL, n = NULL,
 #'
 #' The merged node displays the total count across all streams. An optional
 #' \code{sublabel} is rendered below the main label (useful for describing
-#' the recombined cohort, \emph{e.g.,} \code{"Women with confirmed
-#' diagnosis of ILC"}).
+#' the recombined cohort, \emph{e.g.,} \code{"Participants with confirmed
+#' diagnosis"}).
 #'
 #' @param .flow A \code{selecta} object with active parallel streams
 #'   (from \code{\link{sources}} or \code{\link{stratify}}).
@@ -634,38 +636,38 @@ allocate <- function(.flow, variable = NULL, labels = NULL, n = NULL,
 #' # Split-and-recombine: stratify, then combine
 #' enroll(n = 158) |>
 #'   stratify(labels = c("Not screened", "Screened"), n = c(82, 76),
-#'            label = "Breast MRI screening") |>
-#'   exclude("Women without ILC", n = c(44, 66)) |>
-#'   combine("ILC Cohort",
-#'           sublabel = "Women with confirmed diagnosis of ILC") |>
-#'   exclude("Without pathology reports", n = 7) |>
+#'            label = "Screening status") |>
+#'   exclude("Condition not confirmed", n = c(44, 66)) |>
+#'   combine("Confirmed cohort",
+#'           sublabel = "Participants with confirmed diagnosis") |>
+#'   exclude("Incomplete records", n = 7) |>
 #'   endpoint("Final cohort")
 #'
 #' @export
 combine <- function(.flow, label, sublabel = NULL, n = NULL,
                     reasons = NULL) {
 
-    if (!inherits(.flow, "selecta"))
-        stop("'.flow' must be a selecta object", call. = FALSE)
+  if (!inherits(.flow, "selecta"))
+    stop("'.flow' must be a selecta object", call. = FALSE)
 
-    has_parallel <- FALSE
-    for (s in .flow$steps) {
-        if (s$type %chin% c("sources", "stratify")) { has_parallel <- TRUE; break }
-    }
-    if (!has_parallel)
-        stop("combine() requires a preceding sources() or stratify() step",
-             call. = FALSE)
+  has_parallel <- FALSE
+  for (s in .flow$steps) {
+    if (s$type %chin% c("sources", "stratify")) { has_parallel <- TRUE; break }
+  }
+  if (!has_parallel)
+    stop("combine() requires a preceding sources() or stratify() step",
+         call. = FALSE)
 
-    step <- list(
-        type     = "combine",
-        label    = label,
-        sublabel = sublabel,
-        n        = n,
-        reasons  = reasons
-    )
+  step <- list(
+    type     = "combine",
+    label    = label,
+    sublabel = sublabel,
+    n        = n,
+    reasons  = reasons
+  )
 
-    .flow$steps <- c(.flow$steps, list(step))
-    .flow
+  .flow$steps <- c(.flow$steps, list(step))
+  .flow
 }
 
 
@@ -704,34 +706,34 @@ combine <- function(.flow, label, sublabel = NULL, n = NULL,
 classify <- function(.flow, rows = NULL, cols = NULL, n = NULL,
                      label = NULL) {
 
-    if (!inherits(.flow, "selecta"))
-        stop("'.flow' must be a selecta object", call. = FALSE)
+  if (!inherits(.flow, "selecta"))
+    stop("'.flow' must be a selecta object", call. = FALSE)
 
-    if (is.null(n))
-        stop("Supply 'n' as a matrix of counts", call. = FALSE)
+  if (is.null(n))
+    stop("Supply 'n' as a matrix of counts", call. = FALSE)
 
-    if (!is.matrix(n)) n <- as.matrix(n)
+  if (!is.matrix(n)) n <- as.matrix(n)
 
-    if (is.null(rows)) rows <- rownames(n)
-    if (is.null(cols)) cols <- colnames(n)
-    if (is.null(rows))
-        stop("Supply 'rows' or a matrix with row names", call. = FALSE)
-    if (is.null(cols))
-        stop("Supply 'cols' or a matrix with column names", call. = FALSE)
-    if (nrow(n) != length(rows) || ncol(n) != length(cols))
-        stop("Dimensions of 'n' must match length of 'rows' and 'cols'",
-             call. = FALSE)
+  if (is.null(rows)) rows <- rownames(n)
+  if (is.null(cols)) cols <- colnames(n)
+  if (is.null(rows))
+    stop("Supply 'rows' or a matrix with row names", call. = FALSE)
+  if (is.null(cols))
+    stop("Supply 'cols' or a matrix with column names", call. = FALSE)
+  if (nrow(n) != length(rows) || ncol(n) != length(cols))
+    stop("Dimensions of 'n' must match length of 'rows' and 'cols'",
+         call. = FALSE)
 
-    step <- list(
-        type  = "classify",
-        rows  = rows,
-        cols  = cols,
-        n     = n,
-        label = label
-    )
+  step <- list(
+    type  = "classify",
+    rows  = rows,
+    cols  = cols,
+    n     = n,
+    label = label
+  )
 
-    .flow$steps <- c(.flow$steps, list(step))
-    .flow
+  .flow$steps <- c(.flow$steps, list(step))
+  .flow
 }
 
 

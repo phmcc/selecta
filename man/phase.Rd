@@ -24,6 +24,8 @@ subsequent steps until the next \code{phase()} call or the end of
 the flow.
 }
 \examples{
+# Phase labels divide a flow into labeled stages. The printed summary
+# marks each phase with a "--- label ---" banner.
 enroll(n = 1200, label = "Records identified") |>
   phase("Enrollment") |>
   exclude("Duplicates", n = 84) |>
@@ -32,8 +34,7 @@ enroll(n = 1200, label = "Records identified") |>
   phase("Follow-up") |>
   exclude("Lost to follow-up", n = c(23, 31)) |>
   phase("Analysis") |>
-  endpoint("Final Analysis") |>
-  flowchart()
+  endpoint("Final Analysis")
 
 }
 \seealso{

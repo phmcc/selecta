@@ -18,7 +18,7 @@ A \code{data.table} with columns \code{phase}, \code{role},
 }
 \description{
 Computes all counts from the pipeline and returns a \code{data.table}
-summarising each node in the diagram.
+summarizing each node in the diagram.
 }
 \examples{
 flow <- enroll(n = 500) |>

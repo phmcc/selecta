@@ -7,7 +7,7 @@
 assess(
   .flow,
   label,
-  expr,
+  criteria,
   not_received = NULL,
   reasons = NULL,
   show_zero = FALSE
@@ -19,8 +19,9 @@ assess(
 \item{label}{Character string naming the test or procedure
 (\emph{e.g.,} \code{"Index test"}, \code{"Reference standard"}).}
 
-\item{expr}{An unquoted expression that evaluates to \code{TRUE} for
-rows that did \strong{not} receive the test. Data-driven mode only.}
+\item{criteria}{An unquoted logical expression that evaluates to
+\code{TRUE} for rows that did \strong{not} receive the test. Data
+mode only.}
 
 \item{not_received}{Integer (manual mode). Number of participants who
 did not receive this test.}

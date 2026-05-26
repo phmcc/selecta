@@ -40,8 +40,8 @@ two topologies:
 
 The merged node displays the total count across all streams. An optional
 \code{sublabel} is rendered below the main label (useful for describing
-the recombined cohort, \emph{e.g.,} \code{"Women with confirmed
-diagnosis of ILC"}).
+the recombined cohort, \emph{e.g.,} \code{"Participants with confirmed
+diagnosis"}).
 }
 \examples{
 # PRISMA: merge identification sources
@@ -53,11 +53,11 @@ sources(PubMed = 1234, Embase = 567) |>
 # Split-and-recombine: stratify, then combine
 enroll(n = 158) |>
   stratify(labels = c("Not screened", "Screened"), n = c(82, 76),
-           label = "Breast MRI screening") |>
-  exclude("Women without ILC", n = c(44, 66)) |>
-  combine("ILC Cohort",
-          sublabel = "Women with confirmed diagnosis of ILC") |>
-  exclude("Without pathology reports", n = 7) |>
+           label = "Screening status") |>
+  exclude("Condition not confirmed", n = c(44, 66)) |>
+  combine("Confirmed cohort",
+          sublabel = "Participants with confirmed diagnosis") |>
+  exclude("Incomplete records", n = 7) |>
   endpoint("Final cohort")
 
 }

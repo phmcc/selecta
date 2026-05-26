@@ -22,7 +22,9 @@ draw_grid(
   pad = 0.08,
   line_height = 0.2,
   margin = 0.25,
-  phase_width = 0.22
+  phase_width = 0.22,
+  font_family = "Helvetica",
+  number_format = NULL
 )
 }
 \arguments{
@@ -78,6 +80,17 @@ inches. Default 0.25.}
 
 \item{phase_width}{Numeric. Width of phase label boxes in inches.
 Default 0.22.}
+
+\item{font_family}{Character. Font family used for all text in the
+diagram. Default \code{"Helvetica"}. Set to \code{""} to use the
+device default.}
+
+\item{number_format}{Character string or two-element character vector.
+Locale-aware formatting for participant counts: \code{"us"} (default,
+\code{1,234}), \code{"eu"} (\code{1.234}), \code{"space"}
+(\code{1\\u202F234}), \code{"none"} (\code{1234}), or a custom
+\code{c(big.mark, decimal.mark)} pair. Falls back to
+\code{getOption("selecta.number_format", "us")} when \code{NULL}.}
 }
 \value{
 Invisibly returns the graph, augmented with computed layout
@@ -86,7 +99,7 @@ Invisibly returns the graph, augmented with computed layout
 \description{
 Computes all layout in inches using physical text measurements, then
 renders the diagram within a fixed-margin viewport. Intended to be called
-by \code{\link{flowchart}} or \code{\link{autoflow}} rather than
+by \code{\link{flowchart}} or \code{\link{flowsave}} rather than
 directly.
 }
 \keyword{internal}

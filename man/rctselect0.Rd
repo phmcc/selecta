@@ -22,7 +22,7 @@ rctselect0
 A synthetic dataset of 800 patients in an observational study with
 no treatment arms. Includes eligibility flags, exclusion reasons,
 and follow-up loss indicators suitable for demonstrating STROBE-style
-enrollment diagrams in data-driven mode.
+enrollment diagrams in data mode.
 }
 \examples{
 data(rctselect0)

@@ -20,5 +20,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Paul Hsin-ti McClelland \email{PaulHMcClelland@protonmail.com} (\href{https://orcid.org/0000-0002-3119-6531}{ORCID}) [copyright holder]
 
+Authors:
+\itemize{
+  \item Paul Hsin-ti McClelland \email{PaulHMcClelland@protonmail.com} (\href{https://orcid.org/0000-0002-3119-6531}{ORCID}) [copyright holder]
+}
+
 }
 \keyword{internal}

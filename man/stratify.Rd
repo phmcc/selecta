@@ -13,9 +13,9 @@ allocate(.flow, variable = NULL, labels = NULL, n = NULL, label = "Randomized")
 \item{.flow}{A \code{selecta} object.}
 
 \item{variable}{Character string naming the column that defines the arms
-(data-driven mode). Ignored in manual mode.}
+(data mode). Ignored in manual mode.}
 
-\item{labels}{A character vector of arm labels. In data-driven mode, this
+\item{labels}{A character vector of arm labels. In data mode, this
 can be a named vector to relabel factor levels (\emph{e.g.,}
 \code{c(A = "Drug A", B = "Placebo")}). In manual mode, these are the
 arm names.}

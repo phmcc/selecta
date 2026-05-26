@@ -7,7 +7,7 @@
 cohort(.flow, split = FALSE, arm = NULL)
 }
 \arguments{
-\item{.flow}{A \code{selecta} object created in data-driven mode
+\item{.flow}{A \code{selecta} object created in data mode
 (\code{data} supplied to \code{\link{enroll}}).}
 
 \item{split}{Logical. If \code{TRUE} and arms are defined, return a named
@@ -27,16 +27,16 @@ A \code{data.table} containing the participants remaining after
 Returns the dataset remaining after all exclusion criteria have been
 applied. When arms are defined via \code{\link{stratify}}, the result
 is either a single combined \code{data.table} or a named list of
-per-arm \code{data.table}s. Data-driven mode only.
+per-arm \code{data.table}s. Data mode only.
 }
 \details{
-This supports a seamless modelling workflow: define the enrollment
+This supports a seamless modeling workflow: define the enrollment
 flow, render it with \code{\link{flowchart}}, and immediately pass the
 resulting cohort into downstream analysis.
 }
 \examples{
 flow <- enroll(rctselect2, id = "patient_id") |>
-  exclude("Ineligible", expr = eligible == FALSE) |>
+  exclude("Ineligible", criteria = eligible == FALSE) |>
   endpoint("Final")
 
 final <- cohort(flow)
@@ -45,5 +45,5 @@ nrow(final)
 }
 \seealso{
 \code{\link{cohorts}} for stage-by-stage snapshots,
-  \code{\link{enroll}} for initialising a data-driven flow
+  \code{\link{enroll}} for initializing a data-mode flow
 }

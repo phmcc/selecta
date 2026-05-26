@@ -31,7 +31,7 @@ An object of class \code{"selecta"} containing the data (if
 }
 \description{
 Entry point for building an EQUATOR-style enrollment diagram from a single
-starting population. Accepts either a \code{data.frame} (data-driven mode,
+starting population. Accepts either a \code{data.frame} (data mode,
 where counts are computed automatically from exclusion expressions) or a
 starting count \code{n} (manual mode, where counts are supplied explicitly
 at each step).
@@ -45,7 +45,7 @@ instead.
 # Manual mode
 enroll(n = 500, label = "Assessed for eligibility")
 
-# Data-driven mode
+# Data mode
 enroll(rctselect2, id = "patient_id", label = "Study Population")
 
 # Minimal CONSORT pipeline

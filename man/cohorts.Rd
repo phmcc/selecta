@@ -7,7 +7,7 @@
 cohorts(.flow)
 }
 \arguments{
-\item{.flow}{A \code{selecta} object created in data-driven mode
+\item{.flow}{A \code{selecta} object created in data mode
 (\code{data} supplied to \code{\link{enroll}}).}
 }
 \value{
@@ -19,7 +19,7 @@ A named list of cohort snapshots, keyed by step label. Each
 Returns a named list of datasets at each step of the enrollment flow,
 enabling cross-cohort comparisons (\emph{e.g.,} examining characteristics
 of participants removed by a specific exclusion criterion).
-Data-driven mode only.
+Data mode only.
 }
 \details{
 Each element of the returned list is itself a list with:
@@ -35,7 +35,7 @@ Each element of the returned list is itself a list with:
 }
 \examples{
 flow <- enroll(rctselect2, id = "patient_id") |>
-  exclude("Ineligible", expr = eligible == FALSE) |>
+  exclude("Ineligible", criteria = eligible == FALSE) |>
   endpoint("Final")
 
 stages <- cohorts(flow)

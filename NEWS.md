@@ -1,3 +1,12 @@
+# *selecta* 0.4.0 (2026-05-26)
+
+* Phase boxes rework
+* Add regional number formatting
+* Refine vignette workflows and documentation
+* Rename `expr` parameter to `criteria`
+* Rename `suggest_size()` function to `recdims()`
+* Add logo
+
 # *selecta* 0.3.0 (2026-03-14)
 
 * Add "split-and-recombine" functionality

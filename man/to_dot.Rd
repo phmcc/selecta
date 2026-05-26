@@ -4,15 +4,112 @@
 \alias{to_dot}
 \title{Convert Graph to Graphviz DOT String}
 \usage{
-to_dot(graph)
+to_dot(
+  graph,
+  number_format = NULL,
+  count_first = FALSE,
+  ortho = FALSE,
+  formatting = c("plain", "rich"),
+  font_family = "Helvetica",
+  padding_pt = 14,
+  padding_adjust = 0,
+  box_fill = "#FFFFFF",
+  side_fill = "#F0F0F0",
+  border_col = "black",
+  arrow_col = "black",
+  source_fill = "#D6E6F2",
+  source_header_fill = "#1F3A6B",
+  source_header_text = "#FFFFFF"
+)
 }
 \arguments{
 \item{graph}{A computed and laid-out graph.}
+
+\item{number_format}{Locale-aware count formatter (see
+\code{\link{flowchart}}). Defaults to the
+\code{selecta.number_format} option.}
+
+\item{count_first}{Logical. If \code{TRUE}, the count appears before
+the label text in each box (\emph{e.g.,} \verb{200 Excluded}
+instead of \verb{Excluded, n = 200}), matching the count-first
+layout available in the grid engine. Default \code{FALSE}.}
+
+\item{ortho}{Logical. If \code{TRUE}, requests right-angle (orthogonal)
+edges via Graphviz's \code{splines=ortho} attribute. Default
+\code{FALSE}.}
+
+\item{formatting}{Character string, either \code{"plain"} (default)
+or \code{"rich"}. See Details.}
+
+\item{font_family}{Character string. Graphviz \code{fontname} value
+for the body text. Default \code{"Helvetica"}.}
+
+\item{padding_pt}{Numeric. Horizontal padding applied uniformly on
+each side of every node's text, in points. Default 14.}
+
+\item{padding_adjust}{Numeric. Additive offset to \code{padding_pt}
+for fine-tuning, in points. Default 0.}
+
+\item{box_fill}{Character. Fill color for main boxes. Default
+\code{"#FFFFFF"}.}
+
+\item{side_fill}{Character. Fill color for side (exclusion) boxes.
+Default \code{"#F0F0F0"}.}
+
+\item{border_col}{Character. Border color for all boxes. Default
+\code{"black"}.}
+
+\item{arrow_col}{Character. Color for arrows and connector lines.
+Default \code{"black"}.}
+
+\item{source_fill}{Character. Fill color for source boxes in
+multi-source diagrams (PRISMA, MOOSE). Default \code{"#D6E6F2"}.}
+
+\item{source_header_fill}{Character. Fill color for source-column
+header boxes. Default \code{"#1F3A6B"}.}
+
+\item{source_header_text}{Character. Text color for source-column
+header labels. Default \code{"#FFFFFF"}.}
 }
 \value{
 A character string in DOT format.
 }
 \description{
-Convert Graph to Graphviz DOT String
+Generates a Graphviz DOT-language representation of a computed graph.
+Node fill colors follow the package's standard palette: navy blue with
+white text for source headers, light blue for source boxes, and white
+for everything else.
+}
+\details{
+The engine has two label-formatting modes selected by the
+\code{formatting} argument:
+
+\describe{
+  \item{\code{"plain"} (default)}{Labels are emitted as plain DOT
+    text without inline markup. Graphviz handles plain text reliably
+    across all backends, producing exactly-centered labels at every
+    font and zoom level. Source headers receive a bold typeface via
+    a whole-node \code{fontname} (\emph{e.g.,} \code{"Helvetica-Bold"})
+    rather than inline \code{<B>} markup; this preserves the visual
+    emphasis without invoking Graphviz's HTML-label code path.}
+  \item{\code{"rich"}}{Labels use HTML-like markup with inline bold
+    for the descriptive text and italic for the lowercase \emph{n} in
+    "n = X", matching the typographic conventions used by the grid
+    engine and by published EQUATOR diagrams. This mode invokes
+    Graphviz's HTML-label code path, whose text-width estimator
+    drifts slightly from the actually-rendered glyph widths.
+    Width measurement uses embedded Adobe Font Metric (AFM) tables
+    for the rendered Helvetica and Times families, with trailing-
+    whitespace compensation to recenter the visible glyphs. The
+    result is sub-pixel-accurate centering for Helvetica and exact
+    centering for Times; other fonts (Courier, system sans-serifs)
+    may show small residual drift since their Graphviz HTML-label
+    metrics differ from what browsers actually render.}
+}
+
+Most users should accept the default \code{"plain"} formatting,
+which is the more robust choice for prototyping and web embedding.
+The \code{"rich"} mode is available for diagrams where the inline
+italic-\emph{n} and bold-label typography is essential.
 }
 \keyword{internal}
