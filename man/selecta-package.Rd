@@ -8,6 +8,42 @@
 \description{
 Build EQUATOR-style flowcharts for clinical studies by sequentially defining inclusion and exclusion criteria, study arms, and endpoints. The pipe-friendly API supports CONSORT (randomized trials), STROBE (observational cohorts), STARD (diagnostic accuracy), PRISMA (systematic reviews), and MOOSE (observational meta-analysis) diagram layouts, with multi-source entry, convergence, cross-classification grids, and per-arm labelling. Diagrams are rendered via 'grid' graphics in both data-driven (automatic counting) and manual-count modes, with optional 'DiagrammeR'/'Graphviz' output.
 }
+\section{Package options}{
+
+\code{selecta} reads the following session options, each settable with
+\code{options()} and each with a safe default:
+\describe{
+  \item{\code{selecta.number_format}}{Default count formatting when
+    \code{number_format} is not passed explicitly. A preset (\code{"us"},
+    \code{"eu"}, \code{"space"}, \code{"none"}) or a custom
+    \code{c(big.mark, decimal.mark)} pair. Defaults to \code{"us"}.}
+  \item{\code{selecta.vpad}}{Default vertical padding between rows, in
+    inches, used by the grid engine and by \code{\link{recdims}}.
+    Defaults to \code{0.25}.}
+  \item{\code{selecta.check_arithmetic}}{Whether manual-mode count
+    consistency checks emit advisory warnings (arm counts not summing to
+    the split total, an exclusion exceeding the available count,
+    sub-reasons not summing to their total, or a manual \code{combine()}
+    disagreeing with its streams). The counts are never altered. Defaults
+    to \code{TRUE}.}
+  \item{\code{selecta.debug_layout}}{Whether the computation and rendering
+    functions print a structured layout trace via \code{message()} (node
+    and edge tables, computed positions, recommended dimensions, per-phase
+    band heights, and the generated DOT source). Useful for bug reports.
+    Defaults to \code{FALSE}.}
+}
+}
+
+\examples{
+\donttest{
+opts <- options()  # save to restore afterwards
+options(selecta.number_format = "eu")     # 1.234 instead of 1,234
+options(selecta.vpad = 0.35)              # looser default spacing
+options(selecta.check_arithmetic = FALSE) # silence manual-count warnings
+options(selecta.debug_layout = TRUE)      # print a layout trace
+options(opts)                             # restore previous options
+}
+}
 \seealso{
 Useful links:
 \itemize{

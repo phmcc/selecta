@@ -60,9 +60,9 @@ cohort(flow)     # extract the analysis-ready dataset
 
 | Guideline | Study type | Key functions |
 |:----------|:-----------|:-------------|
-| **CONSORT** | Randomized trials | `enroll()`, `allocate()`, `phase()` |
+| **CONSORT** | Randomized trials | `enroll()`, `allocate()` |
 | **STROBE** | Observational cohorts | `enroll()`, `stratify()` |
-| **STARD** | Diagnostic accuracy | `assess()`, `classify()` |
+| **STARD** | Diagnostic accuracy | `assess()`, `stratify()`, `endpoint()` |
 | **PRISMA** | Systematic reviews | `sources()`, `combine()` |
 | **MOOSE** | Meta-analyses of observational studies | `sources()`, `combine()`, `stratify()` |
 
@@ -74,15 +74,14 @@ Functions for building the enrollment flow. Each returns a modified `selecta` ob
 
 | Function | Purpose | Guideline |
 |:---------|:--------|:----------|
-| `enroll()` | Initialize a flow from data (`data`, `id`) or counts (`n`) | All |
-| `sources()` | Initialize a multi-source flow with parallel columns | PRISMA |
+| `enroll()` | Initialize a flow from data (`data`, `id`) or counts (`n`) | CONSORT, STROBE, STARD, split-and-recombine |
+| `sources()` | Initialize a multi-source flow with parallel columns | PRISMA, MOOSE |
+| `phase()` | Label a study phase (vertical text in left margin) | All |
 | `exclude()` | Remove participants matching a criterion, with optional sub-reasons | All |
-| `assess()` | Record a test/procedure receipt step | STARD |
-| `phase()` | Label a study phase (vertical text in left margin) | CONSORT |
-| `stratify()` | Split into parallel strata by any characteristic | STROBE, MOOSE |
 | `allocate()` | Split into randomized arms (alias for `stratify()`) | CONSORT |
-| `combine()` | Merge parallel streams into a single flow | PRISMA, split-and-recombine |
-| `classify()` | Add a terminal cross-classification grid | STARD |
+| `stratify()` | Split into parallel strata by any characteristic | STROBE, STARD, MOOSE |
+| `assess()` | Record a test/procedure receipt step | STARD |
+| `combine()` | Merge parallel streams into a single flow | PRISMA, MOOSE, split-and-recombine |
 | `endpoint()` | Designate the terminal node(s) | All |
 
 #### Rendering and export
@@ -157,6 +156,14 @@ The `number_format` argument accepts named presets (`"us"`, `"eu"`, `"space"`, `
 ```r
 options(selecta.number_format = "eu")   # 1.234 instead of 1,234
 options(selecta.vpad = 0.35)            # increase default vertical spacing
+```
+
+### Diagnostic output
+
+For inspecting how a diagram is laid out—when reporting a rendering problem, or when tuning spacing and phase wrapping—`selecta` can emit a structured trace of its internal computation. The trace is controlled by a single session option:
+
+```r
+options(selecta.debug_layout = TRUE)
 ```
 
 ## Comparison with Related Packages
@@ -245,7 +252,7 @@ stages <- cohorts(flow)
 stages[["Failed eligibility"]]$excluded
 
 # Dataset remaining after the eligibility exclusion
-stages[["Failed eligibility"]]$remaining
+stages[["Failed eligibility"]]$included
 ```
 
 ## Development
@@ -266,6 +273,7 @@ The design of `selecta` draws inspiration from several existing packages and ref
 - **EQUATOR Network** — Reporting-guideline standards (CONSORT, STROBE, STARD, PRISMA, MOOSE)
 - **consort** (Dayim) — CONSORT diagram conventions
 - **DiagrammeR** (Iannone) — Graphviz/DOT rendering approach
+- **Graphviz** — The graph visualization engine underlying the package's DOT export and rendering
 - **data.table** (Dowle & Srinivasan) — High-performance data operations
 
 ## License
@@ -289,7 +297,7 @@ A BibTeX entry for LaTeX users is
     title = {selecta: EQUATOR-Style Enrollment Diagrams for Clinical Studies},
     author = {Paul Hsin-ti McClelland},
     year = {2026},
-    note = {R package version 0.4.0},
+    note = {R package version 0.5.0},
     url = {https://phmcc.codeberg.page/selecta/},
   }
 ```

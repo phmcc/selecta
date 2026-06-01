@@ -1,3 +1,5 @@
+### * Main functions
+
 #' Compute Enrollment Counts
 #'
 #' Walks the step list and resolves all counts, producing a graph of
@@ -21,23 +23,18 @@ compute <- function(x) {
   add_node <- function(text, n, role, reasons = NULL,
                        arm_id = NA_integer_, phase = NA_integer_,
                        stream_group = NA_character_,
-                       grid_row = NA_integer_, grid_col = NA_integer_,
                        sublabel = NA_character_) {
     nid <<- nid + 1L
-    ## Defensive: callers may explicitly pass NULL for optional scalars
-    ## (overriding the formal default), which would create length-0
-    ## list elements and trigger rbindlist warnings during finalization.
+    ## Defensive: drop NULL scalars (which would create length-0 list
+    ## elements and trigger rbindlist warnings during finalization).
     if (is.null(sublabel))     sublabel     <- NA_character_
     if (is.null(stream_group)) stream_group <- NA_character_
     if (is.null(arm_id))       arm_id       <- NA_integer_
-    if (is.null(grid_row))     grid_row     <- NA_integer_
-    if (is.null(grid_col))     grid_col     <- NA_integer_
     nodes[[nid]] <<- list(
       node_id = nid, text = text, n = n,
       role = role, reasons = list(reasons),
       arm_id = arm_id, phase = phase,
       stream_group = stream_group,
-      grid_row = grid_row, grid_col = grid_col,
       sublabel = sublabel
     )
     nid
@@ -113,6 +110,12 @@ compute <- function(x) {
 
   ## ---- Step dispatch ----
 
+  ## diagram_phase of the entry node(s). Set here for enroll() (single
+  ## entry); for sources() it is set when that step runs. Lets the first
+  ## phase encompass the entry box(es).
+  entry_phase    <- if (!has_sources) diagram_phase else NA_integer_
+  prev_phase_seen <- FALSE
+
   for (si in seq_len(n_steps)) {
     step <- steps[[si]]
 
@@ -120,13 +123,27 @@ compute <- function(x) {
     if (step$type == "phase") {
       close_phase(diagram_phase)
       current_phase_label <- step$label
-      current_phase_start <- diagram_phase + 1L
+      ## A phase normally starts at the next diagram phase. The exception is
+      ## the first phase declared immediately after the entry step (enroll()
+      ## or sources()): it encompasses the entry node(s), detected by the
+      ## entry phase still being current with no prior phase opened.
+      current_phase_start <- if (!prev_phase_seen &&
+                                 !is.na(entry_phase) &&
+                                 diagram_phase == entry_phase)
+                                 entry_phase
+                             else
+                                 diagram_phase + 1L
+      prev_phase_seen <- TRUE
       next
     }
 
     ## ---- Sources ----
     if (step$type == "sources") {
       diagram_phase <- diagram_phase + 1L
+      ## Record the entry diagram phase so a phase() declared immediately
+      ## after sources() encompasses the source row (mirrors the enroll()
+      ## case, where entry_phase is set before the loop).
+      if (!prev_phase_seen && is.na(entry_phase)) entry_phase <- diagram_phase
       try_start_phase()
 
       ## One header node and one source node per group
@@ -174,6 +191,13 @@ compute <- function(x) {
 
       total_n <- sum(vapply(streams, function(s) s$n, numeric(1L)))
       merge_n <- if (!is.null(step$n)) step$n else total_n
+      ## A manually supplied combine total should match the streams feeding it.
+      if (x$mode == "manual" && !is.null(step$n) &&
+          length(step$n) == 1L && !is.na(step$n) && step$n != total_n) {
+        warn_arithmetic(
+          "Combine '%s' is given as %s but the incoming streams sum to %s.",
+          step$label, step$n, total_n)
+      }
 
       ## Build node text: label + optional sublabel
       node_text <- step$label
@@ -233,7 +257,7 @@ compute <- function(x) {
       has_incl_label <- !is.null(step$included_label)
       skip_count_node <- (!isTRUE(step$show_count) && !has_incl_label) ||
         (!is.na(upcoming) &&
-         upcoming %chin% c("stratify", "allocate", "endpoint", "classify", "combine"))
+         upcoming %chin% c("stratify", "allocate", "endpoint", "combine"))
 
       if (!in_arms) {
         res <- resolve_exclusion(
@@ -254,7 +278,7 @@ compute <- function(x) {
         if (!skip_count_node) {
           rlbl <- if (!is.null(step$included_label)) step$included_label[1L] else ""
           main_id <- add_node(
-            text = rlbl, n = res$n_remaining, role = "main",
+            text = rlbl, n = res$n_included, role = "main",
             phase = diagram_phase
           )
           add_edge(last_main, main_id, edge_type = "flow")
@@ -262,9 +286,9 @@ compute <- function(x) {
         }
 
         if (x$mode == "data") {
-          current_data$.all <- res$remaining_data
+          current_data$.all <- res$included_data
         } else {
-          current_n <- res$n_remaining
+          current_n <- res$n_included
         }
 
       } else {
@@ -292,9 +316,8 @@ compute <- function(x) {
           )
         })
 
-        ## Harmonize reason ordering across arms so that the same
-        ## categories appear in the same position in every side box.
-        ## Order is determined by total count across all arms (descending).
+        ## Harmonize reason ordering across arms so categories appear in the
+        ## same position in every side box, ordered by total count descending.
         has_any_reasons <- any(vapply(results,
             function(r) !is.null(r$reasons), logical(1L)))
         if (has_any_reasons) {
@@ -337,7 +360,7 @@ compute <- function(x) {
               if (length(incl_labels) >= i) incl_labels[i] else incl_labels[1L]
             } else ""
             main_id <- add_node(
-              text = rlbl, n = res$n_remaining, role = "main",
+              text = rlbl, n = res$n_included, role = "main",
               arm_id = i, phase = diagram_phase
             )
             add_edge(streams[[i]]$last_node, main_id, edge_type = "flow")
@@ -345,10 +368,15 @@ compute <- function(x) {
           }
 
           if (x$mode == "data") {
-            current_data[[arm_labels[i]]] <- res$remaining_data
-          } else {
-            streams[[i]]$n <- res$n_remaining
+            current_data[[arm_labels[i]]] <- res$included_data
           }
+          ## Track the post-exclusion count for this stream in BOTH modes.
+          ## In manual mode this is the authoritative count; in data mode it
+          ## mirrors nrow(included_data) and is what a later combine() sums,
+          ## so omitting it here made combine() report the pre-exclusion
+          ## total even though cohorts() (which recomputes from the data)
+          ## reported the correct figure.
+          streams[[i]]$n <- res$n_included
         }
       }
     }
@@ -374,6 +402,13 @@ compute <- function(x) {
         arm_labels <- step$labels
         n_arms     <- length(arm_labels)
         alloc_n    <- sum(step$n)
+        ## Arm counts should account for everyone entering the split.
+        if (length(current_n) == 1L && !is.na(current_n) &&
+            alloc_n != current_n) {
+          warn_arithmetic(
+            "Split '%s' arm counts sum to %s but %s entered (a difference of %s).",
+            alloc_label, alloc_n, current_n, abs(current_n - alloc_n))
+        }
       }
 
       ## Allocation box on its own row
@@ -408,48 +443,6 @@ compute <- function(x) {
         )
       })
       n_streams <- n_arms
-    }
-
-    ## ---- Classify ----
-    if (step$type == "classify") {
-      diagram_phase <- diagram_phase + 1L
-
-      nr <- length(step$rows)
-      nc <- length(step$cols)
-
-      if (in_arms) {
-        ## Classify per arm: each arm gets its own grid
-        ## For STARD, typically arms are index test result categories
-        ## and classify provides the reference standard cross-tab
-        for (a in seq_len(n_streams)) {
-          for (ri in seq_len(nr)) {
-            for (ci in seq_len(nc)) {
-              cell_text <- paste0(step$rows[ri], " / ", step$cols[ci])
-              cell_n <- step$n[ri, ci]
-              if (is.list(step$n)) cell_n <- step$n[[a]][ri, ci]
-              cell_id <- add_node(
-                text = cell_text, n = cell_n, role = "cell",
-                arm_id = a, phase = diagram_phase,
-                grid_row = ri, grid_col = ci
-              )
-              add_edge(streams[[a]]$last_node, cell_id, edge_type = "classify")
-            }
-          }
-        }
-      } else {
-        ## Single-stream classify
-        for (ri in seq_len(nr)) {
-          for (ci in seq_len(nc)) {
-            cell_text <- paste0(step$rows[ri], " / ", step$cols[ci])
-            cell_id <- add_node(
-              text = cell_text, n = step$n[ri, ci], role = "cell",
-              phase = diagram_phase,
-              grid_row = ri, grid_col = ci
-            )
-            add_edge(last_main, cell_id, edge_type = "classify")
-          }
-        }
-      }
     }
 
     ## ---- Endpoint ----
@@ -498,12 +491,37 @@ compute <- function(x) {
                phase_end = integer())
   }
 
+  ## Optional debug: the constructed graph (nodes, edges, phase ranges).
+  if (isTRUE(getOption("selecta.debug_layout", FALSE))) {
+    node_cols <- intersect(c("node_id", "row", "role", "phase", "arm_id",
+                             "stream_group", "text", "n"), names(nodes_dt))
+    debug_emit("compute() graph",
+               n_nodes = nrow(nodes_dt), n_edges = nrow(edges_dt),
+               n_phases = nrow(phases_dt),
+               nodes = nodes_dt[, ..node_cols],
+               edges = edges_dt,
+               phases = phases_dt)
+  }
+
   list(nodes = nodes_dt, edges = edges_dt, phases = phases_dt)
 }
 
 
-## ---- Exclusion resolution ----
+### * Exclusion resolution
 
+#' Resolve an Exclusion Step
+#'
+#' Evaluates a single exclusion step in either data or manual mode and
+#' returns the excluded and remaining counts, the remaining data (data
+#' mode), and any tabulated sub-reasons.
+#'
+#' @param mode Character, either \code{"data"} or \code{"manual"}.
+#' @param step The exclusion step (list) from the pipeline.
+#' @param data A \code{data.table} of current participants (data mode).
+#' @param current_n Integer current count (manual mode).
+#' @param manual_n_override Optional integer overriding \code{step$n}.
+#' @return A list with \code{n_excluded}, \code{n_included},
+#'   \code{included_data}, and \code{reasons}.
 #' @keywords internal
 resolve_exclusion <- function(mode, step, data = NULL, current_n = NULL,
                               manual_n_override = NULL) {
@@ -521,48 +539,90 @@ resolve_exclusion <- function(mode, step, data = NULL, current_n = NULL,
       stop(sprintf("Exclusion '%s' must evaluate to logical", step$label),
            call. = FALSE)
     mask[is.na(mask)] <- FALSE
-    excluded  <- data[mask]
-    remaining <- data[!mask]
-    n_excl <- nrow(excluded)
+    ## Only the included rows are needed downstream (included_data). The
+    ## excluded count comes from the mask directly, and reason tabulation
+    ## needs only the reason column, so the full excluded subset is never
+    ## materialized.
+    included <- data[!mask]
+    n_excl <- sum(mask)
     n_keep <- nrow(remaining)
 
     reasons <- NULL
     if (!is.null(step$reasons_var) && n_excl > 0L) {
       rvar <- step$reasons_var
-      if (rvar %chin% names(excluded))
-        reasons <- tabulate_reasons(excluded, rvar)
+      if (rvar %chin% names(data))
+        reasons <- tabulate_reasons(data[[rvar]][mask])
     }
     if (!is.null(reasons) && !show_zero) {
       reasons <- reasons[reasons > 0L]
       if (length(reasons) == 0L) reasons <- NULL
     }
 
-    list(n_excluded = n_excl, n_remaining = n_keep,
-         remaining_data = remaining, reasons = reasons)
+    list(n_excluded = n_excl, n_included = n_keep,
+         included_data = included, reasons = reasons)
   } else {
     n_exc <- if (!is.null(manual_n_override)) manual_n_override else step$n
+
+    ## Advisory arithmetic checks (manual mode). Counts are not altered.
+    ## All manual-mode checks are evaluated here at compute time so the audit
+    ## is complete and consistent: an over-exclusion, and sub-reasons that do
+    ## not sum to the exclusion total. (For per-arm exclusions this function
+    ## is called once per arm with arm-resolved values, so the scalar checks
+    ## below cover each arm.)
+    if (length(current_n) == 1L && !is.na(current_n) &&
+        length(n_exc) == 1L && !is.na(n_exc) && n_exc > current_n) {
+      warn_arithmetic(
+        "Exclusion '%s' removes %s but only %s are available (remaining would be %s).",
+        step$label, n_exc, current_n, current_n - n_exc)
+    }
+    raw_reasons <- step$reasons
+    if (!is.null(raw_reasons) && !is.list(raw_reasons) &&
+        is.numeric(raw_reasons) && length(n_exc) == 1L && !is.na(n_exc) &&
+        sum(raw_reasons) != n_exc) {
+      warn_arithmetic(
+        "Exclusion '%s' sub-reasons sum to %s but the exclusion total is %s.",
+        step$label, sum(raw_reasons), n_exc)
+    }
+
     reasons <- step$reasons
     if (!is.null(reasons) && !is.list(reasons) && !show_zero) {
       reasons <- reasons[reasons > 0L]
       if (length(reasons) == 0L) reasons <- NULL
     }
-    list(n_excluded = n_exc, n_remaining = current_n - n_exc,
-         remaining_data = NULL, reasons = reasons)
+    list(n_excluded = n_exc, n_included = current_n - n_exc,
+         included_data = NULL, reasons = reasons)
   }
 }
 
 
-## ---- Helpers ----
+### * Helper functions
 
+#' Tabulate Exclusion Sub-Reasons
+#'
+#' Counts occurrences of each reason category in a vector, treating
+#' \code{NA} as \code{"Other"}, and returns counts sorted descending.
+#'
+#' @param reason_col A vector of reason values for the excluded participants.
+#' @return A named integer vector of counts, ordered by descending count.
 #' @keywords internal
-tabulate_reasons <- function(dt, rvar) {
-  reason_col <- dt[[rvar]]
+tabulate_reasons <- function(reason_col) {
   reason_col[is.na(reason_col)] <- "Other"
   tbl <- data.table(r = reason_col)[, .(n = .N), by = r]
   setorderv(tbl, "n", order = -1L)
   setNames(tbl$n, tbl$r)
 }
 
+#' Split a Dataset into Arm Streams by a Variable
+#'
+#' Partitions a \code{data.table} by the levels of a splitting variable,
+#' optionally relabelling levels, and returns the per-arm data and labels.
+#'
+#' @param dt A \code{data.table} to partition.
+#' @param var Character name of the splitting variable.
+#' @param labels Optional character vector of arm labels; may be named to
+#'   relabel specific factor levels.
+#' @return A list with \code{data} (named list of per-arm
+#'   \code{data.table}s) and \code{labels} (character arm labels).
 #' @keywords internal
 split_by_var <- function(dt, var, labels = NULL) {
   split_col <- dt[[var]]

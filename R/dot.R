@@ -1,3 +1,5 @@
+### * Main functions
+
 #' Convert Graph to Graphviz DOT String
 #'
 #' Generates a Graphviz DOT-language representation of a computed graph.
@@ -64,11 +66,12 @@
 #' @param arrow_col Character. Color for arrows and connector lines.
 #'   Default \code{"black"}.
 #' @param source_fill Character. Fill color for source boxes in
-#'   multi-source diagrams (PRISMA, MOOSE). Default \code{"#D6E6F2"}.
+#'   multi-source diagrams (PRISMA, MOOSE). Default \code{"#FFFFFF"},
+#'   matching the grid engine.
 #' @param source_header_fill Character. Fill color for source-column
-#'   header boxes. Default \code{"#1F3A6B"}.
+#'   header boxes. Default \code{"#D0D0D0"}, matching the grid engine.
 #' @param source_header_text Character. Text color for source-column
-#'   header labels. Default \code{"#FFFFFF"}.
+#'   header labels. Default \code{"black"}, matching the grid engine.
 #' @return A character string in DOT format.
 #' @keywords internal
 to_dot <- function(graph, number_format = NULL, count_first = FALSE,
@@ -80,9 +83,9 @@ to_dot <- function(graph, number_format = NULL, count_first = FALSE,
                    side_fill          = "#F0F0F0",
                    border_col         = "black",
                    arrow_col          = "black",
-                   source_fill        = "#D6E6F2",
-                   source_header_fill = "#1F3A6B",
-                   source_header_text = "#FFFFFF") {
+                   source_fill        = "#FFFFFF",
+                   source_header_fill = "#D0D0D0",
+                   source_header_text = "black") {
 
   formatting <- match.arg(formatting)
   padding_pt <- padding_pt + padding_adjust
@@ -96,15 +99,14 @@ to_dot <- function(graph, number_format = NULL, count_first = FALSE,
   is_times   <- grepl("^Times",   font_family, ignore.case = TRUE)
   is_courier <- grepl("^Courier", font_family, ignore.case = TRUE)
 
-  ## Convert padding to inches for the margin attribute. Vertical margin
-  ## is held smaller than horizontal because the line-height already
-  ## provides comfortable vertical spacing.
+  ## Padding to inches for the margin attribute; vertical is held smaller
+  ## since the line-height already provides comfortable vertical spacing.
   margin_x_in <- padding_pt / 72
   margin_y_in <- 6 / 72
 
   font_size_pt <- 14
 
-  ## ---- DOT emission preamble ------------------------------------------
+  ## ---- DOT emission preamble ----
   lines <- character()
   lines <- c(lines, "digraph selecta {")
   lines <- c(lines, "  rankdir=TB;")
@@ -119,12 +121,11 @@ to_dot <- function(graph, number_format = NULL, count_first = FALSE,
            'fontsize=%d, margin="%.3f,%.3f", color="%s"];'),
     font_family, font_size_pt, margin_x_in, margin_y_in, border_col))
 
-  ## ---- Per-formatting-mode label and node emission --------------------
+  ## ---- Per-formatting-mode label and node emission ----
   if (formatting == "rich") {
 
-    ## RICH MODE: HTML labels with inline bold/italic. Width measured
-    ## from embedded AFM tables; trailing whitespace compensates for
-    ## Graphviz's HTML-label centering offset on bold-bearing lines.
+    ## Rich mode: HTML labels with inline bold/italic; width from embedded
+    ## AFM tables, trailing whitespace correcting Graphviz's centering.
     rich_node <- build_rich_emitter(
       fn = fn, count_first = count_first,
       is_times = is_times, is_courier = is_courier,
@@ -142,10 +143,8 @@ to_dot <- function(graph, number_format = NULL, count_first = FALSE,
 
   } else {
 
-    ## PLAIN MODE: plain DOT labels. Graphviz measures and centers
-    ## plain text accurately. Source headers get bold via a whole-
-    ## node `fontname="Helvetica-Bold"` (or the Bold variant of the
-    ## selected family) rather than inline markup.
+    ## Plain mode: plain DOT labels, which Graphviz measures and centers
+    ## accurately; source headers gain bold via a whole-node Bold fontname.
     plain_node <- build_plain_emitter(
       fn = fn, count_first = count_first,
       font_family = font_family,
@@ -159,7 +158,7 @@ to_dot <- function(graph, number_format = NULL, count_first = FALSE,
     }
   }
 
-  ## ---- Edges (formatting-independent) ---------------------------------
+  ## ---- Edges (formatting-independent) ----
   for (i in seq_len(nrow(edges))) {
     e <- edges[i]
     extras <- switch(e$edge_type,
@@ -167,42 +166,86 @@ to_dot <- function(graph, number_format = NULL, count_first = FALSE,
                          arrow_col, arrow_col),
       converge = sprintf(' style=bold, color="%s", fontcolor="%s"',
                          arrow_col, arrow_col),
-      classify = sprintf(' arrowhead=normal, color="%s", fontcolor="%s"',
-                         arrow_col, arrow_col),
       sprintf(' color="%s", fontcolor="%s"', arrow_col, arrow_col)
     )
     lines <- c(lines, sprintf("  n%d -> n%d [%s];", e$from, e$to, extras))
   }
 
+  ## ---- Source-header positioning (multi-source flows) ----
+  ## Source headers are pure labels with no edges of their own, so Graphviz
+  ## has nothing tying each header above its column and packs all the
+  ## parentless top nodes into one interleaved row. Three constraints fix
+  ## this for any number of source groups: an invisible edge from each header
+  ## to its own source box (matched by stream_group) ranks the header
+  ## directly above that box, a high weight on that edge keeps the box
+  ## centered under its (often wider) header rather than being pulled toward
+  ## the converge target below, and a rank=same grouping holds all the
+  ## headers together on a single top row.
+  hdr_idx <- which(nodes$role == "source_header")
+  if (length(hdr_idx) > 0L) {
+    src_idx <- which(nodes$role == "source")
+    for (h in hdr_idx) {
+      grp <- nodes$stream_group[h]
+      if (is.na(grp)) next
+      match_src <- src_idx[nodes$stream_group[src_idx] == grp]
+      if (length(match_src) >= 1L)
+        lines <- c(lines, sprintf("  n%d -> n%d [style=invis, weight=100];",
+                                  nodes$node_id[h], nodes$node_id[match_src[1L]]))
+    }
+    if (length(hdr_idx) >= 2L) {
+      hdr_ids <- paste(sprintf("n%d", nodes$node_id[hdr_idx]), collapse = "; ")
+      lines <- c(lines, sprintf("  { rank=same; %s; }", hdr_ids))
+    }
+  }
+
   lines <- c(lines, "}")
-  paste(lines, collapse = "\n")
+  dot_src <- paste(lines, collapse = "\n")
+
+  ## With options(selecta.debug_layout = TRUE): emit the generated DOT source
+  ## and its salient settings, mirroring the grid engine's layout debug so
+  ## that both rendering paths can be inspected from the same option.
+  debug_emit("to_dot() source",
+             settings = sprintf(
+                 "formatting=%s  ortho=%s  count_first=%s  font=%s  nodes=%d  edges=%d",
+                 formatting, isTRUE(ortho), isTRUE(count_first), font_family,
+                 nrow(nodes), nrow(edges)),
+             dot = dot_src)
+
+  dot_src
 }
 
 
-## ---- Plain-label emitter --------------------------------------------------
-##
-## Produces a closure that emits one DOT node-statement per call. Plain
-## DOT labels use `\n` for line breaks and require backslash- and quote-
-## escaping. Source headers receive a bold variant of the body font via
-## the per-node `fontname` attribute, which Graphviz measures accurately
-## (unlike inline <B> markup in HTML labels).
+### * Plain-label emitter
 
+#' Build a Plain-Label DOT Node Emitter
+#'
+#' Produces a closure emitting one plain DOT node-statement per call.
+#' Source headers receive a bold variant of the body font via the per-node
+#' \code{fontname}, which Graphviz measures accurately.
+#'
+#' @param fn Count-formatting function.
+#' @param count_first Logical; place the count before the label text.
+#' @param font_family Character body font family.
+#' @param box_fill,side_fill,source_fill Fill colors for main, side, and
+#'   source boxes.
+#' @param source_header_fill,source_header_text Fill and text colors for
+#'   source-header boxes.
+#' @return A function of a single node row returning a DOT node-statement.
 #' @keywords internal
 build_plain_emitter <- function(fn, count_first, font_family,
                                 box_fill, side_fill, source_fill,
                                 source_header_fill, source_header_text) {
 
-  ## Plain DOT escapes: only newline ("\n" -> "\\n" in the source DOT)
-  ## and double-quote ("\"" -> "\\\"") need handling. Backslashes are
-  ## escaped first to avoid double-processing.
+  ## Plain DOT escapes: backslash first (to avoid double-processing), then
+  ## double-quote; newline is emitted later as the literal "\n".
   esc <- function(s) {
     s <- gsub("\\", "\\\\", s, fixed = TRUE)
     s <- gsub('"',  '\\"',  s, fixed = TRUE)
     s
   }
 
-  ## Derive a bold font name for source headers from the chosen family.
-  ## Helvetica -> Helvetica-Bold, Times-Roman -> Times-Bold, etc.
+  ## Derive a bold font name for source headers from the chosen family
+  ## (e.g. Helvetica -> Helvetica-Bold, Times-Roman -> Times-Bold).
   bold_font <- if (grepl("^Times", font_family, ignore.case = TRUE)) {
     "Times-Bold"
   } else if (grepl("^Courier", font_family, ignore.case = TRUE)) {
@@ -221,8 +264,7 @@ build_plain_emitter <- function(fn, count_first, font_family,
     } else if (isTRUE(count_first)) {
       sprintf("%s %s", esc(n_str), esc(text))
     } else {
-      ## Plain DOT line break: "\n" in the rendered string, written as
-      ## "\\n" in the source DOT so Graphviz sees the literal \n.
+      ## Plain DOT line break: written as "\\n" in source so Graphviz sees \n.
       sprintf("%s\\nn = %s", esc(text), esc(n_str))
     }
   }
@@ -249,13 +291,26 @@ build_plain_emitter <- function(fn, count_first, font_family,
 }
 
 
-## ---- Rich (HTML-label) emitter --------------------------------------------
-##
-## Emits HTML-like labels with inline bold/italic markup and a calibrated
-## trailing-whitespace span that compensates for Graphviz's bold-text
-## width underestimate on the SVG backend. Width measurement uses
-## embedded AFM tables for the supported font families.
+### * Rich (HTML-label) emitter
 
+#' Build a Rich HTML-Label DOT Node Emitter
+#'
+#' Emits HTML-like labels with inline bold/italic markup and a calibrated
+#' trailing-whitespace span compensating for Graphviz's bold-text width
+#' underestimate on the SVG backend. Width measurement uses embedded AFM
+#' tables for the supported font families.
+#'
+#' @param fn Count-formatting function.
+#' @param count_first Logical; place the count before the label text.
+#' @param is_times,is_courier Logical flags for the active font family.
+#' @param font_family Character body font family.
+#' @param padding_pt,font_size_pt Numeric horizontal padding and font size
+#'   in points.
+#' @param box_fill,side_fill,source_fill Fill colors for main, side, and
+#'   source boxes.
+#' @param source_header_fill,source_header_text Fill and text colors for
+#'   source-header boxes.
+#' @return A function of a single node row returning a DOT node-statement.
 #' @keywords internal
 build_rich_emitter <- function(fn, count_first, is_times, is_courier,
                                font_family, padding_pt, font_size_pt,
@@ -272,7 +327,7 @@ build_rich_emitter <- function(fn, count_first, is_times, is_courier,
     s
   }
 
-  ## ---- Embedded Adobe Font Metric (AFM) tables ----------------------------
+  ## ---- Embedded Adobe Font Metric (AFM) tables ----
   ## Character advance widths in 1/1000 em units, ASCII range 32-126.
   helvetica_widths <- c(278,278,355,556,556,889,667,222,333,333,389,584,
     278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,
@@ -351,75 +406,72 @@ build_rich_emitter <- function(fn, count_first, is_times, is_courier,
     }
   }
 
-  ## Trailing-whitespace centering correction. Graphviz's HTML-label
-  ## bold-text estimator under-measures Helvetica-Bold by ~0.22pt per
-  ## character; we append non-breaking spaces at a sub-body-text point
-  ## size to inflate Graphviz's estimate and recenter the visible
-  ## glyphs. Times needs no correction; Courier is not reliably
-  ## calibrated from outside Graphviz, so we omit correction there.
-  bold_gap_per_char <- if (is_times || is_courier) 0 else 0.22
-  ws_pt_size        <- 8L
-  ws_unit_pt        <- 0.278 * ws_pt_size
-  trailing_ws <- function(text) {
-    if (!nzchar(text) || bold_gap_per_char == 0) return("")
-    gap_pt <- nchar(text) * bold_gap_per_char
-    if (gap_pt <= 0.5) return("")
-    n_spaces <- max(1L, as.integer(round(gap_pt / ws_unit_pt)))
-    sprintf('<FONT POINT-SIZE="%d">%s</FONT>',
-            ws_pt_size, strrep("&nbsp;", n_spaces))
-  }
-  bold_gap_pt <- function(text) {
-    if (!nzchar(text)) return(0)
-    nchar(text) * bold_gap_per_char
-  }
-
-  ## Width-attribute eligibility: only when AFM metrics match what the
-  ## renderer actually produces (Helvetica and Times via the embedded
-  ## Adobe AFM tables).
-  metrics_reliable <- is_times || identical(font_family, "Helvetica")
-
-  build_label <- function(text, n, role) {
-    has_text <- nchar(text) > 0L
-    n_str    <- fn(n)
-    body <- if (role == "source_header") {
-      sprintf("<B>%s</B>%s", esc(text), trailing_ws(text))
-    } else if (!has_text) {
-      sprintf("<I>n</I> = %s", esc(n_str))
-    } else if (isTRUE(count_first)) {
-      gap_pt  <- bold_gap_pt(n_str) + 2
-      ws_html <- if (gap_pt > 0.5) {
+  ## Trailing-whitespace centering correction: Graphviz under-measures
+    ## Helvetica-Bold by ~0.22 pt/char, so non-breaking spaces at a small
+    ## point size inflate its estimate and recentre the glyphs. Times needs
+    ## no correction; Courier is not reliably calibrated, so none is applied.
+    bold_gap_per_char <- if (is_times || is_courier) 0 else 0.22
+    ws_pt_size        <- 8L
+    ws_unit_pt        <- 0.278 * ws_pt_size
+    trailing_ws <- function(text) {
+        if (!nzchar(text) || bold_gap_per_char == 0) return("")
+        gap_pt <- nchar(text) * bold_gap_per_char
+        if (gap_pt <= 0.5) return("")
         n_spaces <- max(1L, as.integer(round(gap_pt / ws_unit_pt)))
         sprintf('<FONT POINT-SIZE="%d">%s</FONT>',
                 ws_pt_size, strrep("&nbsp;", n_spaces))
-      } else ""
-      sprintf("<B>%s</B> %s%s", esc(n_str), esc(text), ws_html)
-    } else {
-      sprintf(
-        '<B>%s</B>%s<BR/><FONT POINT-SIZE="4"> </FONT><BR/><I>n</I> = %s',
-        esc(text), trailing_ws(text), esc(n_str))
     }
-    sprintf("<%s>", body)
-  }
+    bold_gap_pt <- function(text) {
+        if (!nzchar(text)) return(0)
+        nchar(text) * bold_gap_per_char
+    }
 
-  function(nd) {
-    lbl      <- build_label(nd$text, nd$n, nd$role)
-    width_pt <- width_for_node(nd$text, nd$n, nd$role)
-    width_in <- (width_pt + 2 * padding_pt) / 72
-    fill <- switch(nd$role,
-      side          = side_fill,
-      source        = source_fill,
-      source_header = source_header_fill,
-      cell          = box_fill,
-      alloc         = box_fill,
-      box_fill
-    )
-    width_attr <- if (metrics_reliable) sprintf(", width=%.3f", width_in) else ""
-    if (nd$role == "source_header") {
-      sprintf('  n%d [label=%s, fillcolor="%s", fontcolor="%s"%s];',
-              nd$node_id, lbl, fill, source_header_text, width_attr)
-    } else {
-      sprintf('  n%d [label=%s, fillcolor="%s"%s];',
-              nd$node_id, lbl, fill, width_attr)
+    ## Width-attribute eligibility: only when AFM metrics match the renderer
+    ## output (Helvetica and Times via the embedded Adobe AFM tables).
+    metrics_reliable <- is_times || identical(font_family, "Helvetica")
+
+    build_label <- function(text, n, role) {
+        has_text <- nchar(text) > 0L
+        n_str    <- fn(n)
+        body <- if (role == "source_header") {
+                    sprintf("<B>%s</B>%s", esc(text), trailing_ws(text))
+                } else if (!has_text) {
+                    sprintf("<I>n</I> = %s", esc(n_str))
+                } else if (isTRUE(count_first)) {
+                    gap_pt  <- bold_gap_pt(n_str) + 2
+                    ws_html <- if (gap_pt > 0.5) {
+                                   n_spaces <- max(1L, as.integer(round(gap_pt / ws_unit_pt)))
+                                   sprintf('<FONT POINT-SIZE="%d">%s</FONT>',
+                                           ws_pt_size, strrep("&nbsp;", n_spaces))
+                               } else ""
+                    sprintf("<B>%s</B> %s%s", esc(n_str), esc(text), ws_html)
+                } else {
+                    sprintf(
+                        '<B>%s</B>%s<BR/><FONT POINT-SIZE="4"> </FONT><BR/><I>n</I> = %s',
+                        esc(text), trailing_ws(text), esc(n_str))
+                }
+        sprintf("<%s>", body)
     }
-  }
+
+    function(nd) {
+        lbl      <- build_label(nd$text, nd$n, nd$role)
+        width_pt <- width_for_node(nd$text, nd$n, nd$role)
+        width_in <- (width_pt + 2 * padding_pt) / 72
+        fill <- switch(nd$role,
+                       side          = side_fill,
+                       source        = source_fill,
+                       source_header = source_header_fill,
+                       cell          = box_fill,
+                       alloc         = box_fill,
+                       box_fill
+                       )
+        width_attr <- if (metrics_reliable) sprintf(", width=%.3f", width_in) else ""
+        if (nd$role == "source_header") {
+            sprintf('  n%d [label=%s, fillcolor="%s", fontcolor="%s"%s];',
+                    nd$node_id, lbl, fill, source_header_text, width_attr)
+        } else {
+            sprintf('  n%d [label=%s, fillcolor="%s"%s];',
+                    nd$node_id, lbl, fill, width_attr)
+        }
+    }
 }

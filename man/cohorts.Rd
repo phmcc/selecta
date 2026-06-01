@@ -12,8 +12,8 @@ cohorts(.flow)
 }
 \value{
 A named list of cohort snapshots, keyed by step label. Each
-  snapshot contains \code{remaining}, \code{excluded},
-  \code{n_remaining}, and \code{n_excluded} as described above.
+  snapshot contains \code{included}, \code{excluded},
+  \code{n_included}, and \code{n_excluded} as described above.
 }
 \description{
 Returns a named list of datasets at each step of the enrollment flow,
@@ -24,14 +24,27 @@ Data mode only.
 \details{
 Each element of the returned list is itself a list with:
 \describe{
-  \item{\code{remaining}}{A \code{data.table} of participants still in the
+  \item{\code{included}}{A \code{data.table} of participants still in the
     flow after this step.}
   \item{\code{excluded}}{A \code{data.table} of participants removed at
     this step (for exclusion steps; \code{NULL} otherwise).}
-  \item{\code{n_remaining}}{Integer count of remaining participants.}
+  \item{\code{n_included}}{Integer count of included participants.}
   \item{\code{n_excluded}}{Integer count of excluded participants (or
     \code{NA}).}
 }
+
+
+\code{cohorts()} replays a \emph{data-mode} flow and captures the dataset
+at every step, returning a named list keyed by step label (with
+\code{"_start"} for the initial cohort). Each snapshot exposes both the
+\code{included} and the \code{excluded} rows together with their counts,
+which is useful for validating a diagram against the data, auditing why
+particular participants were dropped, or extracting an intermediate
+population. After a \code{\link{stratify}} or \code{\link{allocate}}
+split, the \code{included} and \code{excluded} elements of a per-arm
+step are themselves named lists with one entry per arm. A manual-mode
+flow has no underlying data and therefore raises an error. To obtain only
+the final analyzed population, use \code{\link{cohort}}.
 }
 \examples{
 flow <- enroll(rctselect2, id = "patient_id") |>
@@ -45,4 +58,8 @@ stages[["Ineligible"]]$n_excluded
 }
 \seealso{
 \code{\link{cohort}} for extracting only the final cohort
+
+Other cohort extraction functions:
+\code{\link[=cohort]{cohort()}}
 }
+\concept{cohort extraction functions}

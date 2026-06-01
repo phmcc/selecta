@@ -36,6 +36,17 @@ Up to three columns are supported, matching the PRISMA 2020 structure:
 previous studies (left), databases and registers (center), and other
 methods (right). Use \code{\link{combine}} downstream to merge the
 parallel streams into a single flow.
+
+
+\code{sources()} initializes a multi-source flow of the kind used in the
+identification stage of systematic-review diagrams (PRISMA, MOOSE), where
+records arrive from several origins and are pooled. Counts are supplied
+as named numeric values; passing named vectors instead of scalars groups
+the sources into labeled columns, and at most three groups are
+supported, matching the standard PRISMA layout. A \code{sources()} flow
+is operated in manual mode and is normally followed by \code{\link{combine}}
+to merge the streams into a single downstream node. For a conventional
+single-entry study, use \code{\link{enroll}} instead.
 }
 \examples{
 # Simple multi-source (one column, no header)
@@ -65,4 +76,14 @@ sources(
 \seealso{
 \code{\link{enroll}} for single-source entry,
   \code{\link{combine}} to merge parallel streams into a single flow
+
+Other flow construction functions:
+\code{\link[=assess]{assess()}},
+\code{\link[=combine]{combine()}},
+\code{\link[=endpoint]{endpoint()}},
+\code{\link[=enroll]{enroll()}},
+\code{\link[=exclude]{exclude()}},
+\code{\link[=phase]{phase()}},
+\code{\link[=stratify]{stratify()}}
 }
+\concept{flow construction functions}

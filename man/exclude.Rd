@@ -74,6 +74,33 @@ After a \code{stratify()} step, both \code{label} and
 \code{included_label} accept character vectors (one element per arm)
 for per-arm labeling -- useful in observational designs where
 attrition mechanisms differ across strata.
+
+
+\code{exclude()} records participants removed at a step and is the most
+common pipeline verb. In data mode, \code{criteria} is an unquoted logical
+expression evaluated against the dataset (rows for which it is
+\code{TRUE} are removed) and \code{reasons} may name a column whose values
+are tabulated into a sub-reason breakdown; in manual mode, \code{n} gives
+the number removed and \code{reasons} may be a named numeric vector.
+After a \code{\link{stratify}} or \code{\link{allocate}} split the
+exclusion applies per arm, in which case \code{n}, \code{reasons}, and
+\code{included_label} accept per-arm vectors or lists. By default the
+running count box is suppressed between consecutive exclusions for a
+compact diagram; supplying \code{included_label} (or
+\code{show_count = TRUE}) forces a count box to be drawn. When
+\code{getOption("selecta.check_arithmetic")} is \code{TRUE}, the manual
+counts of the whole flow are audited together before export: an
+over-exclusion, a split or combine whose parts do not match the running
+total, and sub-reasons that do not sum to their exclusion total each
+raise an advisory warning, without altering the figures. The audit runs
+whenever the flow is computed, which includes \code{\link{flowchart}},
+\code{\link{flowsave}}, and \code{summary()}, so a single call to any of
+these reports every discrepancy at once.
+
+Eligibility that is more naturally framed as inclusion fits this same
+model: express it as the exclusion of those who fail the criterion, and
+use \code{included_label} to label the retained count (\emph{e.g.,}
+\code{included_label = "Eligible cohort"}).
 }
 \examples{
 enroll(n = 500) |>
@@ -126,4 +153,14 @@ enroll(rctselect2, id = "patient_id") |>
 \seealso{
 \code{\link{assess}} for assessment/procedure steps (STARD),
   \code{\link{enroll}} for initializing a flow
+
+Other flow construction functions:
+\code{\link[=assess]{assess()}},
+\code{\link[=combine]{combine()}},
+\code{\link[=endpoint]{endpoint()}},
+\code{\link[=enroll]{enroll()}},
+\code{\link[=phase]{phase()}},
+\code{\link[=sources]{sources()}},
+\code{\link[=stratify]{stratify()}}
 }
+\concept{flow construction functions}

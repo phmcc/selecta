@@ -23,8 +23,11 @@ draw_grid(
   line_height = 0.2,
   margin = 0.25,
   phase_width = 0.22,
+  phase_multiline = TRUE,
+  phase_max_lines = 3L,
   font_family = "Helvetica",
-  number_format = NULL
+  number_format = NULL,
+  measure_only = FALSE
 )
 }
 \arguments{
@@ -79,7 +82,24 @@ box heights for both main and side boxes. Scales proportionally with
 inches. Default 0.25.}
 
 \item{phase_width}{Numeric. Width of phase label boxes in inches.
-Default 0.22.}
+Default 0.22. When \code{phase_multiline = TRUE} the strip is widened
+automatically to fit the wrapped lines, so this acts as a per-line
+minimum rather than a hard cap.}
+
+\item{phase_multiline}{Logical. If \code{TRUE} (the default), a phase
+label longer than the vertical extent of the boxes it spans is
+word-wrapped across multiple stacked lines (drawn rotated in the strip),
+trading strip width for height so the diagram is not stretched
+vertically to fit a long rotated label. Set to \code{FALSE} to force
+every label onto a single line, in which case a label taller than its
+band stretches the diagram instead. A label that cannot be wrapped (a
+single word taller than its band) falls back to stretching either way.
+Labels containing an explicit newline (\code{"\\n"}) are always split on
+it regardless of this setting. Default \code{TRUE}.}
+
+\item{phase_max_lines}{Integer. Maximum number of wrapped lines per phase
+label when wrapping is active; any overflow is collapsed into the final
+line. Default 3.}
 
 \item{font_family}{Character. Font family used for all text in the
 diagram. Default \code{"Helvetica"}. Set to \code{""} to use the
@@ -91,6 +111,12 @@ Locale-aware formatting for participant counts: \code{"us"} (default,
 (\code{1\\u202F234}), \code{"none"} (\code{1234}), or a custom
 \code{c(big.mark, decimal.mark)} pair. Falls back to
 \code{getOption("selecta.number_format", "us")} when \code{NULL}.}
+
+\item{measure_only}{Logical. When \code{TRUE}, the function computes the
+layout and canvas dimensions but returns before issuing any drawing
+primitives, so no graphics output is produced. Used internally by
+\code{\link{recdims}} to size the canvas without the cost of rendering.
+Defaults to \code{FALSE}.}
 }
 \value{
 Invisibly returns the graph, augmented with computed layout

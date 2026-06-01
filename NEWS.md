@@ -1,3 +1,20 @@
+# *selecta* 0.5.0 (2026-06-01)
+
+* Remove `classify()`. STARD diagrams now use `stratify()` on the index-test
+  result with a per-arm `endpoint(reasons = ...)` for the target-condition
+  breakdown, matching the standard STARD layout.
+* `cohorts()` snapshot fields renamed: `remaining` to `included` and
+  `n_remaining` to `n_included`, mirroring `excluded`/`n_excluded`.
+* DOT engine: source box and header colors now match the grid engine; fix
+  multi-source header alignment; add orthogonal-edge and three-source examples.
+* Arithmetic checks for manual flows now also validate per-arm exclusion
+  sub-reason totals; checks remain toggleable via
+  `options(selecta.check_arithmetic)`.
+* Performance: `recdims()` no longer issues drawing primitives when only
+  measuring dimensions, and data-mode exclusions avoid materializing the
+  excluded subset.
+* Expand documentation and README
+
 # *selecta* 0.4.0 (2026-05-26)
 
 * Phase boxes rework

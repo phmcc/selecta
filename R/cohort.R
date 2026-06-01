@@ -1,3 +1,5 @@
+### * Main functions
+
 #' Extract the Final Cohort
 #'
 #' Returns the dataset remaining after all exclusion criteria have been
@@ -22,6 +24,18 @@
 #'   \code{data.table}s (one per arm). When \code{arm} is specified, a
 #'   single-arm \code{data.table}.
 #'
+#' @details
+#' \code{cohort()} replays the exclusion criteria of a \emph{data-mode} flow
+#' against the original dataset and returns the rows that survive to the
+#' end, so the analyst can pass the exact analyzed population to downstream
+#' modeling. It requires a flow created by supplying \code{data} to
+#' \code{\link{enroll}}; manual-mode flows carry only counts and therefore
+#' raise an error. For an unsplit flow the result is a single
+#' \code{data.table}; after \code{\link{stratify}} or \code{\link{allocate}},
+#' \code{split = TRUE} returns one table per arm and \code{arm} extracts a
+#' single named arm. To inspect the cohort at every intermediate step rather
+#' than only the end, use \code{\link{cohorts}}.
+#'
 #' @seealso \code{\link{cohorts}} for stage-by-stage snapshots,
 #'   \code{\link{enroll}} for initializing a data-mode flow
 #'
@@ -33,6 +47,7 @@
 #' final <- cohort(flow)
 #' nrow(final)
 #'
+#' @family cohort extraction functions
 #' @export
 cohort <- function(.flow, split = FALSE, arm = NULL) {
 
@@ -75,11 +90,11 @@ cohort <- function(.flow, split = FALSE, arm = NULL) {
 #'
 #' Each element of the returned list is itself a list with:
 #' \describe{
-#'   \item{\code{remaining}}{A \code{data.table} of participants still in the
+#'   \item{\code{included}}{A \code{data.table} of participants still in the
 #'     flow after this step.}
 #'   \item{\code{excluded}}{A \code{data.table} of participants removed at
 #'     this step (for exclusion steps; \code{NULL} otherwise).}
-#'   \item{\code{n_remaining}}{Integer count of remaining participants.}
+#'   \item{\code{n_included}}{Integer count of included participants.}
 #'   \item{\code{n_excluded}}{Integer count of excluded participants (or
 #'     \code{NA}).}
 #' }
@@ -88,8 +103,21 @@ cohort <- function(.flow, split = FALSE, arm = NULL) {
 #'   (\code{data} supplied to \code{\link{enroll}}).
 #'
 #' @return A named list of cohort snapshots, keyed by step label. Each
-#'   snapshot contains \code{remaining}, \code{excluded},
-#'   \code{n_remaining}, and \code{n_excluded} as described above.
+#'   snapshot contains \code{included}, \code{excluded},
+#'   \code{n_included}, and \code{n_excluded} as described above.
+#'
+#' @details
+#' \code{cohorts()} replays a \emph{data-mode} flow and captures the dataset
+#' at every step, returning a named list keyed by step label (with
+#' \code{"_start"} for the initial cohort). Each snapshot exposes both the
+#' \code{included} and the \code{excluded} rows together with their counts,
+#' which is useful for validating a diagram against the data, auditing why
+#' particular participants were dropped, or extracting an intermediate
+#' population. After a \code{\link{stratify}} or \code{\link{allocate}}
+#' split, the \code{included} and \code{excluded} elements of a per-arm
+#' step are themselves named lists with one entry per arm. A manual-mode
+#' flow has no underlying data and therefore raises an error. To obtain only
+#' the final analyzed population, use \code{\link{cohort}}.
 #'
 #' @seealso \code{\link{cohort}} for extracting only the final cohort
 #'
@@ -102,6 +130,7 @@ cohort <- function(.flow, split = FALSE, arm = NULL) {
 #' names(stages)
 #' stages[["Ineligible"]]$n_excluded
 #'
+#' @family cohort extraction functions
 #' @export
 cohorts <- function(.flow) {
 
@@ -116,7 +145,7 @@ cohorts <- function(.flow) {
 }
 
 
-## ---- Internal snapshot engine ----
+### * Internal snapshot engine
 
 #' Compute Snapshots at Each Stage
 #'
@@ -136,9 +165,9 @@ compute_snapshots <- function(x) {
 
   ## Starting snapshot
   stages[["_start"]] <- list(
-    remaining   = current_data$.all,  # copy deferred to caller if needed
+    included   = current_data$.all,  # copy deferred to caller if needed
     excluded    = NULL,
-    n_remaining = .row_count(current_data$.all),
+    n_included = .row_count(current_data$.all),
     n_excluded  = NA_integer_
   )
 
@@ -154,13 +183,13 @@ compute_snapshots <- function(x) {
         idx_excl <- which(mask)
         idx_keep <- which(!mask)
         excluded  <- current_data$.all[idx_excl]
-        remaining <- current_data$.all[idx_keep]
-        current_data$.all <- remaining
+        included <- current_data$.all[idx_keep]
+        current_data$.all <- included
 
         stages[[step$label]] <- list(
-          remaining   = copy(remaining),
+          included   = copy(included),
           excluded    = copy(excluded),
-          n_remaining = length(idx_keep),
+          n_included = length(idx_keep),
           n_excluded  = length(idx_excl)
         )
 
@@ -173,20 +202,20 @@ compute_snapshots <- function(x) {
           idx_excl <- which(mask)
           idx_keep <- which(!mask)
           list(excluded  = dt[idx_excl],
-               remaining = dt[idx_keep],
+               included = dt[idx_keep],
                n_excluded  = length(idx_excl),
-               n_remaining = length(idx_keep))
+               n_included = length(idx_keep))
         })
         names(arm_results) <- arm_labels
 
         ## Update current data
         for (aname in arm_labels)
-          current_data[[aname]] <- arm_results[[aname]]$remaining
+          current_data[[aname]] <- arm_results[[aname]]$included
 
         stages[[step$label]] <- list(
-          remaining   = lapply(arm_results, function(r) copy(r$remaining)),
+          included   = lapply(arm_results, function(r) copy(r$included)),
           excluded    = lapply(arm_results, function(r) copy(r$excluded)),
-          n_remaining = vapply(arm_results, `[[`, integer(1L), "n_remaining"),
+          n_included = vapply(arm_results, `[[`, integer(1L), "n_included"),
           n_excluded  = vapply(arm_results, `[[`, integer(1L), "n_excluded")
         )
       }
@@ -201,9 +230,9 @@ compute_snapshots <- function(x) {
       current_data <- split_result$data
 
       stages[["_arm"]] <- list(
-        remaining   = lapply(current_data, copy),
+        included   = lapply(current_data, copy),
         excluded    = NULL,
-        n_remaining = vapply(current_data, .row_count, integer(1L)),
+        n_included = vapply(current_data, .row_count, integer(1L)),
         n_excluded  = NA_integer_
       )
 
@@ -217,25 +246,25 @@ compute_snapshots <- function(x) {
       }
 
       stages[[step$label]] <- list(
-        remaining   = copy(current_data$.all),
+        included   = copy(current_data$.all),
         excluded    = NULL,
-        n_remaining = .row_count(current_data$.all),
+        n_included = .row_count(current_data$.all),
         n_excluded  = NA_integer_
       )
 
     } else if (step$type == "endpoint") {
       if (!in_arms) {
         stages[[step$label]] <- list(
-          remaining   = copy(current_data$.all),
+          included   = copy(current_data$.all),
           excluded    = NULL,
-          n_remaining = .row_count(current_data$.all),
+          n_included = .row_count(current_data$.all),
           n_excluded  = NA_integer_
         )
       } else {
         stages[[step$label]] <- list(
-          remaining   = lapply(current_data, copy),
+          included   = lapply(current_data, copy),
           excluded    = NULL,
-          n_remaining = vapply(current_data, .row_count, integer(1L)),
+          n_included = vapply(current_data, .row_count, integer(1L)),
           n_excluded  = NA_integer_
         )
       }

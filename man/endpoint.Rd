@@ -25,6 +25,17 @@ The updated \code{selecta} object with an endpoint step
 Adds the terminal node(s) to the enrollment flow. If arms have been
 defined via \code{\link{stratify}}, one endpoint box appears per arm.
 }
+\details{
+\code{endpoint()} closes the flow with its terminal node(s) and is
+usually the last step in a pipeline. When the flow has been split with
+\code{\link{stratify}} or \code{\link{allocate}} and not recombined, one
+endpoint box is drawn per arm, and \code{label} and \code{reasons} may be
+supplied per arm. The optional \code{reasons} prints sub-item counts
+beneath the total, which is used for STARD final-diagnosis boxes, where
+each terminal box reports its target-condition breakdown.
+The completed object is then passed to \code{\link{flowchart}},
+\code{\link{flowsave}}, or \code{\link{recdims}}.
+}
 \examples{
 enroll(n = 300) |>
   exclude("Excluded", n = 40) |>
@@ -40,6 +51,16 @@ enroll(n = 500) |>
 
 }
 \seealso{
-\code{\link{classify}} for cross-classification terminal grids,
-  \code{\link{flowchart}} for rendering
+\code{\link{assess}} for the diagnostic test-receipt steps that
+  precede a STARD endpoint, \code{\link{flowchart}} for rendering
+
+Other flow construction functions:
+\code{\link[=assess]{assess()}},
+\code{\link[=combine]{combine()}},
+\code{\link[=enroll]{enroll()}},
+\code{\link[=exclude]{exclude()}},
+\code{\link[=phase]{phase()}},
+\code{\link[=sources]{sources()}},
+\code{\link[=stratify]{stratify()}}
 }
+\concept{flow construction functions}

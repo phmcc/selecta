@@ -40,6 +40,18 @@ at each step).
 For flows that begin with multiple parallel identification streams
 (\emph{e.g.,} PRISMA 2020 systematic reviews), use \code{\link{sources}}
 instead.
+
+
+\code{enroll()} begins every single-source pipeline and fixes the
+operating mode for all subsequent steps. Supplying \code{data} (with
+\code{id}) selects \emph{data mode}, in which later \code{exclude()} and
+\code{stratify()} steps filter and partition the dataset and counts are
+derived from the data; supplying \code{n} instead selects \emph{manual
+mode}, in which counts are taken from the numbers given at each step. The
+two modes are mutually exclusive, and the resulting object is intended to
+be extended with the pipe operator. For diagrams with several entry
+sources that converge (PRISMA, MOOSE), use \code{\link{sources}} instead
+of \code{enroll()}.
 }
 \examples{
 # Manual mode
@@ -59,4 +71,14 @@ enroll(n = 500) |>
 \code{\link{sources}} for multi-source entry,
   \code{\link{exclude}} for adding exclusion criteria,
   \code{\link{flowchart}} for rendering
+
+Other flow construction functions:
+\code{\link[=assess]{assess()}},
+\code{\link[=combine]{combine()}},
+\code{\link[=endpoint]{endpoint()}},
+\code{\link[=exclude]{exclude()}},
+\code{\link[=phase]{phase()}},
+\code{\link[=sources]{sources()}},
+\code{\link[=stratify]{stratify()}}
 }
+\concept{flow construction functions}

@@ -41,6 +41,19 @@ assignment, exposure status, diagnostic test result, etc. Subsequent
 \details{
 \code{allocate()} is a convenience alias with default label
 \code{"Randomized"}, suitable for interventional trials (CONSORT).
+
+
+\code{stratify()} fans the flow into parallel arms, after which each
+\code{\link{exclude}} (and the eventual \code{\link{endpoint}}) applies
+within every arm. In data mode, \code{variable} names a column whose
+levels define the arms, optionally relabelled through a named
+\code{labels} vector; in manual mode, \code{labels} and \code{n} give the
+arm names and per-arm counts directly. \code{allocate()} is an identical
+alias differing only in its default \code{label} (\code{"Randomized"}),
+provided so that interventional trials (CONSORT) read naturally; both
+record the same step type. Parallel arms may later be merged with
+\code{\link{combine}} to form a split-and-recombine diagram, and a flow
+may be split again after combining.
 }
 \examples{
 # Observational study (STROBE)
@@ -56,4 +69,14 @@ enroll(n = 400) |>
 \seealso{
 \code{\link{exclude}} for per-arm exclusions after splitting,
   \code{\link{endpoint}} for per-arm endpoints
+
+Other flow construction functions:
+\code{\link[=assess]{assess()}},
+\code{\link[=combine]{combine()}},
+\code{\link[=endpoint]{endpoint()}},
+\code{\link[=enroll]{enroll()}},
+\code{\link[=exclude]{exclude()}},
+\code{\link[=phase]{phase()}},
+\code{\link[=sources]{sources()}}
 }
+\concept{flow construction functions}

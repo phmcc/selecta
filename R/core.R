@@ -1,3 +1,5 @@
+### * Initialization
+
 #' Initialize an Enrollment Flow
 #'
 #' Entry point for building an EQUATOR-style enrollment diagram from a single
@@ -28,6 +30,18 @@
 #'   \code{\link{stratify}}, \code{\link{endpoint}}, \emph{etc.}) append
 #'   steps to this object.
 #'
+#' @details
+#' \code{enroll()} begins every single-source pipeline and fixes the
+#' operating mode for all subsequent steps. Supplying \code{data} (with
+#' \code{id}) selects \emph{data mode}, in which later \code{exclude()} and
+#' \code{stratify()} steps filter and partition the dataset and counts are
+#' derived from the data; supplying \code{n} instead selects \emph{manual
+#' mode}, in which counts are taken from the numbers given at each step. The
+#' two modes are mutually exclusive, and the resulting object is intended to
+#' be extended with the pipe operator. For diagrams with several entry
+#' sources that converge (PRISMA, MOOSE), use \code{\link{sources}} instead
+#' of \code{enroll()}.
+#'
 #' @seealso \code{\link{sources}} for multi-source entry,
 #'   \code{\link{exclude}} for adding exclusion criteria,
 #'   \code{\link{flowchart}} for rendering
@@ -45,6 +59,7 @@
 #'   allocate(labels = c("Treatment", "Control"), n = c(218, 217)) |>
 #'   endpoint("Analyzed")
 #'
+#' @family flow construction functions
 #' @export
 enroll <- function(data = NULL, id = NULL, n = NULL,
                    label = "Study Population") {
@@ -110,6 +125,17 @@ enroll <- function(data = NULL, id = NULL, n = NULL,
 #'   pre-loaded. The total starting count is the sum of all source counts
 #'   across all groups.
 #'
+#' @details
+#' \code{sources()} initializes a multi-source flow of the kind used in the
+#' identification stage of systematic-review diagrams (PRISMA, MOOSE), where
+#' records arrive from several origins and are pooled. Counts are supplied
+#' as named numeric values; passing named vectors instead of scalars groups
+#' the sources into labeled columns, and at most three groups are
+#' supported, matching the standard PRISMA layout. A \code{sources()} flow
+#' is operated in manual mode and is normally followed by \code{\link{combine}}
+#' to merge the streams into a single downstream node. For a conventional
+#' single-entry study, use \code{\link{enroll}} instead.
+#'
 #' @seealso \code{\link{enroll}} for single-source entry,
 #'   \code{\link{combine}} to merge parallel streams into a single flow
 #'
@@ -137,6 +163,7 @@ enroll <- function(data = NULL, id = NULL, n = NULL,
 #'           reasons = c("Duplicates" = 340,
 #'                       "Marked ineligible" = 12))
 #'
+#' @family flow construction functions
 #' @export
 sources <- function(..., headers = NULL) {
 
@@ -215,6 +242,7 @@ sources <- function(..., headers = NULL) {
   obj
 }
 
+### * Exclusion
 
 #' Exclude Participants by a Criterion
 #'
@@ -267,6 +295,33 @@ sources <- function(..., headers = NULL) {
 #'
 #' @return The updated \code{selecta} object with an exclusion step appended.
 #'
+#' @details
+#' \code{exclude()} records participants removed at a step and is the most
+#' common pipeline verb. In data mode, \code{criteria} is an unquoted logical
+#' expression evaluated against the dataset (rows for which it is
+#' \code{TRUE} are removed) and \code{reasons} may name a column whose values
+#' are tabulated into a sub-reason breakdown; in manual mode, \code{n} gives
+#' the number removed and \code{reasons} may be a named numeric vector.
+#' After a \code{\link{stratify}} or \code{\link{allocate}} split the
+#' exclusion applies per arm, in which case \code{n}, \code{reasons}, and
+#' \code{included_label} accept per-arm vectors or lists. By default the
+#' running count box is suppressed between consecutive exclusions for a
+#' compact diagram; supplying \code{included_label} (or
+#' \code{show_count = TRUE}) forces a count box to be drawn. When
+#' \code{getOption("selecta.check_arithmetic")} is \code{TRUE}, the manual
+#' counts of the whole flow are audited together before export: an
+#' over-exclusion, a split or combine whose parts do not match the running
+#' total, and sub-reasons that do not sum to their exclusion total each
+#' raise an advisory warning, without altering the figures. The audit runs
+#' whenever the flow is computed, which includes \code{\link{flowchart}},
+#' \code{\link{flowsave}}, and \code{summary()}, so a single call to any of
+#' these reports every discrepancy at once.
+#'
+#' Eligibility that is more naturally framed as inclusion fits this same
+#' model: express it as the exclusion of those who fail the criterion, and
+#' use \code{included_label} to label the retained count (\emph{e.g.,}
+#' \code{included_label = "Eligible cohort"}).
+#'
 #' @seealso \code{\link{assess}} for assessment/procedure steps (STARD),
 #'   \code{\link{enroll}} for initializing a flow
 #'
@@ -317,6 +372,7 @@ sources <- function(..., headers = NULL) {
 #'   exclude("Ineligible or duplicate",
 #'           criteria = eligible == FALSE | is_duplicate == TRUE)
 #'
+#' @family flow construction functions
 #' @export
 exclude <- function(.flow, label, criteria, n = NULL, reasons = NULL,
                     show_zero = FALSE, show_count = FALSE,
@@ -367,145 +423,7 @@ exclude <- function(.flow, label, criteria, n = NULL, reasons = NULL,
   .flow
 }
 
-
-#' Record an Assessment or Procedure Step
-#'
-#' Models a step where participants undergo (or fail to undergo) a test
-#' or procedure. This is the primary building block for STARD-style
-#' diagnostic accuracy diagrams. The side box shows who did \emph{not}
-#' receive the procedure (with optional reasons), and the main flow
-#' continues with those who \emph{were} assessed.
-#'
-#' Internally, \code{assess()} creates an exclusion step with inverted
-#' label semantics: the side box reads \code{"Did not receive [label]"}
-#' and the remaining-count box reads \code{"Received [label]"}.
-#'
-#' @param .flow A \code{selecta} object.
-#' @param label Character string naming the test or procedure
-#'   (\emph{e.g.,} \code{"Index test"}, \code{"Reference standard"}).
-#' @param criteria An unquoted logical expression that evaluates to
-#'   \code{TRUE} for rows that did \strong{not} receive the test. Data
-#'   mode only.
-#' @param not_received Integer (manual mode). Number of participants who
-#'   did not receive this test.
-#' @param reasons Named integer vector of reasons for non-receipt
-#'   (\emph{e.g.,} \code{c("Refused" = 12, "Contraindicated" = 10)}).
-#' @param show_zero Logical. If \code{TRUE}, display zero-count reasons.
-#'   Default \code{FALSE}.
-#'
-#' @return The updated \code{selecta} object with an assessment step
-#'   appended.
-#'
-#' @seealso \code{\link{exclude}} for general exclusion steps,
-#'   \code{\link{classify}} for cross-classification (STARD)
-#'
-#' @examples
-#' # STARD diagnostic accuracy flow
-#' enroll(n = 360, label = "Eligible patients") |>
-#'   assess("Index test", not_received = 22,
-#'          reasons = c("Refused" = 12, "Contraindicated" = 10)) |>
-#'   assess("Reference standard", not_received = 18) |>
-#'   classify(rows = c("Target +", "Target -"),
-#'            cols = c("Index +", "Index -"),
-#'            n = matrix(c(175, 25, 15, 105), nrow = 2,
-#'                       dimnames = list(c("Target +", "Target -"),
-#'                                       c("Index +", "Index -"))))
-#'
-#' @export
-assess <- function(.flow, label, criteria, not_received = NULL,
-                   reasons = NULL, show_zero = FALSE) {
-
-  if (!inherits(.flow, "selecta"))
-    stop("'.flow' must be a selecta object", call. = FALSE)
-
-  has_expr <- !missing(criteria)
-
-  if (.flow$mode == "data" && !has_expr)
-    stop("Supply 'criteria' in data mode", call. = FALSE)
-  if (.flow$mode == "manual" && is.null(not_received))
-    stop("Supply 'not_received' in manual mode", call. = FALSE)
-
-  ## Construct exclusion step with inverted label semantics
-  side_label <- paste("Did not receive", tolower(label))
-  remaining  <- paste("Received", tolower(label))
-
-  expr_call <- if (has_expr) substitute(criteria) else NULL
-
-  ## Classify reasons argument
-  reasons_var <- NULL
-  reasons_manual <- NULL
-  if (!is.null(reasons)) {
-    if (is.character(reasons) && length(reasons) == 1L) {
-      if (.flow$mode != "data")
-        stop("Column-name 'reasons' only works in data mode", call. = FALSE)
-      reasons_var <- reasons
-    } else {
-      reasons_manual <- reasons
-    }
-  }
-
-  step <- list(
-    type           = "exclude",
-    label          = side_label,
-    expr_call      = expr_call,
-    n              = not_received,
-    reasons        = reasons_manual,
-    reasons_var    = reasons_var,
-    show_zero      = show_zero,
-    show_count     = TRUE,
-    included_label = remaining
-  )
-
-  .flow$steps <- c(.flow$steps, list(step))
-  .flow
-}
-
-
-#' Label a Phase of the Enrollment Flow
-#'
-#' Adds a vertical phase label to the left margin of the diagram
-#' (\emph{e.g.,} \code{"Enrollment"}, \code{"Allocation"},
-#' \code{"Follow-up"}, \code{"Analysis"}). Phase labels span all
-#' subsequent steps until the next \code{phase()} call or the end of
-#' the flow.
-#'
-#' @param .flow A \code{selecta} object.
-#' @param label Character string. The phase label, rendered as rotated
-#'   text on the left margin.
-#'
-#' @return The updated \code{selecta} object with a phase marker
-#'   appended.
-#'
-#' @seealso \code{\link{flowchart}} for rendering with phase labels
-#'
-#' @examples
-#' # Phase labels divide a flow into labeled stages. The printed summary
-#' # marks each phase with a "--- label ---" banner.
-#' enroll(n = 1200, label = "Records identified") |>
-#'   phase("Enrollment") |>
-#'   exclude("Duplicates", n = 84) |>
-#'   phase("Allocation") |>
-#'   stratify(labels = c("Drug A", "Placebo"), n = c(520, 533)) |>
-#'   phase("Follow-up") |>
-#'   exclude("Lost to follow-up", n = c(23, 31)) |>
-#'   phase("Analysis") |>
-#'   endpoint("Final Analysis")
-#'
-#' @export
-phase <- function(.flow, label) {
-
-  if (!inherits(.flow, "selecta"))
-    stop("'.flow' must be a selecta object", call. = FALSE)
-
-  step <- list(
-    type  = "phase",
-    label = label
-  )
-
-  .flow$steps <- c(.flow$steps, list(step))
-  .flow
-}
-
+### * Flow
 
 #' Split into Parallel Study Arms or Strata
 #'
@@ -534,6 +452,19 @@ phase <- function(.flow, label) {
 #'   appended. All subsequent pipeline steps operate independently within
 #'   each arm.
 #'
+#' @details
+#' \code{stratify()} fans the flow into parallel arms, after which each
+#' \code{\link{exclude}} (and the eventual \code{\link{endpoint}}) applies
+#' within every arm. In data mode, \code{variable} names a column whose
+#' levels define the arms, optionally relabelled through a named
+#' \code{labels} vector; in manual mode, \code{labels} and \code{n} give the
+#' arm names and per-arm counts directly. \code{allocate()} is an identical
+#' alias differing only in its default \code{label} (\code{"Randomized"}),
+#' provided so that interventional trials (CONSORT) read naturally; both
+#' record the same step type. Parallel arms may later be merged with
+#' \code{\link{combine}} to form a split-and-recombine diagram, and a flow
+#' may be split again after combining.
+#'
 #' @seealso \code{\link{exclude}} for per-arm exclusions after splitting,
 #'   \code{\link{endpoint}} for per-arm endpoints
 #'
@@ -547,6 +478,7 @@ phase <- function(.flow, label) {
 #' enroll(n = 400) |>
 #'   allocate(labels = c("Drug A", "Placebo"), n = c(200, 200))
 #'
+#' @family flow construction functions
 #' @export
 stratify <- function(.flow, variable = NULL, labels = NULL, n = NULL,
                      label = "Stratified") {
@@ -623,6 +555,20 @@ allocate <- function(.flow, variable = NULL, labels = NULL, n = NULL,
 #' @return The updated \code{selecta} object with a combine step
 #'   appended. All subsequent steps operate on the single merged stream.
 #'
+#' @details
+#' \code{combine()} converges the active parallel streams into one node and
+#' is the counterpart to both entry splits. After \code{\link{sources}} it
+#' pools the identification streams of a systematic review; after
+#' \code{\link{stratify}} (or \code{\link{allocate}}) it recombines strata
+#' that were handled independently, producing a split-and-recombine diagram.
+#' By default the merged count is the sum of the incoming streams \emph{after}
+#' any per-arm exclusions applied since the split; an explicit \code{n}
+#' overrides this in manual mode, and when
+#' \code{getOption("selecta.check_arithmetic")} is \code{TRUE} a supplied
+#' \code{n} that disagrees with the stream sum raises an advisory warning.
+#' The optional \code{sublabel} prints on a second line inside the merged
+#' box, which is convenient for naming the recombined cohort.
+#'
 #' @seealso \code{\link{sources}} for multi-source entry,
 #'   \code{\link{stratify}} for split-and-recombine flows
 #'
@@ -643,6 +589,7 @@ allocate <- function(.flow, variable = NULL, labels = NULL, n = NULL,
 #'   exclude("Incomplete records", n = 7) |>
 #'   endpoint("Final cohort")
 #'
+#' @family flow construction functions
 #' @export
 combine <- function(.flow, label, sublabel = NULL, n = NULL,
                     reasons = NULL) {
@@ -671,70 +618,8 @@ combine <- function(.flow, label, sublabel = NULL, n = NULL,
 }
 
 
-#' Cross-Classification Grid
-#'
-#' Adds a terminal cross-classification step, producing an m \eqn{\times}{x}
-#' n result grid. This is the primary building block for STARD-style
-#' diagnostic accuracy diagrams where participants are classified by index
-#' test result and reference standard outcome.
-#'
-#' @param .flow A \code{selecta} object.
-#' @param rows Character vector of row labels (\emph{e.g.,} index test
-#'   results).
-#' @param cols Character vector of column labels (\emph{e.g.,} reference
-#'   standard outcomes).
-#' @param n A matrix of counts with \code{length(rows)} rows and
-#'   \code{length(cols)} columns. Row and column names are used as labels
-#'   if \code{rows}/\code{cols} are not supplied.
-#' @param label Optional character string header for the grid.
-#'
-#' @return The updated \code{selecta} object with a classification step
-#'   appended.
-#'
-#' @seealso \code{\link{assess}} for preceding assessment steps,
-#'   \code{\link{endpoint}} for simple terminal nodes
-#'
-#' @examples
-#' enroll(n = 320, label = "Received both tests") |>
-#'   classify(
-#'     rows = c("Test positive", "Test negative"),
-#'     cols = c("Target +", "Target \u2212"),
-#'     n = matrix(c(160, 10, 20, 130), nrow = 2)
-#'   )
-#'
-#' @export
-classify <- function(.flow, rows = NULL, cols = NULL, n = NULL,
-                     label = NULL) {
+### * Termination
 
-  if (!inherits(.flow, "selecta"))
-    stop("'.flow' must be a selecta object", call. = FALSE)
-
-  if (is.null(n))
-    stop("Supply 'n' as a matrix of counts", call. = FALSE)
-
-  if (!is.matrix(n)) n <- as.matrix(n)
-
-  if (is.null(rows)) rows <- rownames(n)
-  if (is.null(cols)) cols <- colnames(n)
-  if (is.null(rows))
-    stop("Supply 'rows' or a matrix with row names", call. = FALSE)
-  if (is.null(cols))
-    stop("Supply 'cols' or a matrix with column names", call. = FALSE)
-  if (nrow(n) != length(rows) || ncol(n) != length(cols))
-    stop("Dimensions of 'n' must match length of 'rows' and 'cols'",
-         call. = FALSE)
-
-  step <- list(
-    type  = "classify",
-    rows  = rows,
-    cols  = cols,
-    n     = n,
-    label = label
-  )
-
-  .flow$steps <- c(.flow$steps, list(step))
-  .flow
-}
 
 
 #' Mark the Final Analysis Endpoint
@@ -753,8 +638,19 @@ classify <- function(.flow, rows = NULL, cols = NULL, n = NULL,
 #' @return The updated \code{selecta} object with an endpoint step
 #'   appended.
 #'
-#' @seealso \code{\link{classify}} for cross-classification terminal grids,
-#'   \code{\link{flowchart}} for rendering
+#' @details
+#' \code{endpoint()} closes the flow with its terminal node(s) and is
+#' usually the last step in a pipeline. When the flow has been split with
+#' \code{\link{stratify}} or \code{\link{allocate}} and not recombined, one
+#' endpoint box is drawn per arm, and \code{label} and \code{reasons} may be
+#' supplied per arm. The optional \code{reasons} prints sub-item counts
+#' beneath the total, which is used for STARD final-diagnosis boxes, where
+#' each terminal box reports its target-condition breakdown.
+#' The completed object is then passed to \code{\link{flowchart}},
+#' \code{\link{flowsave}}, or \code{\link{recdims}}.
+#'
+#' @seealso \code{\link{assess}} for the diagnostic test-receipt steps that
+#'   precede a STARD endpoint, \code{\link{flowchart}} for rendering
 #'
 #' @examples
 #' enroll(n = 300) |>
@@ -769,6 +665,7 @@ classify <- function(.flow, rows = NULL, cols = NULL, n = NULL,
 #'            reasons = list(c("Target +" = 160, "Target -" = 40),
 #'                           c("Target +" = 25, "Target -" = 275)))
 #'
+#' @family flow construction functions
 #' @export
 endpoint <- function(.flow, label = "Final Analysis", reasons = NULL) {
 
@@ -783,4 +680,172 @@ endpoint <- function(.flow, label = "Final Analysis", reasons = NULL) {
 
   .flow$steps <- c(.flow$steps, list(step))
   .flow
+}
+
+#' Record an Assessment or Procedure Step
+#'
+#' Models a step where participants undergo (or fail to undergo) a test
+#' or procedure. This is the primary building block for STARD-style
+#' diagnostic accuracy diagrams. The side box shows who did \emph{not}
+#' receive the procedure (with optional reasons), and the main flow
+#' continues with those who \emph{were} assessed.
+#'
+#' Internally, \code{assess()} creates an exclusion step with inverted
+#' label semantics: the side box reads \code{"Did not receive [label]"}
+#' and the remaining-count box reads \code{"Received [label]"}.
+#'
+#' @param .flow A \code{selecta} object.
+#' @param label Character string naming the test or procedure
+#'   (\emph{e.g.,} \code{"Index test"}, \code{"Reference standard"}).
+#' @param criteria An unquoted logical expression that evaluates to
+#'   \code{TRUE} for rows that did \strong{not} receive the test. Data
+#'   mode only.
+#' @param not_received Integer (manual mode). Number of participants who
+#'   did not receive this test.
+#' @param reasons Named integer vector of reasons for non-receipt
+#'   (\emph{e.g.,} \code{c("Refused" = 12, "Contraindicated" = 10)}).
+#' @param show_zero Logical. If \code{TRUE}, display zero-count reasons.
+#'   Default \code{FALSE}.
+#'
+#' @return The updated \code{selecta} object with an assessment step
+#'   appended.
+#'
+#' @details
+#' \code{assess()} models a test or procedure that only part of the cohort
+#' undergoes, the recurring motif of STARD diagnostic-accuracy diagrams. It
+#' is implemented as an \code{\link{exclude}} step with inverted label
+#' semantics: the side box reads \dQuote{Did not receive \emph{label}} and
+#' the continuing box reads \dQuote{Received \emph{label}}, so the main flow
+#' carries those who \emph{were} assessed. In data mode, \code{criteria} is
+#' an unquoted logical expression that is \code{TRUE} for participants who
+#' did \strong{not} receive the test; in manual mode, \code{not_received}
+#' gives that count and \code{reasons} an optional named breakdown. Chained
+#' \code{assess()} steps commonly precede a \code{\link{stratify}} split on
+#' the index-test result, with each terminal box reporting its
+#' target-condition breakdown.
+#'
+#' @seealso \code{\link{exclude}} for general exclusion steps,
+#'   \code{\link{endpoint}} for the terminal diagnosis boxes (STARD)
+#'
+#' @examples
+#' # STARD diagnostic accuracy flow
+#' enroll(n = 360, label = "Eligible patients") |>
+#'   assess("Index test", not_received = 22,
+#'          reasons = c("Refused" = 12, "Contraindicated" = 10)) |>
+#'   assess("Reference standard", not_received = 18) |>
+#'   stratify(labels = c("Index test positive", "Index test negative"),
+#'            n = c(150, 170), label = "Index test result") |>
+#'   endpoint("Final diagnosis",
+#'            reasons = list(c("Target +" = 130, "Target -" = 20),
+#'                           c("Target +" = 15, "Target -" = 155)))
+#'
+#' @family flow construction functions
+#' @export
+assess <- function(.flow, label, criteria, not_received = NULL,
+                   reasons = NULL, show_zero = FALSE) {
+
+    if (!inherits(.flow, "selecta"))
+        stop("'.flow' must be a selecta object", call. = FALSE)
+
+    has_expr <- !missing(criteria)
+
+    if (.flow$mode == "data" && !has_expr)
+        stop("Supply 'criteria' in data mode", call. = FALSE)
+    if (.flow$mode == "manual" && is.null(not_received))
+        stop("Supply 'not_received' in manual mode", call. = FALSE)
+
+    ## Construct exclusion step with inverted label semantics
+    side_label <- paste("Did not receive", tolower(label))
+    remaining  <- paste("Received", tolower(label))
+
+    expr_call <- if (has_expr) substitute(criteria) else NULL
+
+    ## Classify reasons argument
+    reasons_var <- NULL
+    reasons_manual <- NULL
+    if (!is.null(reasons)) {
+        if (is.character(reasons) && length(reasons) == 1L) {
+            if (.flow$mode != "data")
+                stop("Column-name 'reasons' only works in data mode", call. = FALSE)
+            reasons_var <- reasons
+        } else {
+            reasons_manual <- reasons
+        }
+    }
+
+    step <- list(
+        type           = "exclude",
+        label          = side_label,
+        expr_call      = expr_call,
+        n              = not_received,
+        reasons        = reasons_manual,
+        reasons_var    = reasons_var,
+        show_zero      = show_zero,
+        show_count     = TRUE,
+        included_label = remaining
+    )
+
+    .flow$steps <- c(.flow$steps, list(step))
+    .flow
+}
+
+
+### * Phase
+
+#' Label a Phase of the Enrollment Flow
+#'
+#' Adds a vertical phase label to the left margin of the diagram
+#' (\emph{e.g.,} \code{"Enrollment"}, \code{"Allocation"},
+#' \code{"Follow-up"}, \code{"Analysis"}). Phase labels span all
+#' subsequent steps until the next \code{phase()} call or the end of
+#' the flow.
+#'
+#' @param .flow A \code{selecta} object.
+#' @param label Character string. The phase label, rendered as rotated
+#'   text on the left margin.
+#'
+#' @return The updated \code{selecta} object with a phase marker
+#'   appended.
+#'
+#' @details
+#' \code{phase()} inserts a stage boundary rather than a flow node. Each
+#' call opens a phase whose rotated label is drawn as a vertical strip in
+#' the left margin spanning every subsequent step until the next
+#' \code{phase()} or the end of the flow, reproducing the
+#' \dQuote{Enrollment / Allocation / Follow-up / Analysis} bands of CONSORT
+#' diagrams. Phase markers are purely presentational: they do not alter
+#' counts or topology, and the printed summary denotes each one with a
+#' \dQuote{--- label ---} banner. Long phase labels wrap to fit their band
+#' by default in the grid engine; the \code{dot} engine does not render
+#' phase strips.
+#'
+#' @seealso \code{\link{flowchart}} for rendering with phase labels
+#'
+#' @examples
+#' # Phase labels divide a flow into labeled stages. The printed summary
+#' # marks each phase with a "--- label ---" banner.
+#' enroll(n = 1200, label = "Records identified") |>
+#'   phase("Enrollment") |>
+#'   exclude("Duplicates", n = 84) |>
+#'   phase("Allocation") |>
+#'   stratify(labels = c("Drug A", "Placebo"), n = c(520, 533)) |>
+#'   phase("Follow-up") |>
+#'   exclude("Lost to follow-up", n = c(23, 31)) |>
+#'   phase("Analysis") |>
+#'   endpoint("Final Analysis")
+#'
+#' @family flow construction functions
+#' @export
+phase <- function(.flow, label) {
+
+    if (!inherits(.flow, "selecta"))
+        stop("'.flow' must be a selecta object", call. = FALSE)
+
+    step <- list(
+        type  = "phase",
+        label = label
+    )
+
+    .flow$steps <- c(.flow$steps, list(step))
+    .flow
 }

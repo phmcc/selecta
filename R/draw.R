@@ -1,3 +1,5 @@
+### * Main functions
+
 #' Draw Enrollment Diagram via Grid Graphics
 #'
 #' Computes all layout in inches using physical text measurements, then
@@ -39,7 +41,22 @@
 #' @param margin Numeric. Fixed margin on all four sides of the canvas in
 #'   inches. Default 0.25.
 #' @param phase_width Numeric. Width of phase label boxes in inches.
-#'   Default 0.22.
+#'   Default 0.22. When \code{phase_multiline = TRUE} the strip is widened
+#'   automatically to fit the wrapped lines, so this acts as a per-line
+#'   minimum rather than a hard cap.
+#' @param phase_multiline Logical. If \code{TRUE} (the default), a phase
+#'   label longer than the vertical extent of the boxes it spans is
+#'   word-wrapped across multiple stacked lines (drawn rotated in the strip),
+#'   trading strip width for height so the diagram is not stretched
+#'   vertically to fit a long rotated label. Set to \code{FALSE} to force
+#'   every label onto a single line, in which case a label taller than its
+#'   band stretches the diagram instead. A label that cannot be wrapped (a
+#'   single word taller than its band) falls back to stretching either way.
+#'   Labels containing an explicit newline (\code{"\\n"}) are always split on
+#'   it regardless of this setting. Default \code{TRUE}.
+#' @param phase_max_lines Integer. Maximum number of wrapped lines per phase
+#'   label when wrapping is active; any overflow is collapsed into the final
+#'   line. Default 3.
 #' @param font_family Character. Font family used for all text in the
 #'   diagram. Default \code{"Helvetica"}. Set to \code{""} to use the
 #'   device default.
@@ -49,6 +66,11 @@
 #'   (\code{1\\u202F234}), \code{"none"} (\code{1234}), or a custom
 #'   \code{c(big.mark, decimal.mark)} pair. Falls back to
 #'   \code{getOption("selecta.number_format", "us")} when \code{NULL}.
+#' @param measure_only Logical. When \code{TRUE}, the function computes the
+#'   layout and canvas dimensions but returns before issuing any drawing
+#'   primitives, so no graphics output is produced. Used internally by
+#'   \code{\link{recdims}} to size the canvas without the cost of rendering.
+#'   Defaults to \code{FALSE}.
 #'
 #' @return Invisibly returns the graph, augmented with computed layout
 #'   dimensions (\code{diagram_width_in}, \code{diagram_height_in}).
@@ -71,8 +93,11 @@ draw_grid <- function(graph,
                       line_height    = 0.20,
                       margin         = 0.25,
                       phase_width    = 0.22,
+                      phase_multiline = TRUE,
+                      phase_max_lines = 3L,
                       font_family    = "Helvetica",
-                      number_format  = NULL) {
+                      number_format  = NULL,
+                      measure_only   = FALSE) {
 
     nodes  <- graph$nodes
     edges  <- graph$edges
@@ -85,17 +110,14 @@ draw_grid <- function(graph,
 
     if (is.null(cex_side)) cex_side <- cex
 
-    ## Resolve number formatting once. Capture the package-level fmt_n()
-    ## by lexical lookup, then shadow it with a marks-bound closure so all
-    ## interior fmt_n() calls inherit the locale automatically. The RHS
-    ## of the capture line resolves before the local binding is created.
+    ## Resolve number formatting once: capture the package fmt_n() by lexical
+    ## lookup, then shadow it with a marks-bound closure so interior calls
+    ## inherit the locale (the RHS resolves before the local binding exists).
     marks       <- resolve_number_marks(number_format)
     .pkg_fmt_n  <- fmt_n
     fmt_n       <- function(n) .pkg_fmt_n(n, marks)
 
-    ## ==================================================================
-    ## VIEWPORT
-    ## ==================================================================
+    ## ---- Viewport ----
 
     has_phases <- nrow(phases) > 0L
 
@@ -105,10 +127,87 @@ draw_grid <- function(graph,
     dev_w_in <- convertWidth(unit(1, "npc"), "inches", valueOnly = TRUE)
     dev_h_in <- convertHeight(unit(1, "npc"), "inches", valueOnly = TRUE)
 
-    ## Phase label strip: measure text to size boxes, plus margin-sized gap
+    ## Line-height and padding scalars (inches). Defined here because the
+    ## phase-label wrap target below requires them; they are device-
+    ## independent and reused throughout the layout passes.
+    lh      <- line_height * (cex / 0.85)
+    side_lh <- line_height * (cex_side / 0.85)
+    pad_h   <- pad
+    pad_v   <- pad
+    vpad_in <- vpad
+
+    ## Phase label strip sizing. Labels are drawn rotated 90 degrees, so a
+    ## label's unrotated width (longest line, once split) is the height its
+    ## strip must span. Explicit newlines always split; phase_multiline
+    ## additionally word-wraps over-long lines. Computed once so the sizing
+    ## and rendering passes share one set of lines.
+    phase_lines <- NULL
+    label_h_in  <- NULL
     if (has_phases) {
-        ph_box_w_in  <- phase_width
-        phase_gap_in <- margin  # gap between phase boxes and content = margin
+        ff0 <- if (nzchar(font_family)) font_family else NULL
+        gp_ph_meas0 <- gpar(cex = cex_phase, fontface = "bold",
+                            fontfamily = ff0)
+        tw0 <- function(label, gp)
+            convertWidth(grobWidth(textGrob(label, gp = gp)),
+                         "inches", valueOnly = TRUE)
+        ## Wrapping (and its line cap) applies only when phase_multiline is
+        ## on; explicit "\n" splits regardless and is never capped away.
+        ml_wrap <- isTRUE(phase_multiline)
+        ml_max  <- if (ml_wrap) max(1L, as.integer(phase_max_lines)) else NA_integer_
+
+        ## Per-phase wrap target: the phase's natural vertical extent in
+        ## inches, so a rotated label wraps to fit its own band rather than
+        ## the whole device. The extent is device-independent (it depends on
+        ## box line counts and gaps, not on the canvas), so the measuring
+        ## pass in recdims() and the rendering pass agree on the line count.
+        ## Box heights here are computed from line counts only, mirroring the
+        ## per-role formulas in Pass 1; any residual is absorbed by the band
+        ## model. A small floor keeps a single-row phase wrappable.
+        ph_targets <- rep(NA_real_, nrow(phases))
+        if (ml_wrap) {
+            nreason_v <- lengths(nodes$reasons)
+            node_h_est <- function(j) {
+                r <- nodes$role[j]; k <- nreason_v[j]
+                if (r == "side")                       (1 + k) * side_lh + 2 * pad_v
+                else if (r == "source")                (1 + k) * lh + 2 * pad_v
+                else if (r == "source_header")         1 * lh + 2 * pad_v
+                else if (r == "endpoint" && k > 0L)    (1 + k) * lh + 2 * pad_v
+                else                                   (if (count_first) 1L else 2L) * lh +
+                                                           k * lh + 2 * pad_v
+            }
+            heights <- vapply(seq_len(nrow(nodes)), node_h_est, numeric(1L))
+            ## Map each phase strip's phase-index span to row indices through
+            ## the same compaction layout_nodes() uses, exactly as
+            ## phase_band_deficits() does, so gapped phase indices are handled.
+            ph_nums <- sort(unique(nodes$phase))
+            ph2row  <- setNames(seq_along(ph_nums), as.character(ph_nums))
+            for (i in seq_len(nrow(phases))) {
+                rws <- ph2row[as.character(seq.int(phases$phase_start[i],
+                                                   phases$phase_end[i]))]
+                rws <- as.integer(rws[!is.na(rws)])
+                ## Per-row natural height = tallest box in that row; the band
+                ## spans the rows plus one vpad between consecutive rows.
+                rh <- vapply(rws, function(rr)
+                    max(heights[nodes$row == rr], 0), numeric(1L))
+                ext <- sum(rh) + max(length(rh) - 1L, 0L) * vpad_in
+                ## Floor: at least a couple of phase line-heights, so a short
+                ## single-row phase still has a usable (wrappable) target.
+                ph_targets[i] <- max(ext, 2 * line_height * (cex_phase / 0.85))
+            }
+        }
+        lab <- lapply(seq_len(nrow(phases)), function(i)
+            measure_phase_label(phases$label[i], gp_ph_meas0, pad, tw0,
+                                 wrap = ml_wrap, max_lines = ml_max,
+                                 max_width_in = if (ml_wrap) ph_targets[i] else NULL))
+        phase_lines <- lapply(lab, `[[`, "lines")
+        label_h_in  <- vapply(lab, `[[`, numeric(1L), "height_in")
+        n_line_max  <- max(vapply(lab, `[[`, integer(1L), "n_lines"))
+
+        ## Strip thickness: one line is phase_width; each extra stacked
+        ## line adds a line-spacing's worth of width.
+        per_line_in   <- line_height * (cex_phase / 0.85)
+        ph_box_w_in   <- max(phase_width, n_line_max * per_line_in)
+        phase_gap_in  <- margin  # gap between phase boxes and content = margin
         phase_strip_w <- ph_box_w_in + phase_gap_in
     } else {
         ph_box_w_in   <- 0
@@ -141,9 +240,7 @@ draw_grid <- function(graph,
     gp_side_bold <- gpar(cex = cex_side,        fontface = "bold",   fontfamily = ff)
     gp_reas      <- gpar(cex = cex_side * 0.92, fontface = "italic", fontfamily = ff)
 
-    ## ==================================================================
-    ## MEASUREMENT HELPERS (all return inches)
-    ## ==================================================================
+    ## ---- Measurement helpers (all return inches) ----
 
     .tw_cache <- new.env(hash = TRUE, parent = emptyenv())
     tw_in <- function(label, gp) {
@@ -156,24 +253,8 @@ draw_grid <- function(graph,
         val
     }
 
-    ## ==================================================================
-    ## LINE HEIGHT: user-controllable, in inches; scales with font size
-    ## ==================================================================
-    lh      <- line_height * (cex / 0.85)
-    side_lh <- line_height * (cex_side / 0.85)
+    ## ---- Pass 1: Box sizes (inches) ----
 
-    ## Padding in inches
-    pad_h   <- pad
-    pad_v   <- pad
-    vpad_in <- vpad
-
-    ## ==================================================================
-    ## PASS 1: Box sizes in inches
-    ## ==================================================================
-
-    ## Ensure grid_row and grid_col columns exist
-    if (!"grid_row" %in% names(nodes)) nodes[, grid_row := NA_integer_]
-    if (!"grid_col" %in% names(nodes)) nodes[, grid_col := NA_integer_]
     if (!"stream_group" %in% names(nodes)) nodes[, stream_group := NA_character_]
     if (!"sublabel" %in% names(nodes)) nodes[, sublabel := NA_character_]
 
@@ -227,13 +308,6 @@ draw_grid <- function(graph,
             }
             bh_in[i] <- (1 + nreas) * side_lh + 2 * pad_v
 
-        } else if (nd_role == "cell") {
-            ## Classification grid cell: text + count
-            txt_w <- if (nchar(nd_text) > 0L) tw_in(nd_text, gp_main_bold) else 0
-            cnt_w <- tw_in(paste0("n = ", fmt_n(nd_n)), gp_main)
-            bw_in[i] <- max(txt_w, cnt_w) + 2 * pad_h
-            bh_in[i] <- 2 * lh + 2 * pad_v
-
         } else if (nd_role == "source") {
             ## Source group node: header line + indented sub-items (like side)
             nreas <- nodes$n_reason[i]
@@ -286,11 +360,11 @@ draw_grid <- function(graph,
                 ## Sub-reasons: indented, italic count + italic label
                 all_reas_nums <- vapply(nd_reas, fmt_n, character(1L))
                 reas_num_w <- max(vapply(all_reas_nums,
-                    function(s) tw_in(s, gp_reas), numeric(1L)))
+                                         function(s) tw_in(s, gp_reas), numeric(1L)))
                 max_reas_w <- 0
                 for (ri in seq_len(nreas)) {
                     rw <- indent_in + reas_num_w + gap_side_in +
-                          tw_in(names(nd_reas)[ri], gp_reas)
+                        tw_in(names(nd_reas)[ri], gp_reas)
                     max_reas_w <- max(max_reas_w, rw)
                 }
             } else {
@@ -348,9 +422,7 @@ draw_grid <- function(graph,
     nodes[, bw_inches := bw_in]
     nodes[, bh_inches := bh_in]
 
-    ## ==================================================================
-    ## PASS 1b: Horizontal layout in inches
-    ## ==================================================================
+    ## ---- Pass 1b: Horizontal layout (inches) ----
 
     hpad_in <- vpad  # horizontal gap between adjacent columns
 
@@ -393,7 +465,7 @@ draw_grid <- function(graph,
             left_of_center  <- max(src_mid, pre_main_w / 2)
             right_of_center <- max(src_mid,
                                    pre_main_w / 2 + ifelse(pre_side_w > 0,
-                                       hpad_in + pre_side_w, 0))
+                                                           hpad_in + pre_side_w, 0))
             total_content_w <- left_of_center + right_of_center
 
             ## main_x at center
@@ -406,7 +478,7 @@ draw_grid <- function(graph,
                 g <- src_group_info[[gi]]
                 g_center <- cursor + g$max_w / 2
                 gi_idx <- nodes$stream_group == g$group &
-                          nodes$role %chin% c("source", "source_header")
+                    nodes$role %chin% c("source", "source_header")
                 gi_idx[is.na(gi_idx)] <- FALSE
                 set(nodes, i = which(gi_idx), j = "x_in", value = g_center)
                 set(nodes, i = which(gi_idx), j = "bw_inches", value = g$max_w)
@@ -461,7 +533,7 @@ draw_grid <- function(graph,
             ## Arm centers are at equal distances from arm_mid = 0
             half_span      <- (max_main_w + hpad_in) / 2
             left_main_rel  <- -half_span
-            right_main_rel <-  half_span
+                right_main_rel <-  half_span
 
             ## Pre-section centered on arm_mid = 0
             pre_right_ext <- pre_main_w / 2 +
@@ -570,68 +642,16 @@ draw_grid <- function(graph,
         }
     }
 
-    ## ---- Cell nodes: position in grid ----
-    cell_nodes_idx <- which(nodes$role == "cell")
-    if (length(cell_nodes_idx) > 0L) {
-        cell_max_w <- max(nodes$bw_inches[cell_nodes_idx])
-        grid_cols <- sort(unique(nodes$grid_col[cell_nodes_idx]))
-        n_gc <- length(grid_cols)
-        cell_gap <- hpad_in  ## full hpad between grid cells
-
-        if (any(!is.na(nodes$arm_id[cell_nodes_idx]))) {
-            ## Per-arm grids: cells under each arm
-            per_arm_cell_span <- n_gc * cell_max_w + (n_gc - 1) * cell_gap
-
-            for (a in unique(nodes$arm_id[cell_nodes_idx])) {
-                arm_x <- nodes[arm_id == a & role %chin% c("arm", "main", "endpoint"), x_in]
-                if (length(arm_x) == 0L) arm_x <- total_content_w / 2
-                arm_base <- arm_x[1L]
-                cell_start <- arm_base - per_arm_cell_span / 2
-                for (ci in seq_along(grid_cols)) {
-                    cx <- cell_start + (ci - 1) * (cell_max_w + cell_gap) + cell_max_w / 2
-                    nodes[role == "cell" & arm_id == a & grid_col == grid_cols[ci],
-                          x_in := cx]
-                }
-            }
-
-            ## Ensure total width covers the grid extent
-            all_cell_x <- nodes$x_in[cell_nodes_idx]
-            cell_left  <- min(all_cell_x) - cell_max_w / 2
-            cell_right <- max(all_cell_x) + cell_max_w / 2
-            if (cell_left < 0 || cell_right > total_content_w) {
-                new_w <- cell_right - min(cell_left, 0)
-                shift <- if (cell_left < 0) -cell_left else 0
-                if (shift > 0) {
-                    nodes[!is.na(x_in), x_in := x_in + shift]
-                }
-                total_content_w <- max(total_content_w, new_w)
-            }
-        } else {
-            ## Single-stream grid
-            cell_span <- n_gc * cell_max_w + (n_gc - 1) * cell_gap
-            cell_start <- (total_content_w - cell_span) / 2
-            for (ci in seq_along(grid_cols)) {
-                cx <- cell_start + (ci - 1) * (cell_max_w + cell_gap) + cell_max_w / 2
-                nodes[role == "cell" & grid_col == grid_cols[ci],
-                      x_in := cx]
-            }
-            ## Widen total if grid is wider
-            total_content_w <- max(total_content_w, cell_span)
-        }
-    }
-
     ## Store computed content width for recdims
     graph$content_width_in <- total_content_w
 
-    ## ==================================================================
-    ## PASS 2: Vertical layout in inches
-    ## ==================================================================
+    ## ---- Pass 2: Vertical layout (inches) ----
 
     n_rows <- max(nodes$row)
     setkey(nodes, node_id)
 
-    ## -- Row heights --
-    main_roles <- c("side", "cell", "source", "source_header")
+    ## ---- Row heights ----
+    main_roles <- c("side", "source", "source_header")
     row_h_in <- numeric(n_rows)
 
     ## Main/arm/alloc/endpoint boxes
@@ -639,13 +659,6 @@ draw_grid <- function(graph,
     if (nrow(mn_subset) > 0L) {
         mn_h <- mn_subset[, .(h = max(bh_inches)), by = row]
         row_h_in[mn_h$row] <- mn_h$h
-    }
-
-    ## Cell rows
-    cn_nodes <- nodes[role == "cell"]
-    if (nrow(cn_nodes) > 0L) {
-        cn_h <- cn_nodes[, .(h = max(bh_inches)), by = row]
-        row_h_in[cn_h$row] <- pmax(row_h_in[cn_h$row], cn_h$h)
     }
 
     ## Source rows: consolidated box + header
@@ -662,13 +675,13 @@ draw_grid <- function(graph,
         row_h_in[sn_h$row] <- pmax(row_h_in[sn_h$row], sn_h$total)
     }
 
-    ## -- Pair gaps --
+    ## ---- Pair gaps ----
     ## Rows with any non-side/non-header content get vpad; others get 0
-    content_roles <- c("side", "cell", "source_header")
+    content_roles <- c("side", "source_header")
     rows_with_content <- unique(nodes[!role %chin% content_roles, row])
     pair_gap_in <- numeric(n_rows)
     pair_gap_in[rows_with_content] <- vpad_in
-    ## -- Exclude-edge gap --
+    ## ---- Exclude-edge gap ----
     excl_edges <- edges[edge_type == "exclude"]
     if (nrow(excl_edges) > 0L) {
         ## Join to get parent row and side box height
@@ -680,7 +693,7 @@ draw_grid <- function(graph,
         ## Per-parent-row max needed
         ee_max <- ee[, .(needed = max(needed)), by = from_row]
         pair_gap_in[ee_max$from_row] <- pmax(pair_gap_in[ee_max$from_row],
-                                              ee_max$needed)
+                                             ee_max$needed)
 
         ## Stacked side boxes: parents with >1 exclude edge
         stack_dt <- ee[, .(n_sides = .N,
@@ -719,88 +732,42 @@ draw_grid <- function(graph,
     ## Content height in inches
     total_h_in <- sum(row_h_in) + sum(pair_gap_in[seq_len(n_rows - 1L)])
 
-    ## --- Phase-label vertical fit ------------------------------------
-    ## A phase label is drawn rotated 90 degrees in the left margin, so
-    ## the *width* of the unrotated label is the height its strip must
-    ## accommodate.  A short terminal phase (typically a one-row
-    ## "Analysis" phase, and shorter still under count_first) can be
-    ## shorter than its own label.  Two coordinated adjustments handle
-    ## this, computed here so node boxes, connectors, and phase strips
-    ## all share one set of positions:
-    ##
-    ##   * the canvas is extended on the deficient phase's own side
-    ##     (trailing space for the last phase, leading space for the
-    ##     first) -- never split symmetrically, which would strand empty
-    ##     space against the opposite margin; and
-    ##   * the phase's node block is shifted toward the strip interior so
-    ##     the boxes sit centred in the (label-extended) strip rather
-    ##     than against its inner edge.
-    ##
-    ## Interior phases are never extended -- doing so would cross a
-    ## neighbour's padding -- and in practice are never the short one, so
-    ## only the first and last phase are considered.
-    ph_lead_pad_in  <- 0   # extra canvas above the first row
-    ph_trail_pad_in <- 0   # extra canvas below the last row
-    ph_first_shift  <- 0   # first-phase node block shifts UP by this (in)
-    ph_last_shift   <- 0   # last-phase  node block shifts DOWN by this (in)
+    ## ---- Phase-label vertical fit (band model) ----
+    ## A phase strip is a horizontal band spanning the diagram width; its
+    ## height must fit the phase's rotated (possibly multi-line) label. The
+    ## per-phase deficit D_i = max(0, label_height_i - natural_band_i) is
+    ## absorbed by growing each band by its own D_i and pushing later bands
+    ## down (in apply_phase_bands()), so one phase never alters a
+    ## neighbor's height. Only the total deficit is needed here, to size
+    ## the canvas.
+    phase_deficit_in <- numeric(0)
+    ## Inter-phase strip separation (inches); single source of truth shared
+    ## by the deficit calc and the band-placement pass (historical 0.01 npc).
+    ph_gap_in <- 0.01 * content_h
     if (has_phases && nrow(phases) > 0L) {
-        gp_ph_meas <- gpar(cex = cex_phase, fontface = "bold",
-                           fontfamily = ff)
-        ph_nums <- sort(unique(nodes$phase))
-        ph2row  <- setNames(seq_along(ph_nums), as.character(ph_nums))
-        phase_rows <- function(idx) {
-            r <- ph2row[as.character(seq.int(phases$phase_start[idx],
-                                             phases$phase_end[idx]))]
-            as.integer(r[!is.na(r)])
-        }
-        ## For a terminal phase: deficit D of the label against the
-        ## natural strip (node span + the half-gap to the inner
-        ## neighbour).  The centring shift is D - gap/2 and the canvas
-        ## reserve 1.5*D - gap/4; both fall out of requiring the strip
-        ## to be label-tall with the node block centred in it.
-        fit_terminal <- function(idx, gap_in) {
-            rws <- phase_rows(idx)
-            if (length(rws) == 0L) return(c(shift = 0, pad = 0))
-            r_a <- min(rws); r_b <- max(rws)
-            span_in <- sum(row_h_in[r_a:r_b])
-            if (r_b > r_a)
-                span_in <- span_in + sum(pair_gap_in[r_a:(r_b - 1L)])
-            need_in <- tw_in(phases$label[idx], gp_ph_meas) + 2 * pad_v
-            D <- need_in - (span_in + gap_in / 2)
-            if (D <= 0) return(c(shift = 0, pad = 0))
-            c(shift = D - gap_in / 2,
-              pad   = max(0, 1.5 * D - gap_in / 4))
-        }
-        n_phase <- nrow(phases)
-        ## last phase: gap above is the inner-neighbour gap
-        rl <- phase_rows(n_phase)
-        if (length(rl) > 0L) {
-            g_above <- if (min(rl) > 1L) pair_gap_in[min(rl) - 1L] else 0
-            ft <- fit_terminal(n_phase, g_above)
-            ph_last_shift   <- ft[["shift"]]
-            ph_trail_pad_in <- ft[["pad"]]
-        }
-        ## first phase: gap below is the inner-neighbour gap
-        if (n_phase > 1L) {
-            rf <- phase_rows(1L)
-            if (length(rf) > 0L) {
-                g_below <- if (max(rf) < n_rows) pair_gap_in[max(rf)] else 0
-                ff_ <- fit_terminal(1L, g_below)
-                ph_first_shift <- ff_[["shift"]]
-                ph_lead_pad_in <- ff_[["pad"]]
-            }
-        }
+        phase_deficit_in <- phase_band_deficits(
+            nodes, edges, phases, row_h_in, pair_gap_in,
+            n_rows, vpad_in, ph_gap_in, label_h_in)
     }
-    total_h_in <- ph_lead_pad_in + total_h_in + ph_trail_pad_in
+    extra_band_in <- if (length(phase_deficit_in)) sum(phase_deficit_in) else 0
+    ## Total content height = natural stack + band growth; the growth is
+    ## distributed by apply_phase_bands(), here it only enlarges the canvas.
+    total_h_in <- sum(row_h_in) + sum(pair_gap_in[seq_len(n_rows - 1L)]) +
+        extra_band_in
 
     ## Store for recdims(): total canvas = content + margins + phase strip
     graph$diagram_height_in <- total_h_in + 2 * margin
     graph$diagram_width_in  <- total_content_w + 2 * margin + phase_strip_w
     graph$phase_strip_w     <- phase_strip_w
 
-    ## ==================================================================
-    ## Convert to npc of the content viewport
-    ## ==================================================================
+    ## Dimension-only callers (recdims()) need nothing beyond the canvas
+    ## measurements just computed. Everything below issues grid drawing
+    ## primitives whose output is discarded when only the dimensions are
+    ## wanted, so return early and skip that work entirely.
+    if (isTRUE(measure_only))
+        return(invisible(graph))
+
+    ## ---- Convert to npc of the content viewport ----
 
     to_npc_h <- function(inches) inches / content_h
     to_npc_w <- function(inches) inches / content_w
@@ -829,54 +796,25 @@ draw_grid <- function(graph,
     ## NPC text width via memoized inch cache
     tw_npc <- function(label, gp) to_npc_w(tw_in(label, gp))
 
-    ## Row y positions (top-down, centered in content area).  Leading and
-    ## trailing pads (non-zero only when a terminal phase label needs the
-    ## extra room) are placed asymmetrically, on the side of the phase
-    ## that needs them, so no empty band appears against the opposite
-    ## margin.
-    lead_pad_npc  <- to_npc_h(ph_lead_pad_in)
-    trail_pad_npc <- to_npc_h(ph_trail_pad_in)
-    actual_h_npc  <- lead_pad_npc + sum(row_h) +
-                     sum(gap_npc[seq_len(n_rows - 1L)]) + trail_pad_npc
-    y_offset <- (1.0 - actual_h_npc) / 2
-
+    ## Row y positions, natural top-down layout (no phase deficits yet),
+    ## laid from the top of the content area. The band pass below grows
+    ## inter-phase spacing and recentres; with no deficits this reduces to
+    ## the former centered layout.
     row_y <- numeric(n_rows)
-    row_y[1L] <- 1.0 - y_offset - lead_pad_npc - row_h[1L] / 2
+    row_y[1L] <- 1.0 - row_h[1L] / 2          # top-anchored for now
     if (n_rows > 1L) {
         ## Drop between consecutive row centers:
         ##   half-height of row r  +  gap below row r  +  half-height of row r+1
         deltas <- row_h[seq_len(n_rows - 1L)] / 2 +
-                  gap_npc[seq_len(n_rows - 1L)] +
-                  row_h[2:n_rows] / 2
+            gap_npc[seq_len(n_rows - 1L)] +
+            row_h[2:n_rows] / 2
         row_y[2:n_rows] <- row_y[1L] - cumsum(deltas)
-    }
-
-    ## Shift terminal-phase node blocks toward the centre of their
-    ## (label-extended) phase strips.  Applied here so node boxes,
-    ## connectors, and the phase strips are all drawn consistently.  A
-    ## terminal phase has no rows beyond it on the shifted side, so the
-    ## shift cascades to nothing -- it only changes the connector length
-    ## from the inner neighbour.  The shift may be negative (a small
-    ## deficit nudges a strip-bottom-flush node slightly inward), so both
-    ## signs are honoured; zero means no adjustment.
-    if (ph_first_shift != 0 || ph_last_shift != 0) {
-        if (ph_first_shift != 0) {
-            fr <- phase_rows(1L)
-            row_y[fr] <- row_y[fr] + to_npc_h(ph_first_shift)   # +: upward
-        }
-        if (ph_last_shift != 0) {
-            lr <- phase_rows(nrow(phases))
-            row_y[lr] <- row_y[lr] - to_npc_h(ph_last_shift)    # +: downward
-        }
     }
 
     row_y_map <- setNames(row_y, as.character(seq_len(n_rows)))
 
-    ## Position non-side, non-cell, non-source nodes at row centers
-    nodes[!role %chin% c("side", "cell", "source", "source_header"), y := row_y_map[as.character(row)]]
-
-    ## Position cell nodes at row centers
-    nodes[role == "cell", y := row_y_map[as.character(row)]]
+    ## Position non-side, non-source nodes at row centers
+    nodes[!role %chin% c("side", "source", "source_header"), y := row_y_map[as.character(row)]]
 
     ## Position source nodes: one box per group, header above
     src_nodes_idx <- which(nodes$role == "source")
@@ -910,10 +848,8 @@ draw_grid <- function(graph,
         }
     }
 
-    ## ==================================================================
-    ## PASS 3: Side-box Y -- anchor vpad below parent
+    ## ---- Pass 3: Side-box Y (anchor vpad below parent) ----
     ## When multiple side boxes share a parent, stack them downward.
-    ## ==================================================================
 
     vpad_npc <- to_npc_h(vpad_in)
 
@@ -939,9 +875,55 @@ draw_grid <- function(graph,
         }
     }
 
-    ## ==================================================================
-    ## DRAW
-    ## ==================================================================
+    ## ---- Pass 4: Phase bands ----
+    ## Grow each band by its deficit, translate later phases down, recentre,
+    ## and place content within each band (even gaps for multi-element
+    ## phases, centered for single-element); returns per-phase strip edges.
+    phase_band_top <- phase_band_bot <- NULL
+    if (has_phases && nrow(phases) > 0L) {
+        pb <- apply_phase_bands(nodes, edges, phases, phase_deficit_in,
+                                to_npc_h, to_npc_w, vpad_in, ph_gap_in)
+        phase_band_top <- pb$band_top   # per-phase strip TOP edge (npc)
+        phase_band_bot <- pb$band_bot   # per-phase strip BOTTOM edge (npc)
+    }
+
+    ## Opt-in numeric geometry dump for debugging the vertical fit, enabled
+    ## with options(selecta.debug_layout = TRUE): emits per-phase label
+    ## demand, deficit, band height, and per-node y extents.
+    if (isTRUE(getOption("selecta.debug_layout", FALSE))) {
+        dbg_band <- NULL
+        if (!is.null(phase_band_top)) {
+            dbg_band <- data.frame(
+                phase     = seq_len(nrow(phases)),
+                label     = phases$label,
+                label_h_in = if (!is.null(label_h_in)) round(label_h_in, 4) else NA_real_,
+                deficit_in = if (length(phase_deficit_in))
+                                 round(phase_deficit_in, 4) else 0,
+                band_top_npc = round(phase_band_top, 4),
+                band_bot_npc = round(phase_band_bot, 4),
+                band_h_npc   = round(phase_band_top - phase_band_bot, 4),
+                band_h_in    = round((phase_band_top - phase_band_bot) * content_h, 4)
+            )
+        }
+        dbg_nodes <- nodes[order(row, node_id),
+            .(node_id, row, role,
+              phase = if ("phase" %in% names(nodes)) phase else NA_integer_,
+              y      = round(y, 4),
+              top    = round(y + box_h / 2, 4),
+              bot    = round(y - box_h / 2, 4),
+              h_in   = round(box_h * content_h, 4))]
+        dims_line <- sprintf("content_h=%.4f in  total_h=%.4f in  extra_band=%.4f in",
+                             content_h, total_h_in, extra_band_in)
+        debug_emit("draw_grid() layout", dimensions = dims_line,
+                   `phase bands` = dbg_band, nodes = dbg_nodes)
+        ## Also stash on the returned graph for programmatic access.
+        graph$debug_layout <- list(content_h_in = content_h,
+                                   total_h_in   = total_h_in,
+                                   extra_band_in = extra_band_in,
+                                   bands = dbg_band, nodes = dbg_nodes)
+    }
+
+    ## ---- DRAW ----
 
     arr <- arrow(length = unit(0.10, "inches"), type = "closed")
 
@@ -954,83 +936,45 @@ draw_grid <- function(graph,
 
         ph_box_w_npc <- to_npc_w(ph_box_w_in)
         ph_x_npc     <- to_npc_w(-(phase_gap_in + ph_box_w_in / 2))
-        ph_gap_npc   <- 0.01
 
         n_ph <- nrow(phases)
-        all_phase_nums <- sort(unique(nodes$phase))
-        phase_to_row <- setNames(seq_along(all_phase_nums),
-                                 as.character(all_phase_nums))
 
-        ph_ext <- lapply(seq_len(n_ph), function(idx) {
-            ps <- phases$phase_start[idx]
-            pe <- phases$phase_end[idx]
-            ph_rows <- phase_to_row[as.character(seq.int(ps, pe))]
-            ph_nds <- nodes[row %in% ph_rows]
-            if (nrow(ph_nds) == 0L) return(list(top = NA_real_, bot = NA_real_))
-            list(top = max(ph_nds$y + ph_nds$box_h / 2),
-                 bot = min(ph_nds$y - ph_nds$box_h / 2))
-        })
-
-        ## Top/bottom boundaries for phase strips
-        ## When source headers exist, flush the top (no cushion)
-        has_hdrs_for_flush <- nrow(nodes[role == "source_header"]) > 0L
-        top_cushion <- if (has_hdrs_for_flush) 0 else 0.008
-        all_top <- max(nodes$y + nodes$box_h / 2, na.rm = TRUE) + top_cushion
-        all_bot <- min(nodes$y - nodes$box_h / 2, na.rm = TRUE) - 0.008
-
-        ## Page edges in content-viewport NPC.  The content viewport has
-        ## clip = "off", so a strip may legitimately extend into the page
-        ## margin; it must not, however, extend across a phase boundary.
-        margin_npc   <- to_npc_h(margin)
-        edge_cushion <- to_npc_h(0.03)
-        top_edge <-  1 + margin_npc - edge_cushion
-        bot_edge <- -margin_npc + edge_cushion
+        ## Per-phase band edges from the band pass are authoritative: each
+        ## is already tall enough for its label and separated by ph_gap, so
+        ## strips are drawn directly with no midpoint estimation.
+        bt_vec <- phase_band_top
+        bb_vec <- phase_band_bot
+        per_line_w <- to_npc_w(line_height * (cex_phase / 0.85))
 
         for (idx in seq_len(n_ph)) {
-            ext <- ph_ext[[idx]]
-            if (is.na(ext$top)) next
-            y_hi <- if (idx == 1L) all_top else {
-                (ph_ext[[idx - 1L]]$bot + ext$top) / 2 - ph_gap_npc / 2
-            }
-            y_lo <- if (idx == n_ph) all_bot else {
-                (ext$bot + ph_ext[[idx + 1L]]$top) / 2 + ph_gap_npc / 2
-            }
-            ## The phase label is rotated 90 degrees, so the *width* of
-            ## the unrotated text is the *height* it needs inside the
-            ## strip.  When the natural box [y_lo, y_hi] is shorter than
-            ## the label -- common for a single-row "Analysis" phase,
-            ## especially under count_first -- the deficit is taken up by
-            ## growing the strip OUTWARD into the page margin only: the
-            ## first phase may grow upward, the last phase downward.  A
-            ## strip is never grown across y_hi / y_lo into an interior
-            ## boundary, as that would eat the inter-phase padding (the
-            ## bleed this logic exists to prevent).  Interior phases keep
-            ## their natural box; they are effectively never the short one.
-            want_h <- max(y_hi - y_lo,
-                          to_npc_h(tw_in(phases$label[idx], gp_ph_text) +
-                                   2 * pad_v),
-                          0.015)
-            extra   <- want_h - (y_hi - y_lo)
-            head_up <- if (idx == 1L)   max(0, top_edge - y_hi) else 0
-            head_dn <- if (idx == n_ph) max(0, y_lo - bot_edge) else 0
-            grow_up <- min(extra / 2, head_up)
-            grow_dn <- min(extra / 2, head_dn)
-            ## Spill any remainder onto whichever side still has headroom.
-            grow_up <- grow_up + min(extra - grow_up - grow_dn,
-                                     head_up - grow_up)
-            grow_dn <- grow_dn + min(extra - grow_up - grow_dn,
-                                     head_dn - grow_dn)
-            top <- y_hi + grow_up
-            bot <- y_lo - grow_dn
+            top <- bt_vec[idx]
+            bot <- bb_vec[idx]
             ht  <- top - bot
             ym  <- (top + bot) / 2
             grid.rect(x = unit(ph_x_npc, "npc"), y = unit(ym, "npc"),
                       width = unit(ph_box_w_npc, "npc"),
                       height = unit(ht, "npc"),
                       gp = gp_ph_box)
-            grid.text(phases$label[idx],
-                      x = unit(ph_x_npc, "npc"), y = unit(ym, "npc"),
-                      rot = 90, gp = gp_ph_text, just = "center")
+            ## Draw the (possibly multi-line) label as rotated rows of text
+            ## offset along x, centered on ph_x_npc.
+            lines_i <- if (!is.null(phase_lines)) phase_lines[[idx]] else phases$label[idx]
+            n_li    <- length(lines_i)
+            if (n_li <= 1L) {
+                grid.text(lines_i[[1L]],
+                          x = unit(ph_x_npc, "npc"), y = unit(ym, "npc"),
+                          rot = 90, gp = gp_ph_text, just = "center")
+            } else {
+                ## Lines read left-to-right: the first line is the leftmost
+                ## (outer) column, each subsequent line one line-width to the
+                ## right (toward the content edge).
+                x0 <- ph_x_npc - (n_li - 1) / 2 * per_line_w
+                for (li in seq_len(n_li)) {
+                    grid.text(lines_i[[li]],
+                              x = unit(x0 + (li - 1) * per_line_w, "npc"),
+                              y = unit(ym, "npc"),
+                              rot = 90, gp = gp_ph_text, just = "center")
+                }
+            }
         }
     }
 
@@ -1038,12 +982,10 @@ draw_grid <- function(graph,
 
     gp_edge <- gpar(col = arrow_col, lwd = lwd, fill = arrow_col)
 
-    ## Shared horizontal bar Y for converge edges.
-    ## For post-stratify convergence the bar must clear any side boxes
-    ## hanging from the arm columns, producing a symmetric inverted-Y.
-    ## In resplit flows (stratify -> combine -> stratify), arm_ids are
-    ## reused, so we restrict the side-box search to nodes whose row
-    ## falls between the from-node rows and the to-node row.
+    ## Shared horizontal bar Y for converge edges. The bar must clear any
+    ## side boxes hanging from the arm columns (symmetric inverted-Y). In
+    ## resplit flows arm_ids are reused, so the side-box search is restricted
+    ## to nodes whose row falls between the from-node rows and the to-node row.
     converge_bar_y <- NULL
     conv_idx <- which(edges$edge_type == "converge")
     if (length(conv_idx) > 0L) {
@@ -1087,8 +1029,8 @@ draw_grid <- function(graph,
     ed[nodes, on = .(from = node_id), `:=`(fx = x, fy = y, fbh = box_h)]
     ed[nodes, on = .(to = node_id), `:=`(tx = x, ty = y, tbh = box_h, tbw = bw)]
 
-    ## -- Flow and classify edges --
-    ed_simple <- ed[edge_type %chin% c("flow", "classify")]
+    ## ---- Flow edges ----
+    ed_simple <- ed[edge_type == "flow"]
     if (nrow(ed_simple) > 0L) {
         grid.segments(
             x0 = unit(ed_simple$fx, "npc"),
@@ -1098,7 +1040,7 @@ draw_grid <- function(graph,
             gp = gp_edge, arrow = arr)
     }
 
-    ## -- Exclude edges --
+    ## ---- Exclude edges ----
     ed_excl <- ed[edge_type == "exclude"]
     if (nrow(ed_excl) > 0L) {
         excl_to_x <- fifelse(ed_excl$tx > ed_excl$fx,
@@ -1110,7 +1052,7 @@ draw_grid <- function(graph,
             gp = gp_edge, arrow = arr)
     }
 
-    ## -- Split edges --
+    ## ---- Split edges ----
     ed_split <- ed[edge_type == "split"]
     for (i in seq_len(nrow(ed_split))) {
         e <- ed_split[i]
@@ -1140,7 +1082,7 @@ draw_grid <- function(graph,
     ## ---- Boxes ----
 
     nodes[, fill_col := fifelse(role == "side", side_fill,
-                         fifelse(role == "source_header", "#d0d0d0", box_fill))]
+                                fifelse(role == "source_header", "#d0d0d0", box_fill))]
 
     for (fc in unique(nodes$fill_col)) {
         batch <- nodes[fill_col == fc]
@@ -1242,15 +1184,6 @@ draw_grid <- function(graph,
                           x = unit(nd_x, "npc"),
                           y = unit(nd_y - sep, "npc"), gp = gp_main, just = "center")
             }
-
-        } else if (nd_role == "cell") {
-            ## Classification grid cell
-            sep <- lh_npc * 0.55
-            grid.text(nd_text, x = unit(nd_x, "npc"),
-                      y = unit(nd_y + sep, "npc"), gp = gp_main_bold, just = "center")
-            grid.text(bquote(italic("n") ~ "=" ~ .(fmt_n(nd_n))),
-                      x = unit(nd_x, "npc"),
-                      y = unit(nd_y - sep, "npc"), gp = gp_main, just = "center")
 
         } else if (nd_role == "source") {
             ## Consolidated source box: header line + indented sub-items
@@ -1358,7 +1291,7 @@ draw_grid <- function(graph,
                 ## Indented, right-aligned italic count + italic label
                 all_reas_nums <- vapply(nd_reas, fmt_n, character(1L))
                 reas_num_npc <- max(vapply(all_reas_nums,
-                    function(s) tw_npc(s, gp_reas), numeric(1L)))
+                                           function(s) tw_npc(s, gp_reas), numeric(1L)))
                 for (j in seq_len(n_reas)) {
                     ry <- top_y - (n_hdr_lines - 1 + j) * lh_npc
                     rc <- fmt_n(nd_reas[j])
@@ -1456,4 +1389,383 @@ draw_grid <- function(graph,
         if (col %in% names(nodes)) set(nodes, j = col, value = NULL)
 
     invisible(graph)
+}
+
+### * Phase-label vertical-fit helpers
+
+#' Measure a (Possibly Wrapped) Phase Label
+#'
+#' Returns the rotated-height demand of a phase label and the lines it
+#' splits to.  Phase labels are drawn rotated 90 degrees, so the relevant
+#' demand on the strip is the unrotated width of the longest line, plus
+#' vertical padding.  Explicit \code{"\n"} newlines are ALWAYS honored
+#' and are never collapsed.  Greedy word-wrapping is applied to each
+#' hard-split segment only when \code{wrap = TRUE} (with a
+#' \code{max_width_in} cap); the \code{max_lines} cap then limits only the
+#' \emph{wrap}-generated lines within a segment, never merging across
+#' explicit newlines.  Leading/trailing whitespace around each line is
+#' trimmed so a stray space (e.g. \code{"A \n test"}) does not inflate the
+#' measured width or the rendered line.
+#'
+#' @param label Character scalar phase label.
+#' @param gp A \code{gpar} for measurement (font face/size/family).
+#' @param pad_v Numeric. Vertical padding added to both ends (inches).
+#' @param tw A measurement function \code{function(label, gp)} returning
+#'   the unrotated text width in inches.
+#' @param wrap Logical. If \code{TRUE}, word-wrap over-long segments.
+#'   Default \code{FALSE} (explicit newlines still split).
+#' @param max_lines Integer or \code{NA}. Cap on wrap-generated lines per
+#'   hard segment; overflow is collapsed into that segment's final line.
+#'   \code{NA} (default) means no cap.
+#' @param max_width_in Numeric or \code{NULL}. Wrap cap (inches).
+#' @return A list with \code{lines} (character vector), \code{n_lines}
+#'   (integer), and \code{height_in} (numeric, the rotated strip height).
+#' @keywords internal
+measure_phase_label <- function(label, gp, pad_v, tw,
+                                wrap = FALSE, max_lines = NA_integer_,
+                                max_width_in = NULL) {
+    ## Explicit newlines always split, independent of `wrap`.
+    hard <- strsplit(label, "\n", fixed = TRUE)[[1L]]
+    if (length(hard) == 0L) hard <- ""
+    hard <- trimws(hard)
+
+    wrap_seg <- function(s) {
+        if (!isTRUE(wrap) || is.null(max_width_in)) return(s)
+        words <- strsplit(s, "\\s+")[[1L]]
+        words <- words[nzchar(words)]
+        if (length(words) == 0L) return(s)
+        lines <- character(0L); cur <- ""
+        for (w in words) {
+            cand <- if (nzchar(cur)) paste(cur, w) else w
+            if (tw(cand, gp) > max_width_in && nzchar(cur)) {
+                lines <- c(lines, cur); cur <- w
+            } else {
+                cur <- cand
+            }
+        }
+        if (nzchar(cur)) lines <- c(lines, cur)
+        ## Cap only the wrap lines of THIS segment; collapse the overflow
+        ## into the segment's last line (never across hard newlines).
+        if (!is.na(max_lines) && max_lines >= 1L && length(lines) > max_lines) {
+            keep <- if (max_lines > 1L) lines[seq_len(max_lines - 1L)] else character(0L)
+            tail_lines <- lines[max(1L, max_lines):length(lines)]
+            lines <- c(keep, paste(tail_lines, collapse = " "))
+        }
+        lines
+    }
+
+    lines <- unlist(lapply(hard, wrap_seg), use.names = FALSE)
+    if (length(lines) == 0L) lines <- ""
+
+    longest <- max(vapply(lines, function(s) tw(s, gp), numeric(1L)))
+    list(lines     = lines,
+         n_lines   = length(lines),
+         height_in = longest + 2 * pad_v)
+}
+
+
+#' Place Rows in Inches (Top-Down)
+#'
+#' Single monotone top-down placement of every node in distance-from-top
+#' inches, used by the phase-fit pass to measure phase extents from
+#' actual node positions.  Anchoring (non-side) boxes sit at their row
+#' centers; side boxes hang \code{vpad_in} below their exclude-edge
+#' parent and stack downward, exactly as in the main rendering pass --
+#' so a phase's measured extent includes side boxes that hang off a
+#' neighbouring phase's row.
+#'
+#' @param nodes Node \code{data.table} with \code{node_id}, \code{role},
+#'   \code{row}, \code{bh_inches}.
+#' @param edges Edge \code{data.table} with \code{edge_type}, \code{from},
+#'   \code{to}.
+#' @param row_h_in Numeric vector of row heights (inches), length n_rows.
+#' @param pair_gap_in Numeric vector of gaps below each row (inches).
+#' @param n_rows Integer number of rows.
+#' @param vpad_in Numeric vertical pad (inches).
+#' @param lead_in Numeric leading pad above the first row (inches).
+#' @return A list with \code{top}, \code{bot} (numeric vectors aligned to
+#'   \code{nodes} row order), \code{d_row}, and \code{bottom_in}.
+#' @keywords internal
+place_rows_in <- function(nodes, edges, row_h_in, pair_gap_in,
+                          n_rows, vpad_in, lead_in = 0) {
+    d_row <- numeric(n_rows)
+    d_row[1L] <- lead_in + row_h_in[1L] / 2
+    if (n_rows > 1L) for (r in 2:n_rows)
+        d_row[r] <- d_row[r - 1L] + row_h_in[r - 1L] / 2 +
+            pair_gap_in[r - 1L] + row_h_in[r] / 2
+
+    nn  <- nrow(nodes)
+    top <- bot <- rep(NA_real_, nn)
+    is_side <- nodes$role == "side"
+
+    ## Anchoring boxes at row centers
+    mi <- which(!is_side)
+    if (length(mi) > 0L) {
+        cr <- d_row[nodes$row[mi]]
+        top[mi] <- cr - nodes$bh_inches[mi] / 2
+        bot[mi] <- cr + nodes$bh_inches[mi] / 2
+    }
+
+    ## Source rows: header sits atop the source box (a contiguous stack),
+    ## mirroring the main rendering pass, so the row's measured extent
+    ## matches its rendered extent.
+    src_idx <- which(nodes$role == "source")
+    hdr_idx <- which(nodes$role == "source_header")
+    if (length(src_idx) > 0L && length(hdr_idx) > 0L) {
+        gap_s <- vpad_in * 0.3
+        for (r in unique(nodes$row[src_idx])) {
+            rc      <- d_row[r]
+            row_top <- rc - row_h_in[r] / 2
+            hh      <- max(nodes$bh_inches[hdr_idx[nodes$row[hdr_idx] == r]])
+            ## Header flush to the row top.
+            hr <- hdr_idx[nodes$row[hdr_idx] == r]
+            top[hr] <- row_top
+            bot[hr] <- row_top + nodes$bh_inches[hr]
+            ## Source boxes immediately below the header band.
+            sr <- src_idx[nodes$row[src_idx] == r]
+            top[sr] <- row_top + hh + gap_s
+            bot[sr] <- top[sr] + nodes$bh_inches[sr]
+        }
+    }
+
+    ## Side boxes hang off their exclude-edge parent, stacked downward
+    excl <- edges[edge_type == "exclude"]
+    if (nrow(excl) > 0L) {
+        for (grp in split(excl, by = "from")) {
+            pix <- match(grp$from[1L], nodes$node_id)
+            if (is.na(pix)) next
+            cur <- d_row[nodes$row[pix]] + nodes$bh_inches[pix] / 2 + vpad_in
+            for (j in seq_len(nrow(grp))) {
+                sid <- match(grp$to[j], nodes$node_id)
+                if (is.na(sid)) next
+                top[sid] <- cur
+                bot[sid] <- cur + nodes$bh_inches[sid]
+                cur <- bot[sid] + vpad_in
+            }
+        }
+    }
+
+    list(top = top, bot = bot, d_row = d_row,
+         bottom_in = max(bot, na.rm = TRUE))
+}
+
+
+#' Per-Phase Band Deficits
+#'
+#' Lays the rows out naturally (in inches) and returns, for each phase,
+#' the vertical deficit \code{D_i = max(0, label_height_i - natural_band_i)}.
+#' The natural band is the phase's slice of the diagram: the two terminal
+#' phases extend \code{vpad_in/4} past the outermost node, and interior
+#' boundaries fall at the half-way line between neighbouring phase content
+#' but stop \code{ph_gap_in/2} short on each side so adjacent strips are
+#' separated by \code{ph_gap_in}.  Phase extents are measured from final
+#' node positions, so a side box hanging off a neighbouring phase's row is
+#' attributed to its own phase.  These deficits are consumed by
+#' \code{apply_phase_bands()}; their sum is the extra canvas height needed.
+#'
+#' @param nodes,edges,phases Graph components.
+#' @param row_h_in,pair_gap_in Natural row heights and gaps (inches).
+#' @param n_rows Integer row count.
+#' @param vpad_in Numeric vertical pad (inches); terminal overhang is
+#'   \code{vpad_in/4}.
+#' @param ph_gap_in Numeric separation between adjacent strips (inches).
+#' @param label_h_in Numeric vector (one per phase) of required band
+#'   heights (rotated label height incl. padding).
+#' @return Numeric vector of length \code{nrow(phases)} of deficits (in).
+#' @keywords internal
+phase_band_deficits <- function(nodes, edges, phases, row_h_in, pair_gap_in,
+                                n_rows, vpad_in, ph_gap_in, label_h_in) {
+    n_ph <- nrow(phases)
+    if (n_ph == 0L) return(numeric(0))
+
+    ph_nums <- sort(unique(nodes$phase))
+    ph2row  <- setNames(seq_along(ph_nums), as.character(ph_nums))
+    phase_rows <- function(i) {
+        r <- ph2row[as.character(seq.int(phases$phase_start[i],
+                                         phases$phase_end[i]))]
+        as.integer(r[!is.na(r)])
+    }
+
+    pl <- place_rows_in(nodes, edges, row_h_in, pair_gap_in,
+                        n_rows, vpad_in, lead_in = 0)
+    et <- eb <- rep(NA_real_, n_ph)
+    for (i in seq_len(n_ph)) {
+        idx <- which(nodes$row %in% phase_rows(i))
+        if (length(idx) == 0L) next
+        et[i] <- min(pl$top[idx], na.rm = TRUE)   # d from top, smaller = higher
+        eb[i] <- max(pl$bot[idx], na.rm = TRUE)
+    }
+
+    ## Natural band boundaries in d-from-top space (descending d):
+    ## terminal overhang vpad/4; interior boundary midpoint, each strip
+    ## stopping ph_gap/2 short so neighbors are separated by ph_gap.
+    overhang <- vpad_in / 4
+    bt <- bb <- numeric(n_ph)
+    bt[1L]   <- et[1L] - overhang
+    bb[n_ph] <- eb[n_ph] + overhang
+    if (n_ph > 1L) for (k in seq_len(n_ph - 1L)) {
+        mid     <- (eb[k] + et[k + 1L]) / 2
+        bb[k]       <- mid - ph_gap_in / 2
+        bt[k + 1L]  <- mid + ph_gap_in / 2
+    }
+    nat_h <- bb - bt
+
+    pmax(0, label_h_in - nat_h)
+}
+
+
+#' Apply Phase Bands (Grow, Translate, Place Content)
+#'
+#' Given nodes already positioned in content NPC and a per-phase deficit
+#' vector, grows each phase band by its own deficit, rigidly translates
+#' every later phase downward by the cumulative deficit above it, and
+#' vertically recentres the whole (taller) diagram.  Band geometry mirrors
+#' \code{phase_band_deficits()}: the two terminal phases overhang the
+#' outermost node by \code{vpad/4}, and adjacent strips are separated by
+#' \code{ph_gap}.  Within a band the content is placed by:
+#' \itemize{
+#'   \item \strong{no deficit} -- natural node positions are preserved
+#'         (so the terminal overhang stays exactly \code{vpad/4}); the
+#'         block is simply translated into its grown/recentred band.
+#'   \item \strong{deficit} -- the band's elements (distinct rows, a
+#'         two-arm row counting as one) are spread to \emph{equal gaps}:
+#'         with \eqn{m} elements there are \eqn{m+1} equal slots (above,
+#'         between each pair, and below), so e.g. a two-element phase
+#'         seats its boxes at the 1/3 and 2/3 marks.
+#' }
+#' Because each band grows only by its own deficit and neighbors are
+#' merely translated, growing one phase never alters another's band
+#' height (no bystander stretch).  Node \code{y} values are updated in
+#' place; per-phase band top/bottom edges (NPC) are returned for the
+#' strip-drawing pass.
+#'
+#' @param nodes Node \code{data.table} with \code{y}, \code{box_h},
+#'   \code{row}, \code{phase}, \code{role}, \code{node_id} (modified in
+#'   place).
+#' @param edges Edge \code{data.table} (\code{edge_type}, \code{from},
+#'   \code{to}); currently unused for placement but kept for signature
+#'   stability with \code{phase_band_deficits()}.
+#' @param phases Phase table with \code{phase_start}, \code{phase_end}.
+#' @param deficit_in Numeric per-phase deficit (inches) from
+#'   \code{phase_band_deficits()}.
+#' @param to_npc_h,to_npc_w Inch->NPC converters (height, width).
+#' @param vpad_in Numeric vertical pad (inches); terminal overhang is
+#'   \code{vpad_in/4}.
+#' @param ph_gap_in Numeric separation between adjacent strips (inches).
+#' @return A list with \code{band_top} and \code{band_bot}: numeric
+#'   vectors (length \code{nrow(phases)}) of each phase strip's top and
+#'   bottom edge in NPC.
+#' @keywords internal
+apply_phase_bands <- function(nodes, edges, phases, deficit_in,
+                              to_npc_h, to_npc_w, vpad_in, ph_gap_in) {
+    n_ph <- nrow(phases)
+    ph_nums <- sort(unique(nodes$phase))
+    ph2row  <- setNames(seq_along(ph_nums), as.character(ph_nums))
+    phase_rows <- function(i) {
+        r <- ph2row[as.character(seq.int(phases$phase_start[i],
+                                         phases$phase_end[i]))]
+        as.integer(r[!is.na(r)])
+    }
+    D        <- to_npc_h(if (length(deficit_in)) deficit_in else rep(0, n_ph))
+    overhang <- to_npc_h(vpad_in / 4)
+    ## Vertical tolerance for grouping boxes into one element: boxes closer
+    ## than half a vpad form a contiguous designed stack (e.g. a source box
+    ## and its header), whereas boxes farther apart are distinct elements.
+    clust_tol <- to_npc_h(vpad_in / 2)
+    ph_gap   <- to_npc_h(ph_gap_in)
+
+    ## Node index sets per phase, and natural extent (npc, larger y =
+    ## higher) of each phase from current node positions.
+    idx_of <- lapply(seq_len(n_ph), function(i)
+        which(nodes$row %in% phase_rows(i)))
+    ext_top <- vapply(seq_len(n_ph), function(i) {
+        ii <- idx_of[[i]]; if (!length(ii)) return(NA_real_)
+        max(nodes$y[ii] + nodes$box_h[ii] / 2)
+    }, numeric(1L))
+    ext_bot <- vapply(seq_len(n_ph), function(i) {
+        ii <- idx_of[[i]]; if (!length(ii)) return(NA_real_)
+        min(nodes$y[ii] - nodes$box_h[ii] / 2)
+    }, numeric(1L))
+
+    ## Natural per-phase band edges (descending y).  Terminal overhang
+    ## vpad/4; interior boundary at the content midpoint, each strip
+    ## stopping ph_gap/2 short so neighbors are separated by ph_gap.
+    nb_t <- nb_b <- numeric(n_ph)
+    nb_t[1L]   <- ext_top[1L] + overhang
+    nb_b[n_ph] <- ext_bot[n_ph] - overhang
+    if (n_ph > 1L) for (k in seq_len(n_ph - 1L)) {
+        mid        <- (ext_bot[k] + ext_top[k + 1L]) / 2
+        nb_b[k]      <- mid + ph_gap / 2
+        nb_t[k + 1L] <- mid - ph_gap / 2
+    }
+
+    ## Grow: band k taller by D[k]; everything below the band's top is
+    ## pushed DOWN (smaller y) by the cumulative deficit above it.
+    cum_above <- c(0, cumsum(D))               # length n_ph+1; cum_above[k]=above phase k
+    bt <- nb_t - cum_above[seq_len(n_ph)]
+    bb <- nb_b - cum_above[seq_len(n_ph) + 1L]
+
+    ## Recentre the grown diagram in [0,1].
+    total_grown <- bt[1L] - bb[n_ph]
+    recentre    <- (1 - total_grown) / 2 - bb[n_ph]
+    bt <- bt + recentre
+    bb <- bb + recentre
+
+    ## Place each phase's content within its grown band.
+    for (i in seq_len(n_ph)) {
+        ii <- idx_of[[i]]; if (!length(ii)) next
+        band_t <- bt[i]; band_b <- bb[i]
+
+        ## Elements = vertical bands, found by clustering boxes whose
+        ## extents overlap or lie within clust_tol. A source box and its
+        ## header (a contiguous stack) thus form one element, while a side
+        ## box hanging in the gap between two main boxes stays its own.
+        ord  <- ii[order(-nodes$y[ii])]          # top to bottom
+        grp_top <- grp_bot <- numeric(0)
+        grp_mem <- list()
+        for (nd_i in ord) {
+            nt_i <- nodes$y[nd_i] + nodes$box_h[nd_i] / 2
+            nb_i <- nodes$y[nd_i] - nodes$box_h[nd_i] / 2
+            hit <- 0L
+            if (length(grp_top)) for (g in seq_along(grp_top)) {
+                if (!(nb_i > grp_top[g] + clust_tol ||
+                      nt_i < grp_bot[g] - clust_tol)) { hit <- g; break }
+            }
+            if (hit == 0L) {
+                grp_top <- c(grp_top, nt_i); grp_bot <- c(grp_bot, nb_i)
+                grp_mem <- c(grp_mem, list(nd_i))
+            } else {
+                grp_top[hit] <- max(grp_top[hit], nt_i)
+                grp_bot[hit] <- min(grp_bot[hit], nb_i)
+                grp_mem[[hit]] <- c(grp_mem[[hit]], nd_i)
+            }
+        }
+        m    <- length(grp_mem)
+        el_h <- grp_top - grp_bot
+
+        if (D[i] > 1e-9) {
+            ## Distribute slack as (m + 1) equal gaps (above, between, and
+            ## below the elements).  This formula intentionally subsumes the
+            ## single-band case (m = 1 yields two equal gaps, i.e. centered):
+            ## do not add a special case for it, as that would break the
+            ## symmetry that keeps a lone element centered.
+            slot <- (band_t - band_b - sum(el_h)) / (m + 1L)
+            cur  <- band_t - slot                # top of first element
+            for (e in seq_len(m)) {
+                jj <- grp_mem[[e]]
+                sh <- cur - grp_top[e]           # shift element so its top = cur
+                set(nodes, i = jj, j = "y", value = nodes$y[jj] + sh)
+                cur <- cur - el_h[e] - slot
+            }
+        } else {
+            ## No deficit: preserve natural layout, translating by the same
+            ## amount this band moved (recentre minus the cumulative deficit
+            ## above).  This keeps the vpad/4 terminal overhang and any
+            ## intra-phase side box's natural position intact.
+            set(nodes, i = ii, j = "y",
+                value = nodes$y[ii] + recentre - cum_above[i])
+        }
+    }
+
+    list(band_top = bt, band_bot = bb)
 }

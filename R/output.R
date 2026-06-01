@@ -1,3 +1,5 @@
+### * Main functions
+
 #' Render an Enrollment Flowchart
 #'
 #' Computes counts from the pipeline, lays out nodes, and draws an
@@ -40,6 +42,20 @@
 #'   structure (a list of \code{nodes}, \code{edges}, and \code{phases}
 #'   data.tables). For \code{engine = "dot"}: returns a DOT-language string.
 #'
+#' @details
+#' \code{flowchart()} is the primary rendering entry point and accepts a
+#' completed pipeline object. The \code{"grid"} engine draws the diagram to
+#' the active graphics device using the \pkg{grid} system and is intended
+#' for publication-quality figures with phase strips, precise dimensions,
+#' and locale-aware counts; the \code{"dot"} engine instead returns a
+#' Graphviz DOT-language string for prototyping or rendering through external
+#' Graphviz tooling, and draws nothing itself. Styling, font, and
+#' number-format options are forwarded to the chosen engine through
+#' \code{...}; options unsupported by an engine (for example the phase
+#' strips, which the DOT engine does not draw) are ignored. \code{flowchart()}
+#' is normally the last call in a pipeline; for direct file output use
+#' \code{\link{flowsave}}, and to size a canvas use \code{\link{recdims}}.
+#'
 #' @seealso \code{\link{flowsave}} for saving to file,
 #'   \code{\link{recdims}} for dimension recommendations,
 #'   \code{\link{plot.selecta}} for S3 plot method
@@ -79,6 +95,7 @@
 #'   flowchart(number_format = "eu")
 #' }
 #'
+#' @family flowchart output functions
 #' @export
 flowchart <- function(.flow, engine = c("grid", "dot"),
                       count_first = FALSE, ...) {
@@ -93,9 +110,9 @@ flowchart <- function(.flow, engine = c("grid", "dot"),
     if (engine == "grid") {
         draw_grid(graph, count_first = count_first, ...)
     } else {
-        ## DOT engine: forward only its supported options. We use do.call
-        ## with a list of present arguments so to_dot()'s defaults remain
-        ## authoritative when the user does not explicitly override them.
+        ## DOT engine: forward only supported options via do.call with a
+        ## list of present arguments, so to_dot()'s defaults stay authoritative
+        ## unless explicitly overridden.
         dots <- list(...)
         td_args <- list(graph         = graph,
                         number_format = dots$number_format,
@@ -134,6 +151,18 @@ plot.selecta <- function(x, engine = c("grid", "dot"), ...) {
 #'
 #' @return Invisibly returns \code{x}.
 #'
+#' @details
+#' The \code{print} method gives a compact, text-only view of a
+#' \code{selecta} object for interactive inspection before rendering. It
+#' lists the operating mode, the starting count, and each pipeline step with
+#' its key parameters (exclusion reasons, arm labels, endpoint sub-items),
+#' and marks phase boundaries with a \dQuote{--- label ---} banner. It does
+#' not draw the diagram or open a graphics device; for that use
+#' \code{\link{flowchart}} or \code{\link{flowsave}}.
+#'
+#' @seealso \code{\link{summary.selecta}} for a tabular per-node summary,
+#'   \code{\link{flowchart}} for rendering
+#'
 #' @examples
 #' flow <- enroll(n = 500) |>
 #'   exclude("Ineligible", n = 65,
@@ -142,6 +171,7 @@ plot.selecta <- function(x, engine = c("grid", "dot"), ...) {
 #'   endpoint("Analyzed")
 #' flow
 #'
+#' @family flowchart output functions
 #' @export
 print.selecta <- function(x, ...) {
 
@@ -199,12 +229,6 @@ print.selecta <- function(x, ...) {
             if (!is.null(s$label))
                 cat(sprintf("         label: \"%s\"\n", s$label))
 
-        } else if (s$type == "classify") {
-            cat(sprintf("  [%d] classify: %d x %d grid\n",
-                        i, length(s$rows), length(s$cols)))
-            cat(sprintf("         rows: %s\n", paste(s$rows, collapse = ", ")))
-            cat(sprintf("         cols: %s\n", paste(s$cols, collapse = ", ")))
-
         } else if (s$type == "endpoint") {
             cat(sprintf("  [%d] endpoint: \"%s\"\n", i, s$label))
             if (!is.null(s$reasons)) {
@@ -243,6 +267,19 @@ print.selecta <- function(x, ...) {
 #'   \code{arm}, \code{text}, and \code{n}. Each row corresponds to one
 #'   node in the computed diagram.
 #'
+#' @details
+#' The \code{summary} method runs the same count computation that underlies
+#' rendering and returns the result as a tidy \code{data.table}, one row per
+#' node, rather than drawing anything. This is convenient for programmatic
+#' checks (confirming arm totals, extracting the final analyzed count) and
+#' for embedding flow figures in tables or reports. The returned object is a
+#' plain \code{data.table} and may be filtered or joined like any other. For
+#' a human-readable console view use \code{\link{print.selecta}}; to render
+#' the diagram use \code{\link{flowchart}}.
+#'
+#' @seealso \code{\link{print.selecta}} for a console summary,
+#'   \code{\link{flowchart}} for rendering
+#'
 #' @examples
 #' flow <- enroll(n = 500) |>
 #'   exclude("Ineligible", n = 65) |>
@@ -250,6 +287,7 @@ print.selecta <- function(x, ...) {
 #'   endpoint("Analyzed")
 #' summary(flow)
 #'
+#' @family flowchart output functions
 #' @export
 summary.selecta <- function(object, ...) {
     graph <- compute(object)
@@ -284,6 +322,11 @@ summary.selecta <- function(object, ...) {
 #'   Default 0.22.
 #' @param margin Numeric. Fixed margin on all four sides in inches.
 #'   Default 0.25.
+#' @param phase_multiline Logical. If \code{TRUE} (the default), long phase
+#'   labels wrap across stacked lines to fit their band; must match the
+#'   draw-time value for accurate dimensions. Default \code{TRUE}.
+#' @param phase_max_lines Integer. Maximum wrapped lines per phase label
+#'   when wrapping is active. Default 3.
 #' @param font_family Character. Font family for text measurement.
 #'   Default \code{"Helvetica"}. Must match the value used at draw time
 #'   for accurate dimensions.
@@ -296,12 +339,32 @@ summary.selecta <- function(object, ...) {
 #'   \code{border_col}) are silently ignored, allowing the same call
 #'   signature to be shared with \code{\link{flowchart}} and
 #'   \code{\link{flowsave}}.
+#' @param .measure_dev Optional zero-argument function that opens a graphics
+#'   device for text measurement, matching the device that will render the
+#'   diagram. When \code{NULL} (the default) a pdf device is used. Advanced
+#'   use only; see Details.
 #' @param .return_graph Logical. If \code{TRUE}, attaches the pre-computed
 #'   graph as an attribute for reuse by \code{\link{flowsave}}.
 #'   Default \code{FALSE}. Internal use only.
 #'
 #' @return A named numeric vector with elements \code{width} and
 #'   \code{height} (in inches), rounded up to the nearest tenth.
+#'
+#' @details
+#' \code{recdims()} computes the canvas size a flow needs at a given
+#' typography and layout, so the figure is neither clipped nor surrounded by
+#' excess whitespace. It lays the diagram out and measures it on a throwaway
+#' graphics device, returning width and height in inches without drawing
+#' anything visible. Because text metrics are font- and device-dependent,
+#' any sizing parameter passed here (\code{cex}, \code{font_family},
+#' \code{phase_multiline}, \code{number_format}, and so on) should match the
+#' values used at render time; styling-only parameters are ignored so the
+#' same call can be shared across \code{recdims()}, \code{\link{flowchart}},
+#' and \code{\link{flowsave}}. The advanced \code{.measure_dev} argument
+#' supplies a custom device opener when measurement must match a non-default
+#' device. \code{\link{flowsave}} calls \code{recdims()} internally when
+#' \code{width} or \code{height} is left unspecified, so explicit use is
+#' only needed when the dimensions themselves are wanted.
 #'
 #' @seealso \code{\link{flowsave}} for saving to file,
 #'   \code{\link{flowchart}} for interactive rendering
@@ -314,15 +377,17 @@ summary.selecta <- function(object, ...) {
 #'
 #' recdims(flow)
 #'
+#' @family flowchart output functions
 #' @export
 recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
                     pad = 0.08, line_height = 0.20,
                     count_first = FALSE, cex = 0.85, cex_side = NULL,
                     cex_phase = 0.9, phase_width = 0.22, margin = 0.25,
+                    phase_multiline = TRUE, phase_max_lines = 3L,
                     font_family = "Helvetica",
                     number_format = NULL,
                     ...,
-                    .return_graph = FALSE) {
+                    .measure_dev = NULL, .return_graph = FALSE) {
 
     if (!inherits(x, "selecta"))
         stop("'x' must be a selecta object", call. = FALSE)
@@ -331,23 +396,37 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
 
     graph <- compute(x)
 
-    ## Run draw_grid on throwaway device for exact dimensions. Styling
-    ## arguments captured in `...` are intentionally discarded: fill colors,
-    ## border colors, and arrow colors do not affect text width or layout
-    ## geometry, so passing them through would risk argument-mismatch errors
-    ## without changing the result.
+    ## Run draw_grid on a throwaway device for exact dimensions. Styling
+    ## arguments in `...` are discarded: colors do not affect text width or
+    ## layout, so forwarding them would risk argument-mismatch errors. Phase
+    ## wrapping IS forwarded, as it changes strip width and label height.
+    ##
+    ## Text metrics are device-dependent, so the measuring device should match
+    ## the device that will ultimately render the diagram. By default a pdf
+    ## device is used (its metrics match the cairo raster and pdf devices that
+    ## flowsave() employs). A caller rendering on another device -- for
+    ## example the ragg device used in the package vignettes -- may pass
+    ## \code{.measure_dev}, a zero-argument function that opens a matching
+    ## device, so that non-default fonts are measured consistently.
     graph_full <- layout_nodes(graph)
-    tf_h <- tempfile(fileext = ".pdf")
-    grDevices::pdf(tf_h, width = 10, height = 10)
+    if (is.null(.measure_dev)) {
+        tf_h <- tempfile(fileext = ".pdf")
+        grDevices::pdf(tf_h, width = 10, height = 10)
+    } else {
+        tf_h <- .measure_dev()
+    }
     draw_args <- list(graph = graph_full, newpage = TRUE,
                       vpad = vpad, pad = pad, line_height = line_height,
                       count_first = count_first, cex = cex, cex_side = cex_side,
                       cex_phase = cex_phase, phase_width = phase_width,
+                      phase_multiline = phase_multiline,
+                      phase_max_lines = phase_max_lines,
                       margin = margin, font_family = font_family,
-                      number_format = number_format)
+                      number_format = number_format,
+                      measure_only = TRUE)
     g <- do.call(draw_grid, draw_args)
     grDevices::dev.off()
-    unlink(tf_h)
+    if (!is.null(tf_h) && file.exists(tf_h)) unlink(tf_h)
 
     h <- g$diagram_height_in
     if (is.null(h) || is.na(h)) h <- 8.0
@@ -356,6 +435,14 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
     if (is.null(w) || is.na(w)) w <- 6.0
 
     result <- c(width = ceiling(w * 10) / 10, height = ceiling(h * 10) / 10)
+
+    ## Optional debug: recommended canvas dimensions and their raw inputs.
+    debug_emit("recdims() dimensions",
+               raw_width_in = w, raw_height_in = h,
+               phase_strip_w_in = g$phase_strip_w %||% NA_real_,
+               width_in = unname(result["width"]),
+               height_in = unname(result["height"]))
+
     if (isTRUE(.return_graph)) attr(result, "graph") <- graph_full
     result
 }
@@ -369,6 +456,15 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
 #' engine pipes Graphviz output through the system \code{dot} binary.
 #' Dimensions are computed automatically from diagram content via
 #' \code{\link{recdims}} unless overridden.
+#'
+#' For the grid engine, the vector formats (PDF, SVG) use R's standard
+#' devices and are recommended where a vector figure is acceptable, as
+#' their font model renders the italic \code{n} and \code{N} of the count
+#' lines reliably. The raster formats (PNG, TIFF) are produced with the
+#' \pkg{ragg} device when it is installed---the same device the package
+#' vignettes use---and fall back to the base \code{png()}/\code{tiff()}
+#' devices otherwise; installing \pkg{ragg} is advised for raster output,
+#' since some cairo-based device configurations drop the plotmath italics.
 #'
 #' @param x A \code{selecta} object.
 #' @param file Character string. Output file path. The format is inferred
@@ -407,6 +503,22 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
 #'
 #' @return Invisibly returns the output file path.
 #'
+#' @details
+#' \code{flowsave()} renders a flow directly to a file, inferring the format
+#' from the extension and choosing dimensions automatically unless
+#' \code{width} and \code{height} are given. With \code{engine = "grid"} it
+#' draws through R's graphics devices (vector \code{.pdf}/\code{.svg} or
+#' raster \code{.png}/\code{.tiff}); raster output prefers the \pkg{ragg}
+#' device when installed, since some cairo configurations drop the plotmath
+#' italics in the count labels. With \code{engine = "dot"} it emits Graphviz
+#' DOT: a \code{.dot} extension writes the source text directly and needs no
+#' external software, whereas image output shells out to the system
+#' \code{dot} binary and therefore requires Graphviz on the \code{PATH}.
+#' When sizing automatically, \code{flowsave()} calls \code{\link{recdims}}
+#' once and reuses the computed layout, so a separate \code{recdims()} call
+#' is unnecessary. The \code{dpi} argument mirrors \code{ggplot2::ggsave()}
+#' for raster resolution.
+#'
 #' @seealso \code{\link{flowchart}} for interactive rendering,
 #'   \code{\link{recdims}} for dimension recommendations
 #'
@@ -417,24 +529,30 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
 #'
 #' \donttest{
 #' # Grid engine (default). Files are written under tempdir() here so
-#' # the example respects CRAN's no-write policy; in practice supply
-#' # any path you like.
+#' # the example respects CRAN's no-write policy; in practice any
+#' # desired path may be supplied.
 #' flowsave(flow, file.path(tempdir(), "consort.pdf"))
 #' flowsave(flow, file.path(tempdir(), "consort.png"),
 #'          width = 8, height = 10)
 #' }
 #'
-#' \dontrun{
-#' # DOT engine: requires the Graphviz 'dot' binary on the system PATH.
-#' flowsave(flow, file.path(tempdir(), "consort.svg"), engine = "dot")
+#' \donttest{
+#' # DOT engine writing a .dot source file requires no external software.
 #' flowsave(flow, file.path(tempdir(), "consort.dot"), engine = "dot")
 #'
-#' # DOT engine with Times typography for serif environments.
-#' flowsave(flow, file.path(tempdir(), "consort.svg"), engine = "dot",
-#'          font_family = "Times-Roman",
-#'          sans_serif  = FALSE)
+#' # Rasterized DOT output (.svg, .png, .pdf) requires the Graphviz 'dot'
+#' # binary on the system PATH, so guard on its availability.
+#' if (nzchar(Sys.which("dot"))) {
+#'   flowsave(flow, file.path(tempdir(), "consort.svg"), engine = "dot")
+#'
+#'   # DOT engine with Times typography for serif environments.
+#'   flowsave(flow, file.path(tempdir(), "consort_times.svg"), engine = "dot",
+#'            font_family = "Times-Roman",
+#'            sans_serif  = FALSE)
+#' }
 #' }
 #'
+#' @family flowchart output functions
 #' @export
 flowsave <- function(x, file, engine = c("grid", "dot"),
                      width = NULL, height = NULL,
@@ -460,12 +578,12 @@ flowsave <- function(x, file, engine = c("grid", "dot"),
   cached_graph <- NULL
 
   if (is.null(width) || is.null(height)) {
-    ## Forward layout parameters to recdims for consistent canvas sizing.
-    ## Request pre-computed graph to reuse the compute() + layout_nodes() result.
+    ## Forward layout parameters to recdims for consistent canvas sizing,
+    ## requesting the pre-computed graph to reuse compute() + layout_nodes().
     sz_args <- list(x = x, .return_graph = TRUE)
     for (p in c("vpad", "pad", "line_height", "count_first", "cex", "cex_side",
-                 "cex_phase", "phase_width", "margin", "font_family",
-                 "number_format"))
+                 "cex_phase", "phase_width", "phase_multiline", "phase_max_lines",
+                 "margin", "font_family", "number_format"))
       if (!is.null(dots[[p]])) sz_args[[p]] <- dots[[p]]
     sz <- do.call(recdims, sz_args)
     if (is.null(width))  width  <- sz["width"]
@@ -473,19 +591,37 @@ flowsave <- function(x, file, engine = c("grid", "dot"),
     cached_graph <- attr(sz, "graph")
   }
 
+  ## Device selection. The pdf and svg devices use R's standard PostScript /
+  ## PDF font model, under which plotmath faces -- including the italic "n"
+  ## and "N" in the count lines -- render reliably. For the raster formats,
+  ## the cairo png/tiff devices can fail to apply the plotmath italic face to
+  ## a named font family, dropping the italics; the ragg device (already a
+  ## suggested dependency, and the device the vignettes render on) does not
+  ## have this problem. Raster output therefore prefers ragg when it is
+  ## installed and falls back to the base device otherwise. No cairo type is
+  ## forced, so the base fallback honours the session's standard bitmap type.
+  has_ragg <- requireNamespace("ragg", quietly = TRUE)
   switch(ext,
     pdf  = pdf(file, width = width, height = height),
-    png  = png(file, width = width, height = height, units = "in",
-               res = dpi, type = "cairo"),
     svg  = svg(file, width = width, height = height),
-    tiff =, tif = tiff(file, width = width, height = height, units = "in",
-                        res = dpi, type = "cairo"),
+    png  = if (has_ragg) {
+             ragg::agg_png(file, width = width, height = height,
+                           units = "in", res = dpi)
+           } else {
+             png(file, width = width, height = height, units = "in", res = dpi)
+           },
+    tiff =, tif = if (has_ragg) {
+             ragg::agg_tiff(file, width = width, height = height,
+                            units = "in", res = dpi)
+           } else {
+             tiff(file, width = width, height = height, units = "in", res = dpi)
+           },
     stop(sprintf("Unsupported format: '%s'", ext), call. = FALSE)
   )
   on.exit(dev.off())
 
-  ## Reuse cached graph (compute + layout are device-agnostic);
-  ## draw_grid re-measures text on the real device
+  ## Reuse cached graph (compute + layout are device-agnostic); draw_grid
+  ## re-measures text on the real device.
   graph <- if (!is.null(cached_graph)) cached_graph else {
     layout_nodes(compute(x))
   }
@@ -498,9 +634,8 @@ flowsave <- function(x, file, engine = c("grid", "dot"),
 #' @keywords internal
 .flowsave_dot <- function(x, file, ext, dpi = 300, sans_serif = TRUE, ...) {
 
-  ## Generate DOT source via the standard flowchart() dispatch so that
-  ## count_first, number_format, ortho, font_family, padding_pt, and
-  ## the color parameters are forwarded uniformly.
+  ## Generate DOT source via the standard flowchart() dispatch so all
+  ## formatting and color parameters are forwarded uniformly.
   dot_str <- flowchart(x, engine = "dot", ...)
 
   ## Raw DOT source: write directly and skip the binary
@@ -519,7 +654,7 @@ flowsave <- function(x, file, engine = c("grid", "dot"),
          "system PATH. Install Graphviz or use engine = 'grid'.",
          call. = FALSE)
 
-  ## Map our extensions to Graphviz output formats
+  ## Map file extensions to Graphviz output formats
   gv_fmt <- switch(ext, pdf = "pdf", png = "png", svg = "svg",
                    tif = "tif", tiff = "tif")
 
@@ -535,15 +670,12 @@ flowsave <- function(x, file, engine = c("grid", "dot"),
     warning("'dot' returned non-zero status when rendering '", file, "'",
             call. = FALSE)
 
-  ## Sans-serif font substitution for SVG output. Graphviz's emitted
-  ## font-family attribute names a single face (Helvetica with default
-  ## settings, or Times-Roman if requested via font_family); we expand
-  ## that to a cross-platform fallback chain so the displayed face
-  ## resolves to the platform's native sans-serif (Helvetica on macOS,
-  ## Arial on Windows, Liberation Sans / DejaVu Sans on Linux). PDF and
-  ## raster outputs bake the font choice into the file at render time
-  ## and cannot be post-processed here; for those formats the displayed
-  ## font matches the layout font.
+  ## Sans-serif font substitution for SVG output. Graphviz emits a single
+  ## face (Helvetica, or Times-Roman if requested); this expands it to a
+  ## cross-platform fallback chain resolving to the native sans-serif
+  ## (Helvetica on macOS, Arial on Windows, Liberation/DejaVu Sans on
+  ## Linux). PDF and raster outputs bake the font at render time and are
+  ## not post-processed, so their displayed font matches the layout font.
   if (isTRUE(sans_serif) && gv_fmt == "svg" && file.exists(file)) {
     sans_chain <- "Helvetica, Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif"
     svg_text <- paste(readLines(file, warn = FALSE), collapse = "\n")

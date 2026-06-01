@@ -1,3 +1,5 @@
+### * Main functions
+
 #' Number Formatting Utilities
 #'
 #' Internal utilities for locale-aware integer formatting of participant

@@ -1,3 +1,5 @@
+### * Main functions
+
 #' Layout Nodes for Grid Rendering
 #'
 #' Assigns row (vertical position) and preliminary x (horizontal) positions
@@ -17,9 +19,8 @@ layout_nodes <- function(graph) {
   nodes[, row := row_map[as.character(phase)]]
 
   ## ---- X positions ----
-  ## Initial x values; these are overridden by data-driven positioning
-  ## in draw.R after box widths are measured.  We set reasonable defaults
-  ## here so the graph structure is inspectable before rendering.
+  ## Preliminary defaults, overridden by data-driven positioning in draw.R
+  ## once box widths are measured; set here so structure is inspectable.
   arm_ids <- sort(unique(nodes[!is.na(arm_id), arm_id]))
   n_arms  <- length(arm_ids)
 
@@ -87,35 +88,14 @@ layout_nodes <- function(graph) {
           x := side_x_map[as.character(arm_id)]]
   }
 
-  ## ---- Cell nodes (classify grid) ----
-  cell_nodes <- nodes[role == "cell"]
-  if (nrow(cell_nodes) > 0L) {
-    grid_cols <- sort(unique(cell_nodes$grid_col))
-    n_gc <- length(grid_cols)
+  graph$nodes <- nodes
 
-    if (!is.na(cell_nodes$arm_id[1L])) {
-      ## Per-arm grids: position cells below each arm
-      for (a in unique(cell_nodes$arm_id)) {
-        arm_base_x <- nodes[arm_id == a & role %chin% c("arm", "main", "endpoint"), x][1L]
-        if (is.na(arm_base_x)) arm_base_x <- 0.5
-        col_offsets <- seq(-0.08 * (n_gc - 1) / 2, 0.08 * (n_gc - 1) / 2,
-                           length.out = n_gc)
-        for (ci in seq_along(grid_cols)) {
-          nodes[role == "cell" & arm_id == a & grid_col == grid_cols[ci],
-                x := arm_base_x + col_offsets[ci]]
-        }
-      }
-    } else {
-      ## Single-stream grid
-      col_offsets <- seq(-0.12 * (n_gc - 1) / 2, 0.12 * (n_gc - 1) / 2,
-                         length.out = n_gc)
-      for (ci in seq_along(grid_cols)) {
-        nodes[role == "cell" & grid_col == grid_cols[ci],
-              x := 0.5 + col_offsets[ci]]
-      }
-    }
+  ## Optional debug: preliminary x and row assignments before draw-time
+  ## data-driven positioning.
+  if (isTRUE(getOption("selecta.debug_layout", FALSE))) {
+    cols <- intersect(c("node_id", "row", "role", "arm_id", "x"), names(nodes))
+    debug_emit("layout_nodes() positions", positions = nodes[, ..cols])
   }
 
-  graph$nodes <- nodes
   graph
 }

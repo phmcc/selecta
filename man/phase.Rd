@@ -23,6 +23,18 @@ Adds a vertical phase label to the left margin of the diagram
 subsequent steps until the next \code{phase()} call or the end of
 the flow.
 }
+\details{
+\code{phase()} inserts a stage boundary rather than a flow node. Each
+call opens a phase whose rotated label is drawn as a vertical strip in
+the left margin spanning every subsequent step until the next
+\code{phase()} or the end of the flow, reproducing the
+\dQuote{Enrollment / Allocation / Follow-up / Analysis} bands of CONSORT
+diagrams. Phase markers are purely presentational: they do not alter
+counts or topology, and the printed summary denotes each one with a
+\dQuote{--- label ---} banner. Long phase labels wrap to fit their band
+by default in the grid engine; the \code{dot} engine does not render
+phase strips.
+}
 \examples{
 # Phase labels divide a flow into labeled stages. The printed summary
 # marks each phase with a "--- label ---" banner.
@@ -39,4 +51,14 @@ enroll(n = 1200, label = "Records identified") |>
 }
 \seealso{
 \code{\link{flowchart}} for rendering with phase labels
+
+Other flow construction functions:
+\code{\link[=assess]{assess()}},
+\code{\link[=combine]{combine()}},
+\code{\link[=endpoint]{endpoint()}},
+\code{\link[=enroll]{enroll()}},
+\code{\link[=exclude]{exclude()}},
+\code{\link[=sources]{sources()}},
+\code{\link[=stratify]{stratify()}}
 }
+\concept{flow construction functions}

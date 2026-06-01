@@ -42,6 +42,20 @@ The merged node displays the total count across all streams. An optional
 \code{sublabel} is rendered below the main label (useful for describing
 the recombined cohort, \emph{e.g.,} \code{"Participants with confirmed
 diagnosis"}).
+
+
+\code{combine()} converges the active parallel streams into one node and
+is the counterpart to both entry splits. After \code{\link{sources}} it
+pools the identification streams of a systematic review; after
+\code{\link{stratify}} (or \code{\link{allocate}}) it recombines strata
+that were handled independently, producing a split-and-recombine diagram.
+By default the merged count is the sum of the incoming streams \emph{after}
+any per-arm exclusions applied since the split; an explicit \code{n}
+overrides this in manual mode, and when
+\code{getOption("selecta.check_arithmetic")} is \code{TRUE} a supplied
+\code{n} that disagrees with the stream sum raises an advisory warning.
+The optional \code{sublabel} prints on a second line inside the merged
+box, which is convenient for naming the recombined cohort.
 }
 \examples{
 # PRISMA: merge identification sources
@@ -64,4 +78,14 @@ enroll(n = 158) |>
 \seealso{
 \code{\link{sources}} for multi-source entry,
   \code{\link{stratify}} for split-and-recombine flows
+
+Other flow construction functions:
+\code{\link[=assess]{assess()}},
+\code{\link[=endpoint]{endpoint()}},
+\code{\link[=enroll]{enroll()}},
+\code{\link[=exclude]{exclude()}},
+\code{\link[=phase]{phase()}},
+\code{\link[=sources]{sources()}},
+\code{\link[=stratify]{stratify()}}
 }
+\concept{flow construction functions}

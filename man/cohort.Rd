@@ -33,6 +33,18 @@ per-arm \code{data.table}s. Data mode only.
 This supports a seamless modeling workflow: define the enrollment
 flow, render it with \code{\link{flowchart}}, and immediately pass the
 resulting cohort into downstream analysis.
+
+
+\code{cohort()} replays the exclusion criteria of a \emph{data-mode} flow
+against the original dataset and returns the rows that survive to the
+end, so the analyst can pass the exact analyzed population to downstream
+modeling. It requires a flow created by supplying \code{data} to
+\code{\link{enroll}}; manual-mode flows carry only counts and therefore
+raise an error. For an unsplit flow the result is a single
+\code{data.table}; after \code{\link{stratify}} or \code{\link{allocate}},
+\code{split = TRUE} returns one table per arm and \code{arm} extracts a
+single named arm. To inspect the cohort at every intermediate step rather
+than only the end, use \code{\link{cohorts}}.
 }
 \examples{
 flow <- enroll(rctselect2, id = "patient_id") |>
@@ -46,4 +58,8 @@ nrow(final)
 \seealso{
 \code{\link{cohorts}} for stage-by-stage snapshots,
   \code{\link{enroll}} for initializing a data-mode flow
+
+Other cohort extraction functions:
+\code{\link[=cohorts]{cohorts()}}
 }
+\concept{cohort extraction functions}

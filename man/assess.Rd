@@ -47,6 +47,20 @@ continues with those who \emph{were} assessed.
 Internally, \code{assess()} creates an exclusion step with inverted
 label semantics: the side box reads \code{"Did not receive [label]"}
 and the remaining-count box reads \code{"Received [label]"}.
+
+
+\code{assess()} models a test or procedure that only part of the cohort
+undergoes, the recurring motif of STARD diagnostic-accuracy diagrams. It
+is implemented as an \code{\link{exclude}} step with inverted label
+semantics: the side box reads \dQuote{Did not receive \emph{label}} and
+the continuing box reads \dQuote{Received \emph{label}}, so the main flow
+carries those who \emph{were} assessed. In data mode, \code{criteria} is
+an unquoted logical expression that is \code{TRUE} for participants who
+did \strong{not} receive the test; in manual mode, \code{not_received}
+gives that count and \code{reasons} an optional named breakdown. Chained
+\code{assess()} steps commonly precede a \code{\link{stratify}} split on
+the index-test result, with each terminal box reporting its
+target-condition breakdown.
 }
 \examples{
 # STARD diagnostic accuracy flow
@@ -54,14 +68,24 @@ enroll(n = 360, label = "Eligible patients") |>
   assess("Index test", not_received = 22,
          reasons = c("Refused" = 12, "Contraindicated" = 10)) |>
   assess("Reference standard", not_received = 18) |>
-  classify(rows = c("Target +", "Target -"),
-           cols = c("Index +", "Index -"),
-           n = matrix(c(175, 25, 15, 105), nrow = 2,
-                      dimnames = list(c("Target +", "Target -"),
-                                      c("Index +", "Index -"))))
+  stratify(labels = c("Index test positive", "Index test negative"),
+           n = c(150, 170), label = "Index test result") |>
+  endpoint("Final diagnosis",
+           reasons = list(c("Target +" = 130, "Target -" = 20),
+                          c("Target +" = 15, "Target -" = 155)))
 
 }
 \seealso{
 \code{\link{exclude}} for general exclusion steps,
-  \code{\link{classify}} for cross-classification (STARD)
+  \code{\link{endpoint}} for the terminal diagnosis boxes (STARD)
+
+Other flow construction functions:
+\code{\link[=combine]{combine()}},
+\code{\link[=endpoint]{endpoint()}},
+\code{\link[=enroll]{enroll()}},
+\code{\link[=exclude]{exclude()}},
+\code{\link[=phase]{phase()}},
+\code{\link[=sources]{sources()}},
+\code{\link[=stratify]{stratify()}}
 }
+\concept{flow construction functions}

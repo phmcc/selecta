@@ -17,9 +17,9 @@ to_dot(
   side_fill = "#F0F0F0",
   border_col = "black",
   arrow_col = "black",
-  source_fill = "#D6E6F2",
-  source_header_fill = "#1F3A6B",
-  source_header_text = "#FFFFFF"
+  source_fill = "#FFFFFF",
+  source_header_fill = "#D0D0D0",
+  source_header_text = "black"
 )
 }
 \arguments{
@@ -63,13 +63,14 @@ Default \code{"#F0F0F0"}.}
 Default \code{"black"}.}
 
 \item{source_fill}{Character. Fill color for source boxes in
-multi-source diagrams (PRISMA, MOOSE). Default \code{"#D6E6F2"}.}
+multi-source diagrams (PRISMA, MOOSE). Default \code{"#FFFFFF"},
+matching the grid engine.}
 
 \item{source_header_fill}{Character. Fill color for source-column
-header boxes. Default \code{"#1F3A6B"}.}
+header boxes. Default \code{"#D0D0D0"}, matching the grid engine.}
 
 \item{source_header_text}{Character. Text color for source-column
-header labels. Default \code{"#FFFFFF"}.}
+header labels. Default \code{"black"}, matching the grid engine.}
 }
 \value{
 A character string in DOT format.
