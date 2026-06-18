@@ -11,7 +11,7 @@ placed by:
 
 - **no deficit** – natural node positions are preserved (so the terminal
   overhang stays exactly `vpad/4`); the block is simply translated into
-  its grown/recenterd band.
+  its grown/recentered band.
 
 - **deficit** – the band's elements (distinct rows, a two-arm row
   counting as one) are spread to *equal gaps*: with \\m\\ elements there

@@ -80,11 +80,10 @@ and not recombined, one endpoint box is drawn per arm, and `label` and
 Two distinct presentations of detail are available, which are mutually
 exclusive. `breakdown` itemizes a single box's total as text lines
 inside that box (the STARD final-diagnosis form, reporting each box's
-target-condition composition). Conversely, `groups` divides the
-endpointinto separate side-by-side boxes, one per group, fanning from a
-shared distributor; this design favors study diagrams that end by
-displaying the groups to be analyzed. The completed object is then
-passed to
+target-condition composition). Conversely, `groups` divides the endpoint
+into separate side-by-side boxes, one per group, fanning from a shared
+distributor; this design favors study diagrams that end by displaying
+the groups to be analyzed. The completed object is then passed to
 [`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md),
 [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md),
 or
