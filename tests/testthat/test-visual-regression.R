@@ -21,8 +21,8 @@
 library(testthat)
 library(selecta)
 
-outdir <- "test_output"
-dir.create(outdir, showWarnings = FALSE)
+outdir <- file.path(tempdir(), "test_output")
+dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
 
 ### * CONSORT / STROBE — Data-driven (package datasets)
 

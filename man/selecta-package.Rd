@@ -47,9 +47,9 @@ options(opts)                             # restore previous options
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://phmcc.codeberg.page/selecta/}
-  \item \url{https://codeberg.org/phmcc/selecta/}
-  \item \url{https://github.com/phmcc/selecta/}
+  \item \url{https://phmcc.codeberg.page/selecta}
+  \item \url{https://codeberg.org/phmcc/selecta}
+  \item \url{https://github.com/phmcc/selecta}
   \item Report bugs at \url{https://github.com/phmcc/selecta/issues}
 }
 

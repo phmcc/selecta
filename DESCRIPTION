@@ -22,7 +22,7 @@ Description: Build EQUATOR-style flowcharts for clinical studies by sequentially
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-URL: https://phmcc.codeberg.page/selecta/, https://codeberg.org/phmcc/selecta/, https://github.com/phmcc/selecta/
+URL: https://phmcc.codeberg.page/selecta, https://codeberg.org/phmcc/selecta, https://github.com/phmcc/selecta
 BugReports: https://github.com/phmcc/selecta/issues
 Depends:
     R (>= 4.1.0)
