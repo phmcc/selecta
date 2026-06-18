@@ -57,6 +57,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra
 
+      - name: Install XQuartz (macOS, for the cairo-backed svg() device)
+        if: runner.os == 'macOS'
+        run: brew install --cask xquartz
+
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true

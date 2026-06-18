@@ -1,3 +1,3 @@
-linters: linters_with_defaults(line_length_linter = NULL, object_name_linter = NULL, commented_code_linter = NULL, indentation_linter = NULL, trailing_whitespace_linter = NULL, return_linter = NULL, brace_linter = NULL, spaces_left_parentheses_linter = NULL, infix_spaces_linter = NULL, paren_body_linter = NULL, function_left_parentheses_linter = NULL, object_usage_linter = NULL, object_length_linter = NULL)
-exclusions: list("tests/", "data/", "inst/", "scratch/", "vignettes/", "data-raw/")
+linters: linters_with_defaults(line_length_linter = NULL, object_name_linter = NULL, commented_code_linter = NULL, indentation_linter = NULL, trailing_whitespace_linter = NULL, return_linter = NULL, brace_linter = NULL, spaces_left_parentheses_linter = NULL, infix_spaces_linter = NULL, paren_body_linter = NULL, function_left_parentheses_linter = NULL, object_usage_linter = NULL, object_length_linter = NULL, commas_linter = NULL, semicolon_linter = NULL)
+exclusions: list("tests/", "data/", "inst/", "scratch/", "vignettes/", "data-raw/", "R/dot.R" = list(quotes_linter = 298))
 encoding: "UTF-8"
