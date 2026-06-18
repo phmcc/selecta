@@ -8,47 +8,44 @@ cohorts(.flow)
 }
 \arguments{
 \item{.flow}{A \code{selecta} object created in data mode
-(\code{data} supplied to \code{\link{enroll}}).}
+(\code{data} supplied to \code{enroll()}).}
 }
 \value{
 A named list of cohort snapshots, keyed by step label. Each
-  snapshot contains \code{included}, \code{excluded},
-  \code{n_included}, and \code{n_excluded} as described above.
+  snapshot is itself a list with:
+  \describe{
+    \item{\code{included}}{A \code{data.table} of participants still in
+      the flow after this step.}
+    \item{\code{excluded}}{A \code{data.table} of participants removed at
+      this step (for exclusion steps; \code{NULL} otherwise).}
+    \item{\code{n_included}}{Integer count of included participants.}
+    \item{\code{n_excluded}}{Integer count of excluded participants (or
+      \code{NA}).}
+  }
 }
 \description{
 Returns a named list of datasets at each step of the enrollment flow,
-enabling cross-cohort comparisons (\emph{e.g.,} examining characteristics
-of participants removed by a specific exclusion criterion).
-Data mode only.
+enabling cross-cohort comparisons. Results are reported as a named list,
+organized by step label. Data mode only.
 }
 \details{
-Each element of the returned list is itself a list with:
-\describe{
-  \item{\code{included}}{A \code{data.table} of participants still in the
-    flow after this step.}
-  \item{\code{excluded}}{A \code{data.table} of participants removed at
-    this step (for exclusion steps; \code{NULL} otherwise).}
-  \item{\code{n_included}}{Integer count of included participants.}
-  \item{\code{n_excluded}}{Integer count of excluded participants (or
-    \code{NA}).}
-}
-
-
-\code{cohorts()} replays a \emph{data-mode} flow and captures the dataset
+\code{cohorts()} replays a \emph{data mode} flow and captures the dataset
 at every step, returning a named list keyed by step label (with
 \code{"_start"} for the initial cohort). Each snapshot exposes both the
 \code{included} and the \code{excluded} rows together with their counts,
 which is useful for validating a diagram against the data, auditing why
 particular participants were dropped, or extracting an intermediate
-population. After a \code{\link{stratify}} or \code{\link{allocate}}
+population. After a \code{stratify()} or \code{allocate()}
 split, the \code{included} and \code{excluded} elements of a per-arm
-step are themselves named lists with one entry per arm. A manual-mode
-flow has no underlying data and therefore raises an error. To obtain only
-the final analyzed population, use \code{\link{cohort}}.
+step are themselves named lists with one entry per arm; after a factorial
+(two-level) split the entries are the cells, keyed
+\code{"<parent>: <child>"}. A manual-mode flow has no underlying data and
+therefore raises an error. To obtain only the final analyzed population,
+use \code{cohort()}.
 }
 \examples{
-flow <- enroll(rctselect2, id = "patient_id") |>
-  exclude("Ineligible", criteria = eligible == FALSE) |>
+flow <- enroll(selectaex2, id = "patient_id") |>
+  exclude("Ineligible", criterion = eligible == FALSE) |>
   endpoint("Final")
 
 stages <- cohorts(flow)

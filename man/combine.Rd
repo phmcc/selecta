@@ -8,7 +8,7 @@ combine(.flow, label, sublabel = NULL, n = NULL, reasons = NULL)
 }
 \arguments{
 \item{.flow}{A \code{selecta} object with active parallel streams
-(from \code{\link{sources}} or \code{\link{stratify}}).}
+(from \code{sources()} or \code{stratify()}).}
 
 \item{label}{Character string for the merged node.}
 
@@ -26,36 +26,27 @@ The updated \code{selecta} object with a combine step
   appended. All subsequent steps operate on the single merged stream.
 }
 \description{
-Converges all active parallel streams into a single flow. This handles
-two topologies:
+Converges all active parallel streams into a single flow. Used to handle
+either source convergence or split-and-recombine topologies. After
+\code{stratify()}, recombines strata that were characterized independently
+back into a unified downstream flow.
 }
 \details{
-\enumerate{
-  \item \strong{PRISMA source convergence.} After \code{\link{sources}},
-    merges multiple identification streams into one record pool.
-  \item \strong{Split-and-recombine.} After \code{\link{stratify}},
-    recombines strata that were characterized independently back into
-    a unified downstream flow.
-}
-
-The merged node displays the total count across all streams. An optional
-\code{sublabel} is rendered below the main label (useful for describing
-the recombined cohort, \emph{e.g.,} \code{"Participants with confirmed
-diagnosis"}).
-
-
 \code{combine()} converges the active parallel streams into one node and
-is the counterpart to both entry splits. After \code{\link{sources}} it
+is the counterpart to both entry splits. After \code{sources()}, it
 pools the identification streams of a systematic review; after
-\code{\link{stratify}} (or \code{\link{allocate}}) it recombines strata
+\code{stratify()} (or \code{allocate()}), it recombines strata
 that were handled independently, producing a split-and-recombine diagram.
-By default the merged count is the sum of the incoming streams \emph{after}
-any per-arm exclusions applied since the split; an explicit \code{n}
-overrides this in manual mode, and when
-\code{getOption("selecta.check_arithmetic")} is \code{TRUE} a supplied
-\code{n} that disagrees with the stream sum raises an advisory warning.
-The optional \code{sublabel} prints on a second line inside the merged
-box, which is convenient for naming the recombined cohort.
+
+By default, the merged count is the sum of the incoming streams after
+any per-arm exclusions applied since the split---an explicit \code{n}
+overrides this in manual mode. In such situations, an additional option
+is provided (\code{getOption("selecta.check_arithmetic")}, default
+\code{TRUE}), which will check arithmetic and raise an advisory warning
+if there is a discrepancy between counts.
+
+The optional \code{sublabel} parameter prints on a second line inside the
+merged box, which is convenient for naming the recombined cohort.
 }
 \examples{
 # PRISMA: merge identification sources

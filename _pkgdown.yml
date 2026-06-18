@@ -1,0 +1,135 @@
+env:
+  IN_PKGDOWN: "true"
+
+url: https://phmcc.codeberg.page/selecta/
+
+destination: docs
+
+repo:
+  url:
+    home: https://codeberg.org/phmcc/selecta/
+    source: https://codeberg.org/phmcc/selecta/tree/main/
+    issue: https://codeberg.org/phmcc/selecta/issues/
+    user: https://codeberg.org/phmcc/
+
+template:
+  assets: pkgdown
+  bootstrap: 5
+  bootswatch: cosmo
+  bslib:
+    bg: "#F8F9FA"
+    fg: "#2F2F2F"
+    primary: "#2F2F2F"
+    body-color: "#2F2F2F"
+    headings-color: "#1D1D1D"
+    link-color: "#5A5A5A"
+  math-rendering: mathjax
+
+code:
+  width: 240
+  knitr:
+    opts_chunk:
+      dev: "ragg_png"
+      dpi: 150
+      R.options:
+        width: 160
+
+home:
+  title: selecta - EQUATOR-Style Enrollment Diagrams for Clinical Studies
+  description: Pipe-friendly enrollment and flow diagrams for CONSORT, STROBE, STARD, PRISMA, and MOOSE
+  sidebar:
+    structure: [links, license, community, citation, authors, dev]
+    components:
+      license:
+        title: License
+        text: "[GPL ≥ 3.0](LICENSE.html)"
+
+navbar:
+  structure:
+    left: [home, vignettes, articles, news, reference]
+    right: [search, codeberg, github]
+  components:
+    home:
+      icon: fa-home
+      href: index.html
+      aria-label: Home
+    vignettes:
+      text: Vignettes
+      menu:
+      - text: Enrollment Diagrams
+        href: articles/enrollment_diagrams.html
+      - text: Systematic Reviews
+        href: articles/systematic_reviews.html
+      - text: Split/Recombine Figures
+        href: articles/split_recombine.html
+      - text: Graphviz Export
+        href: articles/graphviz_export.html
+      - text: Advanced Workflows
+        href: articles/advanced_workflows.html
+    articles:
+      text: Articles
+      menu:
+      - text: Gallery
+        href: articles/gallery.html
+      - text: Feature Comparison
+        href: articles/feature_comparison.html
+      - text: Development Roadmap
+        href: articles/development_roadmap.html
+    news:
+      text: Changelog
+      href: news/index.html
+    reference:
+      text: Functions
+      href: reference/index.html
+    codeberg:
+      icon: fa-code-branch
+      href: https://codeberg.org/phmcc/selecta
+      aria-label: Codeberg
+    github:
+      icon: fa-github
+      href: https://github.com/phmcc/selecta
+      aria-label: GitHub
+
+reference:
+- title: Pipeline Construction
+  contents:
+  - enroll
+  - sources
+  - exclude
+  - assess
+  - stratify
+  - allocate
+  - combine
+  - endpoint
+  - phase
+
+- title: Rendering and Export
+  contents:
+  - flowchart
+  - flowsave
+  - recdims
+  - plot.selecta
+
+- title: S3 Methods
+  contents:
+  - print.selecta
+  - summary.selecta
+
+- title: Data Extraction
+  contents:
+  - cohort
+  - cohorts
+
+- title: Sample Data
+  contents:
+  - selectaex0
+  - selectaex2
+  - selectaex3
+  - selectaex6
+
+footer:
+  structure:
+    left: developed_by
+    right: [built_with, legal]
+  components:
+    legal: "[GPLv3 License](https://phmcc.github.io/selecta/LICENSE.html) | [Code of Conduct](https://phmcc.github.io/selecta/CODE_OF_CONDUCT.html)"

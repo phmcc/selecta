@@ -22,20 +22,22 @@ summarizing each node in the diagram.
 }
 \details{
 The \code{summary} method runs the same count computation that underlies
-rendering and returns the result as a tidy \code{data.table}, one row per
+rendering and returns the result as a clean \code{data.table}, one row per
 node, rather than drawing anything. This is convenient for programmatic
 checks (confirming arm totals, extracting the final analyzed count) and
 for embedding flow figures in tables or reports. The returned object is a
 plain \code{data.table} and may be filtered or joined like any other. For
-a human-readable console view use \code{\link{print.selecta}}; to render
-the diagram use \code{\link{flowchart}}.
+a human-readable console view use \code{print.selecta()}; to render
+the diagram use \code{flowchart()}.
 }
 \examples{
+\dontshow{.old <- options(selecta.debug_layout = FALSE)}
 flow <- enroll(n = 500) |>
   exclude("Ineligible", n = 65) |>
   allocate(labels = c("Drug A", "Placebo"), n = c(218, 217)) |>
   endpoint("Analyzed")
 summary(flow)
+\dontshow{options(.old)}
 
 }
 \seealso{

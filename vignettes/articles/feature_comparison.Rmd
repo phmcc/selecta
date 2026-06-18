@@ -1,0 +1,214 @@
+---
+title: "Feature Comparison"
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = TRUE
+)
+```
+
+This article compares `selecta` with other R packages for generating clinical study flow diagrams. The R ecosystem includes several packages targeting specific EQUATOR guidelines, as well as general-purpose flowchart tools. The following comparison identifies areas of overlap and distinction.
+
+---
+
+# Similar Packages
+
+| Package | Primary Focus |
+|:--------|:--------------|
+| **selecta** | Multi-guideline enrollment diagrams (CONSORT, STROBE, STARD, PRISMA, MOOSE) |
+| **consort** | CONSORT diagrams from disposition data |
+| **flowchart** | Tidyverse-style participant flow diagrams |
+| **dtrackr** | Data pipeline tracking with CONSORT/STROBE output |
+| **ggconsort** | CONSORT diagrams with ggplot2 |
+| **PRISMA2020** | Interactive PRISMA 2020 flow diagrams |
+| **PRISMAstatement** | Simple PRISMA flow charts (pre-2020 template) |
+| **stard** | STARD diagnostic-accuracy flow diagrams |
+| **prismadiagramR** | PRISMA diagrams via DiagrammeR |
+| **metagear** | Meta-analysis toolkit with `plot_PRISMA()` function |
+| **consortr** | Shiny app for interactive CONSORT creation |
+
+---
+
+## Core Feature Matrix
+
+```{r feature-table, echo=FALSE, results='asis'}
+features <- data.frame(
+  Feature = c(
+    "CONSORT (randomized trials)",
+    "STROBE (observational cohorts)",
+    "STARD (diagnostic accuracy)",
+    "PRISMA (systematic reviews)",
+    "MOOSE (observational meta-analysis)",
+    "Data-driven counts",
+    "Manual counts",
+    "Multi-arm layouts (3+)",
+    "Factorial (nested-split) designs",
+    "Multi-source convergence",
+    "Split-and-recombine topology",
+    "Phase labels",
+    "Exclusion sub-reasons",
+    "Per-arm exclusion reasons",
+    "Hierarchical (nested) sub-reasons",
+    "Cohort extraction",
+    "Count-first display mode",
+    "Auto-sized file export",
+    "Graphviz/DOT output",
+    "Interactive HTML output<sup>\u2020</sup>",
+    "Pipe-friendly API"
+  ),
+  selecta = c("Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "No", "Yes"),
+  consort = c("Yes", "Partial", "No", "No", "No", "Yes", "Yes", "Partial", "Partial", "No", "No", "Yes", "Yes", "Partial", "No", "No", "No", "No", "Yes", "No", "No"),
+  flowchart = c("Yes", "Partial", "No", "No", "No", "Yes", "Partial", "Yes", "No", "No", "No", "No", "Partial", "No", "No", "No", "No", "Yes", "No", "No", "Yes"),
+  dtrackr = c("Yes", "Yes", "No", "No", "No", "Yes", "No", "Yes", "No", "No", "No", "Partial", "Yes", "Yes", "No", "Yes", "No", "No", "Yes", "No", "Yes"),
+  ggconsort = c("Yes", "No", "No", "No", "No", "Yes", "Yes", "Partial", "No", "No", "No", "No", "Partial", "No", "No", "Yes", "No", "No", "No", "No", "Yes"),
+  PRISMA2020 = c("No", "No", "No", "Yes", "Partial", "No", "Yes", "No", "No", "Yes", "No", "Yes", "Yes", "No", "No", "No", "No", "No", "No", "Yes", "No"),
+  stringsAsFactors = FALSE
+)
+
+cat('<table class="table table-sm" style="font-size: 0.9em;">\n')
+cat('<thead>\n<tr>\n')
+cat('<th style="text-align: left;">Feature</th>\n')
+for (pkg in c("selecta", "consort", "flowchart", "dtrackr", "ggconsort", "PRISMA2020")) {
+  cat(sprintf('<th style="text-align: center;">%s</th>\n', pkg))
+}
+cat('</tr>\n</thead>\n<tbody>\n')
+
+for (i in 1:nrow(features)) {
+  cat('<tr>\n')
+  cat(sprintf('<td style="text-align: left;">%s</td>\n', features$Feature[i]))
+
+  for (pkg in c("selecta", "consort", "flowchart", "dtrackr", "ggconsort", "PRISMA2020")) {
+    val <- features[[pkg]][i]
+    if (val == "Yes") {
+      style <- 'background-color: #d4edda; color: #155724; text-align: center;'
+      symbol <- "\u2713"
+    } else if (val == "Partial") {
+      style <- 'background-color: #fff3cd; color: #856404; text-align: center;'
+      symbol <- "\u25D0"
+    } else {
+      style <- 'background-color: #f8d7da; color: #721c24; text-align: center;'
+      symbol <- "\u2014"
+    }
+    cat(sprintf('<td style="%s">%s</td>\n', style, symbol))
+  }
+  cat('</tr>\n')
+}
+
+cat('</tbody>\n</table>\n')
+cat('<p style="font-size: 0.85em; color: #666;"><strong>Legend:</strong> \u2713 Full support | \u25D0 Partial support | \u2014 Not available</p>\n')
+cat('<p style="font-size: 0.85em; color: #666;"><sup>\u2020</sup> Currently, <code>selecta</code> DOT engine output is embeddable as an HTML widget via <code>DiagrammeR::grViz()</code>, but widget content is a static SVG without native tooltips or clickable hyperlinks.</p>\n')
+```
+
+---
+
+## Feature Definitions
+
+| Feature | Description |
+|:--------|:------------|
+| **CONSORT** | Flow diagrams for randomized controlled trials with allocation and per-arm follow-up |
+| **STROBE** | Flow diagrams for observational cohort studies with exposure stratification |
+| **STARD** | Diagnostic accuracy diagrams with inverted assessment labels and cross-classification |
+| **PRISMA** | Systematic review diagrams with multi-source identification and convergence |
+| **MOOSE** | Observational meta-analysis diagrams (structurally similar to PRISMA) |
+| **Data-driven counts** | Participant counts computed automatically from a dataset |
+| **Manual counts** | Participant counts supplied directly by the analyst |
+| **Multi-arm layouts (3+)** | Support for three or more parallel arms with automatic layout |
+| **Factorial (nested-split) designs** | Cross-classification by two factors via chained `allocate()`/`stratify()`, with parent boxes centered over their sub-arms |
+| **Multi-source convergence** | Parallel identification streams merging into a single screening flow |
+| **Split-and-recombine topology** | Fanning a population into strata for independent characterization, then converging to a single stream before the endpoint |
+| **Phase labels** | Vertical labels (*e.g.,* Enrollment, Allocation, Follow-up, Analysis) |
+| **Exclusion sub-reasons** | Itemized counts within exclusion boxes (*e.g.,* "Declined: 12, Other: 8") |
+| **Per-arm exclusion reasons** | Different sub-reason breakdowns for each treatment arm |
+| **Hierarchical (nested) sub-reasons** | Two-level exclusion breakdowns grouping itemized sub-reasons under broader categories |
+| **Cohort extraction** | Return the analysis-ready dataset after all exclusions |
+| **Count-first display mode** | Bold count before label (*e.g.,* "450 Drug A" instead of "Drug A, n = 450") |
+| **Auto-sized file export** | Automatic dimension calculation when saving to PDF/PNG/SVG/TIFF |
+| **Graphviz/DOT output** | Export diagram as a Graphviz DOT string for external rendering |
+| **Interactive HTML output** | Clickable HTML widgets with tooltips and hyperlinks |
+| **Pipe-friendly API** | Pipeline construction with `|>` or `%>%` operators |
+
+---
+
+# Unique Strengths of *selecta*
+
+The following features distinguish `selecta` from comparable packages:
+
+## Multi-Guideline Support
+
+Most existing packages target a single EQUATOR guideline---typically CONSORT or PRISMA---requiring different tools for different study types. `selecta` provides a unified API across five guidelines (CONSORT, STROBE, STARD, PRISMA, MOOSE), with guideline-specific functions (`allocate()` vs. `stratify()`, `assess()`, `sources()`, `combine()`) that share common conventions for exclusions, phases, and rendering.
+
+```{r multi-guideline, eval=FALSE}
+# Same rendering pipeline, different study types
+enroll(n = 500) |> allocate(...) |> endpoint("Analyzed") |> flowchart()  # CONSORT
+enroll(n = 500) |> stratify(...) |> endpoint("Analyzed") |> flowchart()  # STROBE
+enroll(n = 500) |> assess(...) |> endpoint("Final") |> flowchart()       # STARD
+sources(...) |> combine(...) |> endpoint("Included") |> flowchart()      # PRISMA
+```
+
+## Declarative Pipeline Syntax
+
+The pipeline reads top-to-bottom, matching the visual layout of the diagram and the narrative order in which investigators describe their enrollment process. Each function corresponds to a single structural element (enrollment, exclusion, phase, allocation, endpoint), making the code self-documenting.
+
+## Factorial and Recombination Topologies
+
+`selecta` renders flow shapes that single-split tools cannot express. Two `allocate()` or `stratify()` calls in sequence produce a factorial (nested-split) design, cross-classifying each arm by a second factor with parent boxes centered over their sub-arms. `combine()` reconverges parallel streams, supporting both split-and-recombine layout (stratify, characterize, recombine) and the stepwise pooling of a crossed design; it may be applied more than once to collapse a factorial into a single analysis cohort.
+
+```{r factorial-example, eval=FALSE}
+# 2x2 factorial, then pool the second factor back into the first
+enroll(n = 480) |>
+    allocate(labels = c("Drug A", "Drug B"), n = c(240, 240)) |>
+    allocate(labels = c("Vaccine", "Placebo"), n = c(120, 120, 120, 120)) |>
+    combine("Pooled by antiviral") |>
+    endpoint("Analyzed") |>
+    flowchart()
+```
+
+## Hierarchical Exclusion Reasons
+
+Exclusion reasons may be itemized one level deep or grouped two levels deep, with broad categories subdividing into specific sub-reasons. A named list (manual mode) or a pair of columns (data mode) records the hierarchy, which both rendering engines display with sub-reasons indented or bulleted beneath each category.
+
+```{r nested-example, eval=FALSE}
+enroll(n = 1000) |>
+    exclude("Excluded", n = 250,
+            reasons = list(
+                "Ineligible"     = c("Out of age range" = 70, "Comorbidity" = 55),
+                "Declined"       = c("Time commitment" = 40, "Travel burden" = 20),
+                "Administrative" = 65)) |>
+    endpoint("Enrolled") |>
+    flowchart()
+```
+
+## Cohort Extraction
+
+The specialized `cohort()` function returns the dataset remaining after all exclusion criteria have been applied, enabling a seamless transition from diagram construction to statistical analysis.
+
+```{r cohort-example, eval=FALSE}
+flow <- enroll(data, id = "patient_id") |>
+    exclude("Ineligible", criteria = eligible == FALSE) |>
+    allocate("treatment") |>
+    endpoint("Analyzed")
+
+# Render the diagram
+flowsave(flow, "consort.pdf")
+
+# Extract the analysis-ready cohort
+final_data <- cohort(flow)
+```
+
+## Performance
+
+Built on `data.table` with memoized text measurement, vectorized box and edge drawing, and single-pass layout computation. Diagram rendering completes in under one second for typical clinical trial configurations.
+
+---
+
+# Additional Resources
+
+- [Gallery](gallery.html) --- Example diagrams across all supported guidelines
+- [consort documentation](https://cran.r-project.org/package=consort)
+- [flowchart documentation](https://cran.r-project.org/package=flowchart)
+- [dtrackr documentation](https://cran.r-project.org/package=dtrackr)
+- [PRISMA2020 documentation](https://cran.r-project.org/package=PRISMA2020)
+- [PRISMAstatement documentation](https://cran.r-project.org/package=PRISMAstatement)

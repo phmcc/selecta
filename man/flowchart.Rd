@@ -10,39 +10,58 @@ flowchart(.flow, engine = c("grid", "dot"), count_first = FALSE, ...)
 \method{plot}{selecta}(x, engine = c("grid", "dot"), ...)
 }
 \arguments{
-\item{.flow}{A \code{selecta} object created by \code{\link{enroll}} or
-\code{\link{sources}} and populated with pipeline steps.}
+\item{.flow}{A \code{selecta} object created by \code{enroll()} or
+\code{sources()} and populated with pipeline steps.}
 
 \item{engine}{Character. Rendering engine: \code{"grid"} (default) for
-base grid graphics, or \code{"dot"} to return a Graphviz DOT string
-(for use with \pkg{DiagrammeR}).}
+base R graphics, or \code{"dot"} to return a Graphviz DOT string
+(for use with \pkg{DiagrammeR} or a locally installed executable).}
 
 \item{count_first}{Logical. If \code{TRUE}, side-box labels are rendered
 as \code{"214  Discontinued"} (bold count before label) rather than the
 default \code{"Discontinued (n = 214)"}. Applies to all box types.
 Default \code{FALSE}.}
 
-\item{...}{Additional arguments passed to the rendering function
-(\emph{e.g.,} \code{cex}, \code{cex_side}, \code{cex_phase},
-\code{box_fill}, \code{phase_fill}, \code{vpad}, \code{margin},
-\code{font_family}, \code{number_format}). For
-\code{engine = "dot"}, the supported arguments are
-\code{formatting}, \code{number_format}, \code{count_first},
-\code{ortho}, \code{font_family}, \code{padding_pt},
-\code{padding_adjust}, \code{box_fill}, \code{side_fill},
-\code{border_col}, \code{arrow_col}, \code{source_fill},
-\code{source_header_fill}, \code{source_header_text}. The grid
-engine's \code{phase_fill} and \code{phase_text_col} have no DOT
-equivalent because the DOT engine does not render phase labels.
-The DOT engine's \code{formatting} argument selects label markup:
-\code{"plain"} (default) emits plain DOT labels for robust,
-pixel-accurate centering across all fonts; \code{"rich"} emits
-HTML-like labels with inline bold and italic, matching the grid
-engine's typographic conventions at the cost of small residual
-centering drift on non-Helvetica fonts. The DOT engine's
-\code{font_family} defaults to \code{"Helvetica"} and
-\code{padding_pt} to 14 (uniform horizontal padding in points
-around each label).}
+\item{...}{Additional styling and formatting arguments forwarded to the
+  selected engine; arguments an engine does not recognize are ignored.
+
+  For \code{engine = "grid"}:
+  \describe{
+    \item{cex, cex_side, cex_phase}{Font-size multipliers for the main,
+      side-box, and phase text}
+    \item{box_fill, phase_fill}{Fill colors for boxes and phase strips}
+    \item{vpad, margin}{Vertical spacing between elements and the outer
+      margin, in inches}
+    \item{font_family}{Font family for text}
+    \item{number_format}{Locale-aware count formatter}
+  }
+  For \code{engine = "dot"}:
+  \describe{
+    \item{formatting}{Label markup: \code{"plain"} (default) for robust,
+      pixel-accurate centering across all fonts, or \code{"rich"} for
+      HTML-like inline bold and italic that match the \code{grid} engine's
+      typography at the cost of small centering drift on non-Helvetica
+      fonts}
+    \item{bullets}{Prefix side-box sub-reasons with a bullet; defaults on
+      under \code{"plain"} (where indentation alone is a weak cue) and off
+      under \code{"rich"}}
+    \item{font_family, padding_pt, padding_adjust}{Font family (default
+      \code{"Helvetica"}) and the uniform horizontal label padding in
+      points (default 14) with its fine adjustment}
+    \item{ortho}{Use orthogonal (right-angled) edge routing}
+    \item{box_fill, side_fill, border_col, arrow_col}{Box, side-box,
+      border, and arrow colors}
+    \item{source_fill, source_header_fill, source_header_text}{Source-box
+      fill, header fill, and header text color}
+    \item{phase_labels, phase_fill, phase_text_col}{Toggle and color the
+      phase-band labels (on by default when the flow defines phases; the
+      \code{dot} engine draws them as horizontal left-margin bands rather
+      than the \code{grid} engine's vertical strips)}
+    \item{side_gap_in, rank_sep, node_sep}{Spacing of side boxes, ranks,
+      and nodes, in inches}
+    \item{number_format}{Locale-aware count formatter, shared with the
+      \code{grid} engine}
+  }}
 
 \item{x}{A \code{selecta} object.}
 }
@@ -55,21 +74,21 @@ For \code{engine = "grid"}: invisibly returns the computed graph
 Computes counts from the pipeline, lays out nodes, and draws an
 EQUATOR-style enrollment diagram. This is the primary rendering
 function for interactive use; for saving to file with auto-sized
-dimensions, see \code{\link{flowsave}}.
+dimensions, see \code{flowsave()}.
 }
 \details{
 \code{flowchart()} is the primary rendering entry point and accepts a
-completed pipeline object. The \code{"grid"} engine draws the diagram to
+completed pipeline object. The \code{grid} engine draws the diagram to
 the active graphics device using the \pkg{grid} system and is intended
 for publication-quality figures with phase strips, precise dimensions,
-and locale-aware counts; the \code{"dot"} engine instead returns a
+and locale-aware counts; the \code{dot} engine instead returns a
 Graphviz DOT-language string for prototyping or rendering through external
 Graphviz tooling, and draws nothing itself. Styling, font, and
 number-format options are forwarded to the chosen engine through
 \code{...}; options unsupported by an engine (for example the phase
-strips, which the DOT engine does not draw) are ignored. \code{flowchart()}
+strips, which the \code{dot} engine does not draw) are ignored. \code{flowchart()}
 is normally the last call in a pipeline; for direct file output use
-\code{\link{flowsave}}, and to size a canvas use \code{\link{recdims}}.
+\code{flowsave()}, and to size a canvas use \code{recdims}.
 }
 \examples{
 # Build a flow once, then render it. Most of the package's pipeline
@@ -92,18 +111,19 @@ flow <- enroll(n = 1200) |>
 dot <- flowchart(flow, engine = "dot")
 substr(dot, 1, 50)
 
-\donttest{
-# The "grid" engine draws to the active graphics device.
-flowchart(flow)
+# The "grid" engine draws to the active graphics device. These calls are
+# guarded with interactive() so they render in an interactive session but
+# are skipped during non-interactive documentation builds, where the
+# diagram cannot be sized to the page and would render incorrectly.
+if (interactive()) {
+  flowchart(flow)            # draws to the active device
+  plot(flow)                 # plot() is a thin wrapper around flowchart()
 
-# plot() is a thin wrapper around flowchart().
-plot(flow)
-
-# Locale-aware counts: a European thousands separator.
-enroll(n = 12500) |>
-  exclude("Excluded", n = 1450) |>
-  endpoint("Analyzed") |>
-  flowchart(number_format = "eu")
+  # Locale-aware counts: a European thousands separator.
+  enroll(n = 12500) |>
+    exclude("Excluded", n = 1450) |>
+    endpoint("Analyzed") |>
+    flowchart(number_format = "eu")
 }
 
 }

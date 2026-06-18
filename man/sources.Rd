@@ -26,27 +26,21 @@ An object of class \code{"selecta"} with a \code{sources} step
 }
 \description{
 Entry point for flows that begin with multiple parallel identification
-streams, such as PRISMA 2020 systematic review diagrams. Each named
-argument defines a source \emph{group} (column). Individual databases
-or registers within each group are listed as sub-items inside a single
-box, mirroring the format of exclusion reasons.
+streams, such as systematic review diagrams. Each named argument defines
+a source \emph{group} (column). Individual databases or registers within
+each group are listed as sub-items inside a single box, mirroring the
+format of exclusion reasons.
 }
 \details{
-Up to three columns are supported, matching the PRISMA 2020 structure:
-previous studies (left), databases and registers (center), and other
-methods (right). Use \code{\link{combine}} downstream to merge the
-parallel streams into a single flow.
-
-
 \code{sources()} initializes a multi-source flow of the kind used in the
 identification stage of systematic-review diagrams (PRISMA, MOOSE), where
 records arrive from several origins and are pooled. Counts are supplied
 as named numeric values; passing named vectors instead of scalars groups
 the sources into labeled columns, and at most three groups are
 supported, matching the standard PRISMA layout. A \code{sources()} flow
-is operated in manual mode and is normally followed by \code{\link{combine}}
+is operated in manual mode and is normally followed by \code{combine()}
 to merge the streams into a single downstream node. For a conventional
-single-entry study, use \code{\link{enroll}} instead.
+single-entry study, use \code{enroll()} instead.
 }
 \examples{
 # Simple multi-source (one column, no header)

@@ -46,31 +46,31 @@ NULL
 #' @keywords internal
 resolve_number_marks <- function(number_format = NULL) {
 
-  ## Fall back to global option, then to "us"
-  if (is.null(number_format))
-    number_format <- getOption("selecta.number_format", "us")
+    ## Fall back to global option, then to "us"
+    if (is.null(number_format))
+        number_format <- getOption("selecta.number_format", "us")
 
-  ## Custom vector: c(big.mark, decimal.mark)
-  if (is.character(number_format) && length(number_format) == 2L)
-    return(list(big.mark = number_format[1L],
-                decimal.mark = number_format[2L]))
+    ## Custom vector: c(big.mark, decimal.mark)
+    if (is.character(number_format) && length(number_format) == 2L)
+        return(list(big.mark = number_format[1L],
+                    decimal.mark = number_format[2L]))
 
-  ## Named presets (use thin space U+202F for SI style)
-  if (is.character(number_format) && length(number_format) == 1L) {
-    return(switch(number_format,
-      "us"    = list(big.mark = ",",      decimal.mark = "."),
-      "eu"    = list(big.mark = ".",      decimal.mark = ","),
-      "space" = list(big.mark = "\u202F", decimal.mark = "."),
-      "none"  = list(big.mark = "",       decimal.mark = "."),
-      stop("Unknown number_format preset: '", number_format,
-           "'. Use 'us', 'eu', 'space', 'none', or a ",
-           "two-element character vector c(big.mark, decimal.mark).",
-           call. = FALSE)
-    ))
-  }
+    ## Named presets (use thin space U+202F for SI style)
+    if (is.character(number_format) && length(number_format) == 1L) {
+        return(switch(number_format,
+                      "us"    = list(big.mark = ",",      decimal.mark = "."),
+                      "eu"    = list(big.mark = ".",      decimal.mark = ","),
+                      "space" = list(big.mark = "\u202F", decimal.mark = "."),
+                      "none"  = list(big.mark = "",       decimal.mark = "."),
+                      stop("Unknown number_format preset: '", number_format,
+                           "'. Use 'us', 'eu', 'space', 'none', or a ",
+                           "two-element character vector c(big.mark, decimal.mark).",
+                           call. = FALSE)
+                      ))
+    }
 
-  stop("'number_format' must be a character string preset or a ",
-       "two-element character vector.", call. = FALSE)
+    stop("'number_format' must be a character string preset or a ",
+         "two-element character vector.", call. = FALSE)
 }
 
 
@@ -83,30 +83,30 @@ resolve_number_marks <- function(number_format = NULL) {
 #' @return Invisibly returns \code{TRUE} if valid.
 #' @keywords internal
 validate_number_format <- function(number_format) {
-  if (is.null(number_format)) return(invisible(TRUE))
+    if (is.null(number_format)) return(invisible(TRUE))
 
-  if (!is.character(number_format))
-    stop("'number_format' must be a character string or character vector.",
-         call. = FALSE)
+    if (!is.character(number_format))
+        stop("'number_format' must be a character string or character vector.",
+             call. = FALSE)
 
-  if (length(number_format) == 1L) {
-    valid_presets <- c("us", "eu", "space", "none")
-    if (!number_format %in% valid_presets)
-      stop("Unknown number_format preset: '", number_format,
-           "'. Valid presets are: ",
-           paste(paste0("'", valid_presets, "'"), collapse = ", "),
-           ". Or use a two-element vector c(big.mark, decimal.mark).",
-           call. = FALSE)
-  } else if (length(number_format) == 2L) {
-    if (number_format[1L] == number_format[2L] && nchar(number_format[1L]) > 0L)
-      stop("big.mark and decimal.mark cannot be the same non-empty character.",
-           call. = FALSE)
-  } else {
-    stop("Custom 'number_format' must be a two-element character vector ",
-         "c(big.mark, decimal.mark).", call. = FALSE)
-  }
+    if (length(number_format) == 1L) {
+        valid_presets <- c("us", "eu", "space", "none")
+        if (!number_format %in% valid_presets)
+            stop("Unknown number_format preset: '", number_format,
+                 "'. Valid presets are: ",
+                 paste(paste0("'", valid_presets, "'"), collapse = ", "),
+                 ". Or use a two-element vector c(big.mark, decimal.mark).",
+                 call. = FALSE)
+    } else if (length(number_format) == 2L) {
+        if (number_format[1L] == number_format[2L] && nchar(number_format[1L]) > 0L)
+            stop("big.mark and decimal.mark cannot be the same non-empty character.",
+                 call. = FALSE)
+    } else {
+        stop("Custom 'number_format' must be a two-element character vector ",
+             "c(big.mark, decimal.mark).", call. = FALSE)
+    }
 
-  invisible(TRUE)
+    invisible(TRUE)
 }
 
 
@@ -121,23 +121,23 @@ validate_number_format <- function(number_format) {
 #' @param n Integer count value, or a vector of counts. \code{NA}
 #'   elements are returned as empty strings.
 #' @param marks List with \code{big.mark} and \code{decimal.mark} as
-#'   returned by \code{\link{resolve_number_marks}}. May be \code{NULL},
+#'   returned by \code{resolve_number_marks()}. May be \code{NULL},
 #'   in which case the current global setting is resolved automatically.
-#'   \code{decimal.mark} is forwarded to \code{\link{format}} so that
+#'   \code{decimal.mark} is forwarded to \code{format()} so that
 #'   locales whose thousands separator is a period (\emph{e.g.,} the
 #'   \code{"eu"} preset) do not trip \code{format}'s "big.mark and
 #'   decimal.mark are both '.'" warning.
 #' @return A character vector of formatted counts, parallel to \code{n}.
 #' @keywords internal
 fmt_n <- function(n, marks = NULL) {
-  if (is.null(marks)) marks <- resolve_number_marks()
-  vapply(n, function(x) {
-    if (is.na(x)) return("")
-    if (abs(x) >= 1000)
-      trimws(format(as.integer(x), big.mark = marks$big.mark,
-                    decimal.mark = marks$decimal.mark,
-                    scientific = FALSE))
-    else
-      as.character(as.integer(x))
-  }, character(1L), USE.NAMES = FALSE)
+    if (is.null(marks)) marks <- resolve_number_marks()
+    vapply(n, function(x) {
+        if (is.na(x)) return("")
+        if (abs(x) >= 1000)
+            trimws(format(as.integer(x), big.mark = marks$big.mark,
+                          decimal.mark = marks$decimal.mark,
+                          scientific = FALSE))
+        else
+            as.character(as.integer(x))
+    }, character(1L), USE.NAMES = FALSE)
 }

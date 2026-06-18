@@ -66,15 +66,15 @@ Default \code{"Helvetica"}. Must match the value used at draw time
 for accurate dimensions.}
 
 \item{number_format}{Character string or two-element character vector.
-Locale-aware count formatter passed through to \code{\link{draw_grid}}
-for accurate text measurement. See \code{\link{flowchart}} for
+Locale-aware count formatter passed through to \code{export_grid()}
+for accurate text measurement. See \code{flowchart()} for
 accepted values.}
 
 \item{...}{Additional arguments. Styling-only parameters that do not
 affect text measurement (such as \code{box_fill}, \code{phase_fill},
 \code{border_col}) are silently ignored, allowing the same call
-signature to be shared with \code{\link{flowchart}} and
-\code{\link{flowsave}}.}
+signature to be shared with \code{flowchart()} and
+\code{flowsave()}.}
 
 \item{.measure_dev}{Optional zero-argument function that opens a graphics
 device for text measurement, matching the device that will render the
@@ -82,7 +82,7 @@ diagram. When \code{NULL} (the default) a pdf device is used. Advanced
 use only; see Details.}
 
 \item{.return_graph}{Logical. If \code{TRUE}, attaches the pre-computed
-graph as an attribute for reuse by \code{\link{flowsave}}.
+graph as an attribute for reuse by \code{flowsave()}.
 Default \code{FALSE}. Internal use only.}
 }
 \value{
@@ -91,8 +91,8 @@ A named numeric vector with elements \code{width} and
 }
 \description{
 Computes recommended width and height in inches based on diagram
-content. A throwaway PDF device is opened to obtain accurate text
-measurements, then closed immediately.
+content. A throwaway graphics device is opened to obtain accurate
+text measurements, then closed immediately.
 }
 \details{
 \code{recdims()} computes the canvas size a flow needs at a given
@@ -103,10 +103,10 @@ anything visible. Because text metrics are font- and device-dependent,
 any sizing parameter passed here (\code{cex}, \code{font_family},
 \code{phase_multiline}, \code{number_format}, and so on) should match the
 values used at render time; styling-only parameters are ignored so the
-same call can be shared across \code{recdims()}, \code{\link{flowchart}},
-and \code{\link{flowsave}}. The advanced \code{.measure_dev} argument
+same call can be shared across \code{recdims()}, \code{flowchart()},
+and \code{flowsave()}. The advanced \code{.measure_dev} argument
 supplies a custom device opener when measurement must match a non-default
-device. \code{\link{flowsave}} calls \code{recdims()} internally when
+device. \code{flowsave()} calls \code{recdims()} internally when
 \code{width} or \code{height} is left unspecified, so explicit use is
 only needed when the dimensions themselves are wanted.
 }

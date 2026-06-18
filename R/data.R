@@ -1,11 +1,11 @@
 #' Simulated Observational Cohort (No Arms)
 #'
-#' A synthetic dataset of 800 patients in an observational study with
+#' A synthetic dataset of 3,000 patients in an observational study with
 #' no treatment arms. Includes eligibility flags, exclusion reasons,
 #' and follow-up loss indicators suitable for demonstrating STROBE-style
 #' enrollment diagrams in data mode.
 #'
-#' @format A \code{data.table} with 800 rows and the following columns:
+#' @format A \code{data.table} with 3,000 rows and the following columns:
 #' \describe{
 #'   \item{patient_id}{Unique patient identifier.}
 #'   \item{is_duplicate}{Logical. Whether the record is a duplicate.}
@@ -16,9 +16,9 @@
 #' }
 #'
 #' @examples
-#' data(rctselect0)
-#' str(rctselect0)
-"rctselect0"
+#' data(selectaex0)
+#' str(selectaex0)
+"selectaex0"
 
 
 #' Simulated Two-Arm Randomized Trial
@@ -40,37 +40,39 @@
 #' }
 #'
 #' @examples
-#' data(rctselect2)
-#' table(rctselect2$treatment)
-"rctselect2"
+#' data(selectaex2)
+#' str(selectaex2)
+#' table(selectaex2$treatment)
+"selectaex2"
 
 
 #' Simulated Three-Arm Randomized Trial
 #'
-#' A synthetic dataset of 3,600 patients in a three-arm randomized
-#' controlled trial. Structure matches \code{\link{rctselect2}} with an
+#' A synthetic dataset of 2,400 patients in a three-arm randomized
+#' controlled trial. Structure matches \code{\link{selectaex2}} with an
 #' additional treatment arm.
 #'
-#' @format A \code{data.table} with 3,600 rows. See \code{\link{rctselect2}}
+#' @format A \code{data.table} with 2,400 rows. See \code{\link{selectaex2}}
 #'   for column descriptions.
 #'
 #' @examples
-#' data(rctselect3)
-#' table(rctselect3$treatment)
-"rctselect3"
+#' data(selectaex3)
+#' str(selectaex3)
+#' table(selectaex3$treatment)
+"selectaex3"
 
 
 #' Simulated Six-Arm Dose-Finding Trial
 #'
-#' A synthetic dataset of 7,200 patients in a six-arm dose-finding
-#' trial. Structure matches \code{\link{rctselect2}} with six treatment
-#' arms. Intended for demonstrating wide multi-arm layouts using
-#' \code{\link{stratify}}.
+#' A synthetic dataset of 3,600 patients in a six-arm dose-finding
+#' trial. Structure matches \code{\link{selectaex2}} with six treatment
+#' arms.
 #'
-#' @format A \code{data.table} with 7,200 rows. See \code{\link{rctselect2}}
+#' @format A \code{data.table} with 3,600 rows. See \code{\link{selectaex2}}
 #'   for column descriptions.
 #'
 #' @examples
-#' data(rctselect6)
-#' table(rctselect6$treatment)
-"rctselect6"
+#' data(selectaex6)
+#' str(selectaex6)
+#' table(selectaex6$treatment)
+"selectaex6"

@@ -8,7 +8,7 @@ cohort(.flow, split = FALSE, arm = NULL)
 }
 \arguments{
 \item{.flow}{A \code{selecta} object created in data mode
-(\code{data} supplied to \code{\link{enroll}}).}
+(\code{data} supplied to \code{enroll()}).}
 
 \item{split}{Logical. If \code{TRUE} and arms are defined, return a named
 list of \code{data.table}s (one per arm). Default \code{FALSE} returns a
@@ -25,30 +25,25 @@ A \code{data.table} containing the participants remaining after
 }
 \description{
 Returns the dataset remaining after all exclusion criteria have been
-applied. When arms are defined via \code{\link{stratify}}, the result
+applied. When arms are defined via \code{stratify()}, the result
 is either a single combined \code{data.table} or a named list of
-per-arm \code{data.table}s. Data mode only.
+per-arm \code{data.table} objects. Data mode only.
 }
 \details{
-This supports a seamless modeling workflow: define the enrollment
-flow, render it with \code{\link{flowchart}}, and immediately pass the
-resulting cohort into downstream analysis.
-
-
 \code{cohort()} replays the exclusion criteria of a \emph{data-mode} flow
 against the original dataset and returns the rows that survive to the
 end, so the analyst can pass the exact analyzed population to downstream
 modeling. It requires a flow created by supplying \code{data} to
-\code{\link{enroll}}; manual-mode flows carry only counts and therefore
+\code{enroll()}; manual-mode flows carry only counts and therefore
 raise an error. For an unsplit flow the result is a single
-\code{data.table}; after \code{\link{stratify}} or \code{\link{allocate}},
+\code{data.table}; after \code{stratify()} or \code{allocate()},
 \code{split = TRUE} returns one table per arm and \code{arm} extracts a
 single named arm. To inspect the cohort at every intermediate step rather
-than only the end, use \code{\link{cohorts}}.
+than only the end, use \code{cohorts()}.
 }
 \examples{
-flow <- enroll(rctselect2, id = "patient_id") |>
-  exclude("Ineligible", criteria = eligible == FALSE) |>
+flow <- enroll(selectaex2, id = "patient_id") |>
+  exclude("Ineligible", criterion = eligible == FALSE) |>
   endpoint("Final")
 
 final <- cohort(flow)

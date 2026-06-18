@@ -7,7 +7,7 @@
 assess(
   .flow,
   label,
-  criteria,
+  criterion,
   not_received = NULL,
   reasons = NULL,
   show_zero = FALSE
@@ -19,7 +19,7 @@ assess(
 \item{label}{Character string naming the test or procedure
 (\emph{e.g.,} \code{"Index test"}, \code{"Reference standard"}).}
 
-\item{criteria}{An unquoted logical expression that evaluates to
+\item{criterion}{An unquoted logical expression that evaluates to
 \code{TRUE} for rows that did \strong{not} receive the test. Data
 mode only.}
 
@@ -44,21 +44,16 @@ receive the procedure (with optional reasons), and the main flow
 continues with those who \emph{were} assessed.
 }
 \details{
-Internally, \code{assess()} creates an exclusion step with inverted
-label semantics: the side box reads \code{"Did not receive [label]"}
-and the remaining-count box reads \code{"Received [label]"}.
-
-
 \code{assess()} models a test or procedure that only part of the cohort
 undergoes, the recurring motif of STARD diagnostic-accuracy diagrams. It
-is implemented as an \code{\link{exclude}} step with inverted label
+is implemented as an \code{exclude()} step with inverted label
 semantics: the side box reads \dQuote{Did not receive \emph{label}} and
 the continuing box reads \dQuote{Received \emph{label}}, so the main flow
-carries those who \emph{were} assessed. In data mode, \code{criteria} is
+carries those who \emph{were} assessed. In data mode, \code{criterion} is
 an unquoted logical expression that is \code{TRUE} for participants who
 did \strong{not} receive the test; in manual mode, \code{not_received}
 gives that count and \code{reasons} an optional named breakdown. Chained
-\code{assess()} steps commonly precede a \code{\link{stratify}} split on
+\code{assess()} steps commonly precede a \code{stratify()} split on
 the index-test result, with each terminal box reporting its
 target-condition breakdown.
 }
@@ -71,8 +66,8 @@ enroll(n = 360, label = "Eligible patients") |>
   stratify(labels = c("Index test positive", "Index test negative"),
            n = c(150, 170), label = "Index test result") |>
   endpoint("Final diagnosis",
-           reasons = list(c("Target +" = 130, "Target -" = 20),
-                          c("Target +" = 15, "Target -" = 155)))
+           breakdown = list(c("Target +" = 130, "Target -" = 20),
+                            c("Target +" = 15, "Target -" = 155)))
 
 }
 \seealso{

@@ -6,7 +6,7 @@
 \alias{selecta-package}
 \title{selecta: EQUATOR-Style Enrollment Diagrams for Clinical Studies}
 \description{
-Build EQUATOR-style flowcharts for clinical studies by sequentially defining inclusion and exclusion criteria, study arms, and endpoints. The pipe-friendly API supports CONSORT (randomized trials), STROBE (observational cohorts), STARD (diagnostic accuracy), PRISMA (systematic reviews), and MOOSE (observational meta-analysis) diagram layouts, with multi-source entry, convergence, cross-classification grids, and per-arm labelling. Diagrams are rendered via 'grid' graphics in both data-driven (automatic counting) and manual-count modes, with optional 'DiagrammeR'/'Graphviz' output.
+Build EQUATOR-style flowcharts for clinical studies by sequentially defining inclusion and exclusion criteria, study arms, and endpoints. The pipe-friendly API supports CONSORT (randomized trials), STROBE (observational cohorts), STARD (diagnostic accuracy), PRISMA (systematic reviews), and MOOSE (observational meta-analysis) diagram layouts, as well as multi-source convergence, split-and-recombine, factorial, and hybrid topologies. Diagrams are rendered via 'grid' graphics in both data-driven (automatic counting) and manual-count modes, with optional 'DiagrammeR'/'Graphviz' output.
 }
 \section{Package options}{
 
@@ -18,7 +18,7 @@ Build EQUATOR-style flowcharts for clinical studies by sequentially defining inc
     \code{"eu"}, \code{"space"}, \code{"none"}) or a custom
     \code{c(big.mark, decimal.mark)} pair. Defaults to \code{"us"}.}
   \item{\code{selecta.vpad}}{Default vertical padding between rows, in
-    inches, used by the grid engine and by \code{\link{recdims}}.
+    inches, used by the grid engine and by \code{recdims()}.
     Defaults to \code{0.25}.}
   \item{\code{selecta.check_arithmetic}}{Whether manual-mode count
     consistency checks emit advisory warnings (arm counts not summing to
@@ -47,8 +47,9 @@ options(opts)                             # restore previous options
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://phmcc.github.io/selecta/}
-  \item \url{https://github.com/phmcc/selecta}
+  \item \url{https://phmcc.codeberg.page/selecta/}
+  \item \url{https://codeberg.org/phmcc/selecta/}
+  \item \url{https://github.com/phmcc/selecta/}
   \item Report bugs at \url{https://github.com/phmcc/selecta/issues}
 }
 

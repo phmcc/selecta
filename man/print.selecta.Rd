@@ -24,9 +24,9 @@ The \code{print} method gives a compact, text-only view of a
 \code{selecta} object for interactive inspection before rendering. It
 lists the operating mode, the starting count, and each pipeline step with
 its key parameters (exclusion reasons, arm labels, endpoint sub-items),
-and marks phase boundaries with a \dQuote{--- label ---} banner. It does
+and marks phase boundaries with a \dQuote{--- Label ---} banner. It does
 not draw the diagram or open a graphics device; for that use
-\code{\link{flowchart}} or \code{\link{flowsave}}.
+\code{flowchart()} or \code{flowsave()}.
 }
 \examples{
 flow <- enroll(n = 500) |>

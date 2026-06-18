@@ -9,7 +9,7 @@
 #'     \code{"eu"}, \code{"space"}, \code{"none"}) or a custom
 #'     \code{c(big.mark, decimal.mark)} pair. Defaults to \code{"us"}.}
 #'   \item{\code{selecta.vpad}}{Default vertical padding between rows, in
-#'     inches, used by the grid engine and by \code{\link{recdims}}.
+#'     inches, used by the grid engine and by \code{recdims()}.
 #'     Defaults to \code{0.25}.}
 #'   \item{\code{selecta.check_arithmetic}}{Whether manual-mode count
 #'     consistency checks emit advisory warnings (arm counts not summing to
@@ -66,32 +66,37 @@ NULL
 #' @return Invisibly \code{NULL}; called for its side effect.
 #' @keywords internal
 debug_emit <- function(title, ...) {
-  if (!isTRUE(getOption("selecta.debug_layout", FALSE))) return(invisible(NULL))
-  message(sprintf("== selecta debug: %s ==", title))
-  args <- list(...)
-  nms  <- names(args) %||% rep("", length(args))
-  for (i in seq_along(args)) {
-    obj <- args[[i]]
-    lbl <- if (nzchar(nms[i])) nms[i] else NULL
-    if (is.data.frame(obj) || is.matrix(obj)) {
-      if (!is.null(lbl)) message(sprintf("-- %s --", lbl))
-      message(paste(utils::capture.output(print(obj)), collapse = "\n"))
-    } else if (length(obj) == 1L && is.atomic(obj)) {
-      message(sprintf("%s%s", if (!is.null(lbl)) paste0(lbl, " = ") else "", obj))
-    } else {
-      if (!is.null(lbl)) message(sprintf("-- %s --", lbl))
-      message(paste(utils::capture.output(print(obj)), collapse = "\n"))
+    if (!isTRUE(getOption("selecta.debug_layout", FALSE))) return(invisible(NULL))
+    cap <- function(s) {
+        if (length(s) != 1L || is.na(s) || !nzchar(s)) return(s)
+        paste0(toupper(substring(s, 1L, 1L)), substring(s, 2L))
     }
-  }
-  invisible(NULL)
+    message(sprintf("=== selecta debug: %s ===", title))
+    args <- list(...)
+    nms  <- names(args) %||% rep("", length(args))
+    for (i in seq_along(args)) {
+        obj <- args[[i]]
+        lbl <- if (nzchar(nms[i])) nms[i] else NULL
+        if (is.data.frame(obj) || is.matrix(obj)) {
+            if (!is.null(lbl)) message(sprintf("--- %s ---", cap(lbl)))
+            message(paste(utils::capture.output(print(obj)), collapse = "\n"))
+        } else if (length(obj) == 1L && is.atomic(obj)) {
+            message(sprintf("%s%s", if (!is.null(lbl)) paste0(lbl, " = ") else "", obj))
+        } else {
+            if (!is.null(lbl)) message(sprintf("--- %s ---", cap(lbl)))
+            message(paste(utils::capture.output(print(obj)), collapse = "\n"))
+        }
+    }
+    invisible(NULL)
 }
 
-#' Warn About Inconsistent Manual Counts
+#' Warn About an Inconsistency in a Flow
 #'
-#' Emits a \code{warning()} describing an arithmetic inconsistency in a
-#' manually specified flow (for example, arm counts that do not sum to the
-#' number entering a split, or an exclusion larger than the available count).
-#' Manual counts are never altered or rejected, since an author may have a
+#' Emits a \code{warning()} describing a counting or attribution
+#' inconsistency in a flow---for example, manual arm counts that do not sum
+#' to the number entering a split, an exclusion larger than the available
+#' count, or a data-mode reason column that does not account for every
+#' removed row. Counts are never altered or rejected, since an author may have a
 #' legitimate reason for figures that do not reconcile; the warning is purely
 #' advisory and may be silenced with
 #' \code{options(selecta.check_arithmetic = FALSE)}.
@@ -101,16 +106,20 @@ debug_emit <- function(title, ...) {
 #' @return Invisibly \code{NULL}; called for its side effect.
 #' @keywords internal
 warn_arithmetic <- function(fmt, ...) {
-  if (!isTRUE(getOption("selecta.check_arithmetic", TRUE)))
-    return(invisible(NULL))
-  warning(sprintf(fmt, ...), call. = FALSE)
-  invisible(NULL)
+    if (!isTRUE(getOption("selecta.check_arithmetic", TRUE)))
+        return(invisible(NULL))
+    warning(sprintf(fmt, ...), call. = FALSE)
+    invisible(NULL)
 }
 
 ## Suppress R CMD check notes for data.table NSE column references.
 utils::globalVariables(c(
            ".",
+           "..cols",
+           "..node_cols",
            "arm_id",
+           "arm_level",
+           "arm_parent",
            "bh_inches",
            "box_h",
            "bw",
@@ -122,7 +131,9 @@ utils::globalVariables(c(
            "from_row",
            "fr",
            "from_arm",
+           "grp",
            "hdr_h",
+           "i.arm_id",
            "i.bh_inches",
            "i.box_h",
            "i.hdr_h",
@@ -136,6 +147,9 @@ utils::globalVariables(c(
            "r",
            "reasons",
            "role",
+           "row",
+           "s",
+           "side_h",
            "src_h",
            "stack_h",
            "stream_group",

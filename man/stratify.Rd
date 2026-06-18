@@ -12,16 +12,16 @@ allocate(.flow, variable = NULL, labels = NULL, n = NULL, label = "Randomized")
 \arguments{
 \item{.flow}{A \code{selecta} object.}
 
-\item{variable}{Character string naming the column that defines the arms
-(data mode). Ignored in manual mode.}
+\item{variable}{Character string naming the column that defines the arms.
+Data mode only.}
 
 \item{labels}{A character vector of arm labels. In data mode, this
 can be a named vector to relabel factor levels (\emph{e.g.,}
 \code{c(A = "Drug A", B = "Placebo")}). In manual mode, these are the
 arm names.}
 
-\item{n}{Integer vector (manual mode). Number of participants in each arm,
-in the same order as \code{labels}.}
+\item{n}{Integer vector. Number of participants in each arm, in the same
+order as \code{labels}. Manual mode only.}
 
 \item{label}{Character string for the split box. Defaults to
 \code{"Stratified"} for \code{stratify()} and \code{"Randomized"} for
@@ -36,24 +36,28 @@ The updated \code{selecta} object with a stratification step
 Divides the enrollment flow into parallel arms. This is the primary
 function for splitting a population by any characteristic: treatment
 assignment, exposure status, diagnostic test result, etc. Subsequent
-\code{exclude()} calls apply within each arm independently.
+\code{exclude()} calls apply within each arm independently. While
+\code{stratify()} is the primary function, \code{allocate()} is
+provided as a convenience alias with default label \code{"Randomized"},
+suitable for interventional trials (CONSORT).
 }
 \details{
-\code{allocate()} is a convenience alias with default label
-\code{"Randomized"}, suitable for interventional trials (CONSORT).
-
-
-\code{stratify()} fans the flow into parallel arms, after which each
-\code{\link{exclude}} (and the eventual \code{\link{endpoint}}) applies
+\code{stratify()} splits the flow into parallel arms, after which each
+\code{exclude()} (and the eventual \code{endpoint()}) applies
 within every arm. In data mode, \code{variable} names a column whose
-levels define the arms, optionally relabelled through a named
+levels define the arms, optionally relabeled through a named
 \code{labels} vector; in manual mode, \code{labels} and \code{n} give the
-arm names and per-arm counts directly. \code{allocate()} is an identical
-alias differing only in its default \code{label} (\code{"Randomized"}),
-provided so that interventional trials (CONSORT) read naturally; both
-record the same step type. Parallel arms may later be merged with
-\code{\link{combine}} to form a split-and-recombine diagram, and a flow
-may be split again after combining.
+arm names and per-arm counts directly.
+
+\code{allocate()} is an identical alias differing only in its default
+\code{label} (\code{"Randomized"}), provided so that interventional
+trials (CONSORT) read naturally; both record the same step type.
+
+Parallel arms may later be merged with \code{combine()} to form a
+split-and-recombine diagram, and a flow may be split again after
+combining. A second \code{stratify()} or \code{allocate()} before
+combining produces a factorial (two-level) split, supported in both
+data and manual modes.
 }
 \examples{
 # Observational study (STROBE)

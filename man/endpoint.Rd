@@ -4,50 +4,91 @@
 \alias{endpoint}
 \title{Mark the Final Analysis Endpoint}
 \usage{
-endpoint(.flow, label = "Final Analysis", reasons = NULL)
+endpoint(
+  .flow,
+  label = "Final Analysis",
+  breakdown = NULL,
+  groups = NULL,
+  n = NULL,
+  variable = NULL
+)
 }
 \arguments{
 \item{.flow}{A \code{selecta} object.}
 
-\item{label}{Character string for the final box. Default
+\item{label}{Character string for the final box. With \code{groups} it
+labels the shared distributor box above the group boxes. Default
 \code{"Final Analysis"}.}
 
-\item{reasons}{Optional named numeric vector (or list of vectors for
-per-arm endpoints) giving sub-item counts displayed below the total.
-Useful for STARD-style final diagnosis boxes, \emph{e.g.,}
-\code{reasons = c("Target condition +" = 160, "Target condition -" = 20)}.}
+\item{breakdown}{Optional named numeric vector (or, for a per-arm endpoint,
+a list of them) itemizing the box total into parts printed \emph{within}
+the box, beneath the total. This is the STARD final-diagnosis form, where
+each terminal box reports its target-condition composition, \emph{e.g.}
+\code{breakdown = c("Target +" = 160, "Target -" = 40)}. Mutually
+exclusive with \code{groups}.}
+
+\item{groups}{Optional character vector of group labels (manual mode). When
+supplied, the endpoint splits into one \emph{separate} terminal box per
+group, fanning from a shared distributor. Use this for study-design
+diagrams that end by displaying the groups to be analyzed (\dQuote{Group
+A}, \dQuote{Group B}, ...). A split endpoint requires a single incoming
+stream; it cannot follow an unrecombined \code{stratify()} or
+\code{allocate()}. Mutually exclusive with \code{breakdown}.}
+
+\item{n}{Optional numeric vector of per-group counts (manual mode), parallel
+to \code{groups}.}
+
+\item{variable}{Optional character naming a grouping column (data mode).
+Splits the terminal endpoint by that column, one box per level, with
+counts tabulated automatically. The data-mode counterpart of
+\code{groups}/\code{n}; same single-stream requirement.}
 }
 \value{
-The updated \code{selecta} object with an endpoint step
-  appended.
+The updated \code{selecta} object with an endpoint step appended.
 }
 \description{
 Adds the terminal node(s) to the enrollment flow. If arms have been
-defined via \code{\link{stratify}}, one endpoint box appears per arm.
+defined via \code{stratify()}, one endpoint box appears per arm.
 }
 \details{
-\code{endpoint()} closes the flow with its terminal node(s) and is
-usually the last step in a pipeline. When the flow has been split with
-\code{\link{stratify}} or \code{\link{allocate}} and not recombined, one
-endpoint box is drawn per arm, and \code{label} and \code{reasons} may be
-supplied per arm. The optional \code{reasons} prints sub-item counts
-beneath the total, which is used for STARD final-diagnosis boxes, where
-each terminal box reports its target-condition breakdown.
-The completed object is then passed to \code{\link{flowchart}},
-\code{\link{flowsave}}, or \code{\link{recdims}}.
+\code{endpoint()} closes the flow with its terminal node(s) and is usually
+the last step in a pipeline. When the flow has been split with
+\code{stratify()} or \code{allocate()} and not recombined, one
+endpoint box is drawn per arm, and \code{label} and \code{breakdown} may be
+supplied per arm.
+
+Two distinct presentations of detail are available, which are mutually
+exclusive. \code{breakdown} itemizes a single box's total as text lines
+inside that box (the STARD final-diagnosis form, reporting each box's
+target-condition composition). Conversely, \code{groups} divides the
+endpointinto separate side-by-side boxes, one per group, fanning from a
+shared distributor; this design favors study diagrams that end by
+displaying the groups to be analyzed. The completed object is then passed
+to \code{flowchart()}, \code{flowsave()}, or \code{recdims()}.
 }
 \examples{
 enroll(n = 300) |>
   exclude("Excluded", n = 40) |>
   endpoint("Included in analysis")
 
-# STARD-style per-arm endpoint with sub-items
+# STARD-style per-arm endpoint with a within-box breakdown
 enroll(n = 500) |>
   stratify(labels = c("Positive", "Negative"), n = c(200, 300),
            label = "Index test result") |>
   endpoint("Final diagnosis",
-           reasons = list(c("Target +" = 160, "Target -" = 40),
-                          c("Target +" = 25, "Target -" = 275)))
+           breakdown = list(c("Target +" = 160, "Target -" = 40),
+                            c("Target +" = 25, "Target -" = 275)))
+
+# Split endpoint into separate terminal group boxes (manual)
+enroll(n = 300, label = "Eligible cohort") |>
+  endpoint("Allocated to study group",
+           groups = c("Group A", "Group B", "Group C"),
+           n = c(100, 100, 100))
+
+# Split endpoint by a grouping column (data mode)
+df <- data.frame(id = 1:300, grp = sample(c("A", "B", "C"), 300, TRUE))
+enroll(df, id = "id", label = "Eligible cohort") |>
+  endpoint("Allocated to study group", variable = "grp")
 
 }
 \seealso{

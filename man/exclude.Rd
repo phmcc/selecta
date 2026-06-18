@@ -2,17 +2,18 @@
 % Please edit documentation in R/core.R
 \name{exclude}
 \alias{exclude}
-\title{Exclude Participants by a Criterion}
+\title{Exclude Participants by Criteria}
 \usage{
 exclude(
   .flow,
   label,
-  criteria,
+  criterion,
   n = NULL,
   reasons = NULL,
   show_zero = FALSE,
   show_count = FALSE,
-  included_label = NULL
+  included_label = NULL,
+  collapse_singletons = FALSE
 )
 }
 \arguments{
@@ -22,26 +23,34 @@ previous step).}
 \item{label}{Character. Human-readable description for the side box
 (\emph{e.g.,} \code{"Excluded"} or \code{"Lost to follow-up"}).
 After \code{stratify()}, may be a character vector with one label
-per arm (\emph{e.g.,} \code{c("Treatment discontinued", "Initiated treatment")}).}
+per arm (\emph{e.g.,} \code{c("Treatment discontinued", "Initiated
+treatment")}).}
 
-\item{criteria}{An unquoted logical expression evaluated against the
-data. Should evaluate to \code{TRUE} for rows to be \strong{removed}.
+\item{criterion}{An unquoted logical expression evaluated against the
+data. Should evaluate to \code{TRUE} for rows to be removed.
 Compound conditions are supported using the vectorized operators
 \code{&} (and), \code{|} (or), and \code{!} (not). Do not use the
 scalar short-circuit operators \code{&&} or \code{||}, which evaluate
-only the first element of each vector. (Data mode only.)}
+only the first element of each vector. Data mode only.}
 
-\item{n}{Integer (manual mode). Number of participants removed at this step.
-After a \code{stratify()} step, supply a vector with one value per arm.}
+\item{n}{Integer. Number of participants removed at this step.  After
+a \code{stratify()} step, supply a vector with one value per arm.
+Manual mode only.}
 
-\item{reasons}{Exclusion sub-reasons. Accepts three forms:
+\item{reasons}{Exclusion sub-reasons. Accepts these forms:
 \itemize{
-  \item A \strong{named integer vector} (manual mode): counts per reason,
-    \emph{e.g.,} \code{c("Disease progression" = 12, "Declined" = 8)}.
-  \item A \strong{character string} (data mode): column name whose
-    values are tabulated automatically.
-  \item A \strong{list} of named vectors (manual mode after \code{stratify()}):
-    one vector per arm.
+  \item A \emph{character string} (data mode): the name of a column
+    whose values are tabulated automatically into a flat breakdown.
+  \item A \emph{length-2 character vector} (data mode): the names of a
+    reason column and a sub-reason column, cross-tabulated automatically
+    into a two-level breakdown---parents ordered by total, sub-reasons by
+    count.
+  \item A \emph{named numeric vector} (manual mode): counts per reason,
+    \emph{e.g.,} \code{c("Disease progression" = 12, "Declined" = 8)}. An
+    entry may itself be a named numeric vector, giving a two-level
+    breakdown (a reason and its sub-reasons).
+  \item A \emph{list} of any of the above (data or manual mode after
+    \code{stratify()}): one entry per arm.
 }}
 
 \item{show_zero}{Logical. If \code{FALSE} (default), sub-reasons with a
@@ -49,7 +58,7 @@ count of zero are hidden. Set to \code{TRUE} to display all pre-specified
 reason categories, including those with zero participants.}
 
 \item{show_count}{Logical. If \code{FALSE} (default), the intermediate
-count box is suppressed -- the count still updates internally but no box
+count box is suppressed---the count still updates internally but no box
 is rendered. Set to \code{TRUE} to force a count box. Overridden by
 \code{included_label}: providing any \code{included_label} always
 creates a count box regardless of \code{show_count}. Also automatically
@@ -60,47 +69,55 @@ or \code{allocate()}.}
 box showing the count remaining after exclusion. When provided, a
 count box is always rendered regardless of \code{show_count}. After
 \code{stratify()}, may be a character vector with one label per arm.}
+
+\item{collapse_singletons}{Logical. When \code{TRUE}, a parent reason that
+resolves to a single sub-reason is collapsed to a plain leaf carrying the
+parent's label and count (dropping the lone, redundant sub-line). Applies
+to two-level reasons from either a manual nested specification or a
+two-column data-mode cross-tabulation. Default \code{FALSE} keeps every
+parent expanded, for full transparency.}
 }
 \value{
 The updated \code{selecta} object with an exclusion step appended.
 }
 \description{
 Appends an exclusion step to the enrollment flow. Participants matching the
-criterion are removed and shown in a side box. Optionally, itemized
+criteria are removed and shown in a side box. Optionally, itemized
 sub-reasons can be displayed below the total.
 }
 \details{
-After a \code{stratify()} step, both \code{label} and
-\code{included_label} accept character vectors (one element per arm)
-for per-arm labeling -- useful in observational designs where
-attrition mechanisms differ across strata.
-
-
 \code{exclude()} records participants removed at a step and is the most
-common pipeline verb. In data mode, \code{criteria} is an unquoted logical
+common pipeline verb. In data mode, \code{criterion} is an unquoted logical
 expression evaluated against the dataset (rows for which it is
-\code{TRUE} are removed) and \code{reasons} may name a column whose values
-are tabulated into a sub-reason breakdown; in manual mode, \code{n} gives
+\code{TRUE} are removed) and \code{reasons} may name one column (a flat
+breakdown) or two columns (a reason and a sub-reason, cross-tabulated into a
+two-level breakdown); in manual mode, \code{n} gives
 the number removed and \code{reasons} may be a named numeric vector.
-After a \code{\link{stratify}} or \code{\link{allocate}} split the
+After a \code{stratify()} or \code{allocate()} split the
 exclusion applies per arm, in which case \code{n}, \code{reasons}, and
 \code{included_label} accept per-arm vectors or lists. By default the
 running count box is suppressed between consecutive exclusions for a
 compact diagram; supplying \code{included_label} (or
-\code{show_count = TRUE}) forces a count box to be drawn. When
-\code{getOption("selecta.check_arithmetic")} is \code{TRUE}, the manual
-counts of the whole flow are audited together before export: an
+\code{show_count = TRUE}) forces a count box to be drawn.
+
+When \code{getOption("selecta.check_arithmetic")} is \code{TRUE}, the
+manual counts of the whole flow are audited together before export: an
 over-exclusion, a split or combine whose parts do not match the running
 total, and sub-reasons that do not sum to their exclusion total each
-raise an advisory warning, without altering the figures. The audit runs
-whenever the flow is computed, which includes \code{\link{flowchart}},
-\code{\link{flowsave}}, and \code{summary()}, so a single call to any of
-these reports every discrepancy at once.
+raise an advisory warning without altering the figures. The audit runs
+whenever the flow is computed; this includes calls to \code{flowchart()},
+\code{flowsave()}, and \code{summary()}, so a single call to any of
+these functions reports every discrepancy at once.
 
 Eligibility that is more naturally framed as inclusion fits this same
-model: express it as the exclusion of those who fail the criterion, and
+model: express it as the exclusion of those who fail the criteria, and
 use \code{included_label} to label the retained count (\emph{e.g.,}
 \code{included_label = "Eligible cohort"}).
+
+After a \code{stratify()} step, both \code{label} and
+\code{included_label} accept character vectors (one element per arm)
+for per-arm labeling---useful in observational designs where
+attrition mechanisms differ across strata.
 }
 \examples{
 enroll(n = 500) |>
@@ -144,10 +161,10 @@ enroll(n = 900) |>
   endpoint("Analyzed")
 
 # Compound expression (data mode)
-data(rctselect2)
-enroll(rctselect2, id = "patient_id") |>
+data(selectaex2)
+enroll(selectaex2, id = "patient_id") |>
   exclude("Ineligible or duplicate",
-          criteria = eligible == FALSE | is_duplicate == TRUE)
+          criterion = eligible == FALSE | is_duplicate == TRUE)
 
 }
 \seealso{

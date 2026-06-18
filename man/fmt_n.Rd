@@ -11,9 +11,9 @@ fmt_n(n, marks = NULL)
 elements are returned as empty strings.}
 
 \item{marks}{List with \code{big.mark} and \code{decimal.mark} as
-returned by \code{\link{resolve_number_marks}}. May be \code{NULL},
+returned by \code{resolve_number_marks()}. May be \code{NULL},
 in which case the current global setting is resolved automatically.
-\code{decimal.mark} is forwarded to \code{\link{format}} so that
+\code{decimal.mark} is forwarded to \code{format()} so that
 locales whose thousands separator is a period (\emph{e.g.,} the
 \code{"eu"} preset) do not trip \code{format}'s "big.mark and
 decimal.mark are both '.'" warning.}

@@ -1,6 +1,10 @@
 # <span class="pkg-name">selecta</span> <a href="https://phmcc.codeberg.page/selecta/"><img src="man/figures/selecta.svg" align="right" height="139" alt="selecta website" /></a>
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/phmcc/selecta/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/phmcc/selecta/actions/workflows/R-CMD-check.yaml)
+[![test-coverage](https://github.com/phmcc/selecta/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/phmcc/selecta/actions/workflows/test-coverage.yaml)
+[![lint](https://github.com/phmcc/selecta/actions/workflows/lint.yaml/badge.svg)](https://github.com/phmcc/selecta/actions/workflows/lint.yaml)
+[![CRAN status](https://www.r-pkg.org/badges/version/selecta)](https://CRAN.R-project.org/package=selecta)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
@@ -10,13 +14,17 @@
 
 ## Overview
 
-The `selecta` package provides a pipe-friendly, declarative interface for constructing EQUATOR-style enrollment diagrams. A diagram is specified as a sequence of operations—enrollment, exclusion, stratification, recombination, and endpoint—that mirrors the natural language description of a study's participant flow. The package supports multiple reporting guidelines (CONSORT, STROBE, STARD, PRISMA, MOOSE), computes counts either automatically from a supplied dataset or from user-provided integers, renders the diagram via `grid` graphics or Graphviz DOT, and optionally returns the analysis-ready cohort at any stage of the selection process.
+The `selecta` package provides a pipe-friendly, declarative interface for constructing EQUATOR-style flow diagrams. A diagram is specified as a sequence of operations—enrollment, exclusion, stratification, recombination, and endpoint—that mirrors the natural language description of a study's participant flow. The package supports multiple reporting guidelines (CONSORT, STROBE, STARD, PRISMA, MOOSE), hybrid or custom topologies, automatic count computation, arithmetic checking, diagram render via `grid` graphics or Graphviz DOT, and optionally return of the analysis-ready cohort at any stage of the selection process.
 
 For a more comprehensive description of this package and its features, see the [full documentation and vignettes](https://phmcc.codeberg.page/selecta/).
 
+<p align="center">
+  <img src="man/figures/README_hero.png" alt="Flow diagram showcasing multi-source confluence, split-and-recombine flow, and factorial topology" width="80%">
+</p>
+
 ## Installation
 
-This package is not yet on CRAN. Install it from GitHub (stable) or Codeberg (development):
+This package is not yet available on CRAN. Install it from GitHub (stable) or Codeberg (development):
 
 ```r
 # Stable release
@@ -25,8 +33,6 @@ devtools::install_github("phmcc/selecta")
 # Development version
 devtools::install_git("https://codeberg.org/phmcc/selecta.git")
 ```
-
-`selecta` requires R (>= 4.1.0).
 
 ## Package Composition
 
@@ -46,7 +52,7 @@ These principles manifest in the standard calling convention:
 
 ```r
 flow <- enroll(data, id = "patient_id") |>
-  exclude("Excluded", criteria = x | y | z) |>
+  exclude("Excluded", criterion = <condition>) |>
   allocate("treatment_variable") |>
   endpoint("Final Analysis")
 
@@ -76,13 +82,13 @@ Functions for building the enrollment flow. Each returns a modified `selecta` ob
 |:---------|:--------|:----------|
 | `enroll()` | Initialize a flow from data (`data`, `id`) or counts (`n`) | CONSORT, STROBE, STARD, split-and-recombine |
 | `sources()` | Initialize a multi-source flow with parallel columns | PRISMA, MOOSE |
-| `phase()` | Label a study phase (vertical text in left margin) | All |
 | `exclude()` | Remove participants matching a criterion, with optional sub-reasons | All |
 | `allocate()` | Split into randomized arms (alias for `stratify()`) | CONSORT |
 | `stratify()` | Split into parallel strata by any characteristic | STROBE, STARD, MOOSE |
 | `assess()` | Record a test/procedure receipt step | STARD |
 | `combine()` | Merge parallel streams into a single flow | PRISMA, MOOSE, split-and-recombine |
 | `endpoint()` | Designate the terminal node(s) | All |
+| `phase()` | Label a study phase (vertical text in left margin) | All |
 
 #### Rendering and export
 
@@ -114,9 +120,9 @@ Functions for building the enrollment flow. Each returns a modified `selecta` ob
 | Workflow | Data mode | Manual mode |
 |:---|:---|:---|
 | **Initialization** | `enroll(data, id = "patient_id")` | `enroll(n = 1200)` |
-| **Exclusions** | `exclude("Label", criteria = <condition>)` | `exclude("Label", n = 50)` |
+| **Exclusions** | `exclude("Label", criterion = <condition>)` | `exclude("Label", n = 50)` |
 | **Arms** | `allocate("treatment_column")` | `allocate(labels = c("A", "B"), n = c(300, 300))` |
-| **Sub-reasons** | Tabulated from a column (`reasons_var`) | Supplied as a named vector (`reasons`) |
+| **Sub-reasons** | Tabulated from one or two columns (`reasons`) | Named vector, or named list for nested reasons (`reasons`) |
 | **Cohort extraction** | Available via `cohort()` | Not applicable |
 
 ### Flow Topologies
@@ -128,8 +134,7 @@ Functions for building the enrollment flow. Each returns a modified `selecta` ob
 | Permanent arms | `allocate()` / `stratify()` | None | CONSORT, STROBE |
 | Source convergence | `sources()` | `combine()` | PRISMA, MOOSE |
 | Split-and-recombine | `stratify()` | `combine()` | Screening validation, exposure classification |
-
-The split-and-recombine topology fans the population out into strata in the middle of the diagram, characterizes each stratum independently, and reconverges to a single stream before the endpoint—producing the diamond-shaped layout common in screening-validation studies.
+| Factorial (nested split) | `allocate()` / `stratify()`, twice | Optional `combine()` | Factorial trials, cross-classified cohorts |
 
 ### Visual Customization
 
@@ -160,7 +165,7 @@ options(selecta.vpad = 0.35)            # increase default vertical spacing
 
 ### Diagnostic output
 
-For inspecting how a diagram is laid out—when reporting a rendering problem, or when tuning spacing and phase wrapping—`selecta` can emit a structured trace of its internal computation. The trace is controlled by a single session option:
+For inspecting flow diagram layout specifics, `selecta` can emit a structured trace of its internal computation. The trace is controlled by a single session option:
 
 ```r
 options(selecta.debug_layout = TRUE)
@@ -174,15 +179,17 @@ The R ecosystem includes several packages for generating CONSORT diagrams. The f
 |:-----------|:-------:|:-------:|:---------:|:---------------:|
 | Pipe-friendly declarative API | ✓ | — | ✓ | — |
 | Data-driven automatic counting | ✓ | ✓ | ✓ | — |
-| Manual count entry | ✓ | — | — | ✓ |
+| Manual count entry | ✓ | ✓ | — | ✓ |
 | Multi-guideline support (CONSORT, STROBE, STARD, PRISMA) | ✓ | — | — | ◐ |
 | Multi-source entry (PRISMA) | ✓ | — | — | ✓ |
 | Split-and-recombine topology | ✓ | — | — | — |
 | Cohort extraction for analysis | ✓ | — | — | — |
 | Phase labels (CONSORT standard) | ✓ | ✓ | — | — |
-| Exclusion sub-reasons | ✓ | — | — | — |
+| Exclusion sub-reasons | ✓ | ✓ | — | — |
+| Factorial (nested-split) designs | ✓ | ◐ | — | — |
+| Hierarchical (nested) sub-reasons | ✓ | — | — | — |
 | Multi-format export | ✓ | ◐ | ◐ | — |
-| Graphviz/HTML output | ✓ | — | — | — |
+| Graphviz/HTML output | ✓ | ✓ | — | ✓ |
 
 <sub>✓ Full support | ◐ Partial support | — Not available</sub>
 
@@ -190,7 +197,7 @@ A detailed feature comparison is available in the [package documentation](https:
 
 ## Illustrative Example
 
-The `rctselect*` datasets included with this package provide simulated clinical trial selection cohorts with various inclusion/exclusion criteria, as well as different arm allocation criteria. The following example demonstrates how `selecta` functions can be used to generate a CONSORT diagram from the two-armed dataset `rctselect2`, using data-driven counts, count-first formatting, and automatic subcohort extraction.
+The `selectaex*` datasets included with this package provide simulated clinical trial selection cohorts with various inclusion/exclusion criteria, as well as different arm allocation criteria. The following example demonstrates how `selecta` functions can be used to generate a CONSORT diagram from the two-armed dataset `selectaex2`, using data-driven counts, count-first formatting, and automatic subcohort extraction.
 
 ### **Step 0:** Data Preparation
 
@@ -200,25 +207,25 @@ Prior to analysis, load the package and the dataset:
 library(selecta)
 
 # Load example data
-data("rctselect2")
+data("selectaex2")
 ```
 
 ### **Step 1:** Flowchart Creation
 
-Use a pipe-based workflow to sequentially string together the various elements of the flowchart, from top to bottom. The `exclude()` function pares down the dataset based on the condition supplied to the `criteria` parameter, whereas `allocate()`/`stratify()` sets arms. Export the output using the `flowsave()` function.
+Use a pipe-based workflow to sequentially string together the various elements of the flowchart, from top to bottom. The `exclude()` function pares down the dataset based on the condition supplied to the `criterion` parameter, whereas `allocate()`/`stratify()` sets arms. Export the output using the `flowsave()` function.
 
 ``` r
-flow <- enroll(rctselect2, id = "patient_id") |>
+flow <- enroll(selectaex2, id = "patient_id") |>
     phase("Screening") |>
-    exclude("Duplicate records", criteria = is_duplicate == TRUE,
+    exclude("Duplicate records", criterion = is_duplicate == TRUE,
             included_label = "Unique records") |>
-    exclude("Failed eligibility", criteria = eligible == FALSE,
+    exclude("Failed eligibility", criterion = eligible == FALSE,
             reasons = "exclusion_reason",
             included_label = "Eligible cohort") |>
     phase("Allocation") |>
     allocate("treatment") |>
     phase("Follow-up") |>
-    exclude("Discontinued", criteria = discontinued == TRUE,
+    exclude("Discontinued", criterion = discontinued == TRUE,
             reasons = "discontinuation_reason") |>
     phase("Analysis") |>
     endpoint("Analysis cohort")
@@ -226,7 +233,9 @@ flow <- enroll(rctselect2, id = "patient_id") |>
 flowsave(flow, "consort.pdf", count_first = TRUE)
 ```
 
-<img src="man/figures/README_CONSORT_2arm.png" alt="Two-arm CONSORT diagram" width="100%">
+<p align="center">
+  <img src="man/figures/README_CONSORT_2arm.png" alt="Two-arm CONSORT diagram" width="100%">
+</p>
 
 ### **Step 2:** Cohort Extraction
 
@@ -271,9 +280,9 @@ Bug reports and feature requests may be submitted via the issue tracker ([Codebe
 The design of `selecta` draws inspiration from several existing packages and reference standards:
 
 - **EQUATOR Network** — Reporting-guideline standards (CONSORT, STROBE, STARD, PRISMA, MOOSE)
-- **consort** (Dayim) — CONSORT diagram conventions
-- **DiagrammeR** (Iannone) — Graphviz/DOT rendering approach
-- **Graphviz** — The graph visualization engine underlying the package's DOT export and rendering
+- **consort** (Alim Dayim) — CONSORT diagram conventions in R
+- **stard** (Chiara Herzog) — STARD diagram conventions in R
+- **DiagrammeR** (Iannone) — R Graphviz/DOT rendering
 - **data.table** (Dowle & Srinivasan) — High-performance data operations
 
 ## License
@@ -288,7 +297,7 @@ citation("selecta")
 To cite selecta in publications, use:
 
   McClelland PH (2026). _selecta: EQUATOR-Style Enrollment Diagrams
-  for Clinical Studies_. R package version 0.4.0,
+  for Clinical Studies_. R package version 0.6.0,
   <https://phmcc.codeberg.page/selecta/>.
 
 A BibTeX entry for LaTeX users is
@@ -297,7 +306,7 @@ A BibTeX entry for LaTeX users is
     title = {selecta: EQUATOR-Style Enrollment Diagrams for Clinical Studies},
     author = {Paul Hsin-ti McClelland},
     year = {2026},
-    note = {R package version 0.5.0},
+    note = {R package version 0.6.0},
     url = {https://phmcc.codeberg.page/selecta/},
   }
 ```

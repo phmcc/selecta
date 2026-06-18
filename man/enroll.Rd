@@ -9,7 +9,7 @@ enroll(data = NULL, id = NULL, n = NULL, label = "Study Population")
 \arguments{
 \item{data}{A \code{data.frame} or \code{data.table} in which each row
 represents one participant. When supplied, exclusion expressions passed
-to \code{\link{exclude}} are evaluated against this data to compute
+to \code{exclude()} are evaluated against this data to compute
 counts automatically. If \code{NULL} (default), the flow operates in
 manual mode.}
 
@@ -25,9 +25,8 @@ Default is \code{"Study Population"}.}
 \value{
 An object of class \code{"selecta"} containing the data (if
   supplied), mode, starting count, label, and an empty step list.
-  Subsequent pipeline functions (\code{\link{exclude}},
-  \code{\link{stratify}}, \code{\link{endpoint}}, \emph{etc.}) append
-  steps to this object.
+  Subsequent pipeline functions (\code{exclude()}, \code{stratify()},
+  \code{endpoint()}, \emph{etc.}) append steps to this object.
 }
 \description{
 Entry point for building an EQUATOR-style enrollment diagram from a single
@@ -37,28 +36,23 @@ starting count \code{n} (manual mode, where counts are supplied explicitly
 at each step).
 }
 \details{
-For flows that begin with multiple parallel identification streams
-(\emph{e.g.,} PRISMA 2020 systematic reviews), use \code{\link{sources}}
-instead.
-
-
 \code{enroll()} begins every single-source pipeline and fixes the
 operating mode for all subsequent steps. Supplying \code{data} (with
 \code{id}) selects \emph{data mode}, in which later \code{exclude()} and
 \code{stratify()} steps filter and partition the dataset and counts are
-derived from the data; supplying \code{n} instead selects \emph{manual
-mode}, in which counts are taken from the numbers given at each step. The
-two modes are mutually exclusive, and the resulting object is intended to
-be extended with the pipe operator. For diagrams with several entry
-sources that converge (PRISMA, MOOSE), use \code{\link{sources}} instead
-of \code{enroll()}.
+derived from the data. Alternatively, supplying \code{n} instead selects
+\emph{manual mode}, in which counts are taken from the numbers given at
+each step. The two modes are mutually exclusive, and the resulting object
+is intended to be extended with the pipe operator. For diagrams with
+several entry sources that converge (PRISMA, MOOSE), use \code{sources()}
+instead of \code{enroll()}.
 }
 \examples{
 # Manual mode
 enroll(n = 500, label = "Assessed for eligibility")
 
 # Data mode
-enroll(rctselect2, id = "patient_id", label = "Study Population")
+enroll(selectaex2, id = "patient_id", label = "Study Population")
 
 # Minimal CONSORT pipeline
 enroll(n = 500) |>

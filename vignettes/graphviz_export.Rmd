@@ -1,0 +1,368 @@
+---
+title: "Graphviz Export"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Graphviz Export}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE
+)
+
+## DOT rendering helper
+.dot_available <- nzchar(Sys.which("dot"))
+
+## CSS font-family chain ordered for cross-platform Helvetica-likeness:
+## Helvetica resolves on macOS and Adobe-installed environments; Arial
+## is Microsoft's metric-equivalent of Helvetica and resolves on Windows;
+## Liberation Sans and DejaVu Sans cover Linux distributions; sans-serif
+## is the universal CSS generic family that browsers always resolve.
+.sans_chain <- "Helvetica, Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif"
+
+render_dot <- function(dot_str, width = "100%", fmt = c("svg", "png"),
+                       dpi = 150, sans_serif = TRUE) {
+  fmt <- match.arg(fmt)
+  if (.dot_available) {
+    out <- paste0(knitr::fig_path(paste0(".", fmt)))
+    fig_dir <- dirname(out)
+    if (!dir.exists(fig_dir)) dir.create(fig_dir, recursive = TRUE)
+    dot_in <- tempfile(fileext = ".dot")
+    writeLines(dot_str, dot_in)
+    args <- c(paste0("-T", fmt))
+    if (fmt == "png") args <- c(args, paste0("-Gdpi=", dpi))
+    args <- c(args, shQuote(dot_in), "-o", shQuote(out))
+    system2("dot", args, stdout = NULL, stderr = NULL)
+
+    ## Post-process SVG
+    if (isTRUE(sans_serif) && fmt == "svg" && file.exists(out)) {
+      svg_text <- paste(readLines(out, warn = FALSE), collapse = "\n")
+      svg_text <- gsub('font-family="(Helvetica|Times)[^"]*"',
+                       sprintf('font-family="%s"', .sans_chain),
+                       svg_text, perl = TRUE)
+      svg_text <- gsub("font-family='(Helvetica|Times)[^']*'",
+                       sprintf("font-family=\"%s\"", .sans_chain),
+                       svg_text, perl = TRUE)
+      writeLines(svg_text, out)
+    }
+
+    knitr::include_graphics(out, dpi = NA)
+  } else if (requireNamespace("DiagrammeR", quietly = TRUE)) {
+    DiagrammeR::grViz(dot_str, width = width)
+  } else {
+    cat(dot_str)
+  }
+}
+```
+
+The default rendering engine in `selecta` uses R's `grid` graphics system to produce publication-quality PDF, PNG, SVG, and TIFF output. For applications requiring web embedding or integration with graph-manipulation tools, `selecta` also supports export to the Graphviz DOT language. The resulting DOT strings can be rendered with the [`DiagrammeR`](https://rich-iannone.github.io/DiagrammeR/) package or any Graphviz-compatible tool.
+
+> *n.b.:* The diagrams in this vignette are rendered through the system Graphviz binary (`dot`) when available, providing reliable support for all Graphviz attributes (including `splines=ortho` for right-angle edges). When the binary is not available, the vignette falls back to `DiagrammeR::grViz()`, which produces embeddable HTML widgets but may silently drop some Graphviz directives.
+
+---
+
+# Preliminaries
+
+```{r setup}
+library(selecta)
+```
+
+The DOT engine is available through the `engine` argument of `flowchart()` and `plot()`. No additional packages are required to generate DOT strings; however, rendering them as an HTML widget requires `DiagrammeR`:
+
+```{r, eval = FALSE}
+library(DiagrammeR)
+```
+
+---
+
+# Generating DOT Output
+
+## **Example 1:** Basic DOT String
+
+The `engine = "dot"` argument causes `flowchart()` to return a character string in the Graphviz DOT language rather than drawing to a graphics device:
+
+```{r}
+example1 <- enroll(n = 500) |>
+    phase("Enrollment") |>
+    exclude("Ineligible", n = 65,
+            reasons = c("Age < 18" = 30, "No consent" = 35),
+            included_label = "Eligible") |>
+    phase("Analysis") |>
+    endpoint("Final cohort")
+
+dot_str <- flowchart(example1, engine = "dot")
+dot_str
+```
+
+```{r, echo = FALSE, out.width = "100%"}
+render_dot(dot_str)
+```
+
+The DOT string defines a directed graph (`digraph`) with one node per diagram box and one edge per flow or exclusion arrow.
+
+## **Example 2:** Multi-Arm Trial (CONSORT)
+
+The DOT engine supports more complex split diagram types, including multi-arm trials with per-arm exclusions:
+
+```{r}
+example2 <- enroll(n = 1200, label = "Assessed for eligibility") |>
+    phase("Enrollment") |>
+    exclude("Excluded", n = 300,
+            reasons = c("Not meeting criteria" = 160,
+                        "Declined" = 90, "Other" = 50)) |>
+    phase("Allocation") |>
+    allocate(labels = c("Drug A", "Placebo"), n = c(450, 450)) |>
+    phase("Follow-up") |>
+    exclude("Lost to follow-up", n = c(20, 20)) |>
+    phase("Analysis") |>
+    endpoint("Analyzed")
+
+dot_2arm <- flowchart(example2, engine = "dot")
+cat(dot_2arm)
+```
+
+```{r, echo = FALSE, out.width = "100%"}
+render_dot(dot_2arm)
+```
+
+## **Example 3:** Systematic Review (PRISMA)
+
+The DOT engine also handles converging multi-source diagrams. To stay consistent with the grid engine, source boxes use a white fill and source-column headers use a darker gray fill with bold black text; exclusion side boxes remain light gray.
+
+```{r}
+example3 <- sources(
+    previous  = c("Previous review" = 12, "Previous reports" = 15),
+    databases = c("PubMed" = 1234, "Embase" = 567, "CENTRAL" = 89),
+    other     = c("Citation search" = 55, "Websites" = 34),
+    headers   = c(previous  = "Previous studies",
+                  databases = "Databases and registers",
+                  other     = "Other methods")
+) |>
+    combine("Records identified", n = 2006) |>
+    exclude("Duplicates removed", n = 352,
+            included_label = "Records screened") |>
+    exclude("Records excluded", n = 1100) |>
+    endpoint("Studies included in review")
+
+dot_prisma <- flowchart(example3, engine = "dot")
+cat(dot_prisma)
+```
+
+```{r, echo = FALSE, out.width = "100%"}
+render_dot(dot_prisma)
+```
+
+---
+
+# Customizing DOT Output
+
+Because the DOT string is plain text, it can be modified before rendering. This enables customization beyond what `flowchart()` exposes directly.
+
+## **Example 4:** Changing Node Colors
+
+The DOT engine accepts the same coloring parameters as the grid engine, plus three parameters specific to multi-source diagrams. The example below recolors a PRISMA-style flow with a warm palette and switches the source-header text to white for contrast against a dark header fill:
+
+```{r}
+dot_palette <- flowchart(example3, engine = "dot",
+                         box_fill           = "#fffbe6",  # warm cream
+                         side_fill          = "#ffe0e0",  # light pink
+                         source_fill        = "#fff5cc",  # pale yellow
+                         source_header_fill = "#1f5b3a",  # dark green
+                         source_header_text = "#ffffff",  # white text
+                         border_col         = "#5a3a1a",  # warm brown
+                         arrow_col          = "#5a3a1a")
+```
+
+```{r, echo = FALSE, out.width = "100%"}
+render_dot(dot_palette)
+```
+
+The full set of DOT color parameters is:
+
+| Parameter            | Applies to                                         | Default     |
+|:---------------------|:---------------------------------------------------|:------------|
+| `box_fill`           | Main flow boxes (enrollment, allocation, endpoint) | `"#FFFFFF"` |
+| `side_fill`          | Side (exclusion) boxes                             | `"#F0F0F0"` |
+| `border_col`         | Border color for all boxes                         | `"black"`   |
+| `arrow_col`          | Connector arrows and edge labels                   | `"black"`   |
+| `source_fill`        | Source boxes (PRISMA, MOOSE)                       | `"#FFFFFF"` |
+| `source_header_fill` | Source-column header fill                          | `"#D0D0D0"` |
+| `source_header_text` | Source-column header text                          | `"black"`   |
+
+The grid engine's `phase_fill` and `phase_text_col` have no effect on DOT output, which does not render the vertical phase strips.
+
+## **Example 5:** Count-First Layout
+
+The DOT engine accepts the same `count_first = TRUE` argument as the grid engine, producing the compact label format in which the count leads:
+
+```{r}
+dot_cf <- flowchart(example1, engine = "dot", count_first = TRUE)
+```
+
+```{r, echo = FALSE, out.width = "100%"}
+render_dot(dot_cf)
+```
+
+By default each label spans two lines—the descriptive text, then `n = <count>`. The `count_first` flag collapses this to a single leading-count line. Both layouts respect the `number_format` setting for locale-aware count formatting.
+
+## **Example 6:** Rich (HTML) Formatting
+
+For diagrams where inline italic *n* and bold label text are essential, `formatting = "rich"` switches to Graphviz's HTML-like label syntax: the descriptive line renders in bold and the lowercase *n* in "n = X" renders in italic, matching the grid engine and published EQUATOR diagrams:
+
+```{r}
+dot_rich <- flowchart(example1, engine = "dot", formatting = "rich")
+```
+
+```{r, echo = FALSE, out.width = "100%"}
+render_dot(dot_rich)
+```
+
+## **Example 7:** Times Typography
+
+Either formatting mode accepts an alternative `font_family`. Times-Roman suits environments where Helvetica is unavailable or where serif typography fits the surrounding document. Pair it with `sans_serif = FALSE` on `render_dot()` to retain the Times face rather than substituting the cross-platform sans-serif chain:
+
+```{r}
+dot_times <- flowchart(example1, engine = "dot",
+                       font_family = "Times-Roman")
+```
+
+```{r, echo = FALSE, out.width = "100%"}
+render_dot(dot_times, sans_serif = FALSE)
+```
+
+## **Example 8:** Adding Graphviz Attributes
+
+When a needed adjustment has no dedicated parameter, the DOT string can be edited as plain text before rendering. Because the returned value is just text, `gsub()` reaches anything Graphviz understands. For example, to change the overall graph direction from top-to-bottom to left-to-right:
+
+```{r}
+dot_lr <- gsub("rankdir=TB", "rankdir=LR", dot_str)
+```
+
+```{r, echo = FALSE, out.width = "100%"}
+render_dot(dot_lr)
+```
+
+This is the most *ad hoc* of the customization routes: it bypasses the layout pass, so it is reliable for attributes that do not affect box sizing (direction, edge style, background) but unsuitable for anything that does. The font in particular is best changed through `font_family` (Example 7) rather than string substitution, since box widths are measured from font-specific metrics before rendering.
+
+---
+
+# Font Formatting Notes
+
+The DOT engine sizes every box before handing the graph to Graphviz, measuring label widths from embedded Adobe Font Metric (AFM) tables. Tables ship for Helvetica, Times-Roman, and Courier; other font names fall back to the Helvetica tables, which work well for similar sans-serif faces such as Arial, Liberation Sans, and DejaVu Sans. For this reason, the font is best set through `font_family` rather than by editing the generated DOT: changing the name without re-running the measurement pass produces mis-sized boxes.
+
+Plain formatting (the default) uses Graphviz's standard text path, which centers labels reliably and aligns identically across rendering backends. Source-column headers still receive a bold face through the per-node `fontname` attribute (`Helvetica-Bold`, `Times-Bold`, or `Courier-Bold` to match the body font), so the header emphasis survives without invoking HTML labels. Rich formatting (Example 6) opts into Graphviz's HTML-like labels for inline bold and italic; box widths are then measured with a trailing-whitespace centering correction that yields sub-pixel centering for Helvetica and exact centering for Times. Other fonts may show slight residual drift under rich formatting, so plain formatting remains the safer default for them.
+
+---
+
+# The `plot()` Method
+
+The S3 `plot()` method dispatches to `flowchart()` and accepts the same `engine` argument:
+
+```{r}
+dot_via_plot <- plot(example1, engine = "dot")
+identical(dot_via_plot, dot_str)
+```
+
+This provides a convenient shorthand for interactive use.
+
+---
+
+# Bullets vs. Indentation
+
+Left-aligned breakdowns inside side and source boxes—the sub-reasons of an `exclude()` step, whether flat or nested, and the per-source counts of a PRISMA flow—are prefixed with a bullet under plain formatting, where indentation alone barely separates a sub-item from its parent. Passing `bullets = FALSE` removes the prefixes and relies on indentation; `bullets = TRUE` forces them on under rich formatting, whose bold parent labels otherwise carry the hierarchy unaided. The default, `bullets = NULL`, selects per mode.
+
+---
+
+# Saving to File
+
+The `flowsave()` function accepts `engine = "dot"`, piping the diagram through the system Graphviz binary and bypassing R's graphics devices. This requires `dot` on the system `PATH`; the function raises an error otherwise. Output format follows the file extension—PDF, PNG, SVG, TIFF, or `.dot` (the raw source). The `count_first`, `number_format`, `ortho`, `bullets`, `formatting`, `font_family`, and `padding_pt` arguments accepted by `flowchart()` are forwarded:
+
+```{r, eval = FALSE}
+# SVG with cross-platform sans-serif rendering (default)
+flowsave(example1, "consort.svg", engine = "dot")
+
+# PDF output (Helvetica baked into the file at render time)
+flowsave(example1, "consort.pdf", engine = "dot")
+
+# PNG output at a requested DPI
+flowsave(example1, "consort.png", engine = "dot", dpi = 300)
+
+# Raw DOT source for downstream editing or external tools
+flowsave(example1, "consort.dot", engine = "dot")
+```
+
+By default (`sans_serif = TRUE`), SVG output is post-processed to expand Graphviz's single-name `font-family` into a cross-platform fallback chain (`Helvetica, Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif`), so the displayed face resolves to the platform's native sans-serif. Setting `sans_serif = FALSE` retains Graphviz's emitted typography, which is appropriate when consistency with PDF output (always rendered in the layout font) matters more than rendering portability:
+
+```{r, eval = FALSE}
+flowsave(example1, "consort.svg", engine = "dot",
+         font_family = "Times-Roman", sans_serif = FALSE)
+```
+
+---
+
+# Advanced Rendering Options
+
+The `DiagrammeR::grViz()` function renders a DOT string as an HTML widget. In RStudio, this displays in the Viewer pane; in R Markdown documents, it renders inline:
+
+```{r, eval = FALSE}
+library(DiagrammeR)
+
+grViz(dot_str)
+```
+
+The widget embeds in HTML output, but its content is a static SVG: nodes are not clickable and carry no hover tooltips unless `tooltip=` / `URL=` attributes are added to the DOT first. Emitting those attributes from the DOT engine directly is a planned feature (see the [Development Roadmap](development_roadmap.html)).
+
+## Saving as HTML
+
+These HTML widgets can be saved as self-contained HTML files using `htmlwidgets::saveWidget()`:
+
+```{r, eval = FALSE}
+widget <- DiagrammeR::grViz(dot_str)
+htmlwidgets::saveWidget(widget, "consort_diagram.html", selfcontained = TRUE)
+```
+
+## Saving as PNG
+
+Static image export requires the `webshot2` package, which captures the rendered HTML widget as a screenshot:
+
+```{r, eval = FALSE}
+tmp <- tempfile(fileext = ".html")
+htmlwidgets::saveWidget(DiagrammeR::grViz(dot_str), tmp, selfcontained = TRUE)
+webshot2::webshot(tmp, file = "consort_diagram.png",
+                  vwidth = 800, vheight = 1000, delay = 0.5)
+```
+
+---
+
+# Choosing Between Engines
+
+Both engines render the full range of topologies—single-stream, parallel-arm, source convergence, split-and-recombine, and factorial—together with phase labels and hierarchical exclusion reasons. The choice between them is primarily one of layout philosophy:
+
+| Feature | `engine = "grid"` | `engine = "dot"` |
+|:--------|:-------------------|:-----------------|
+| `flowchart()` output | Draws to the graphics device | Returns a DOT-language string |
+| `flowsave()` formats | PDF, PNG, SVG, TIFF | PDF, PNG, SVG, TIFF, `.dot` |
+| Rendering tool | Base R (`grid`) | System Graphviz (`dot`), or DiagrammeR |
+| Layout | Inch-precise, hand-calibrated | Automatic Graphviz layout |
+| Phase labels | Colored vertical strips | Left-margin band labels |
+| Exclusion sub-reasons | Indented text | Bulleted or indented (`bullets`) |
+| Factorial / nested reasons | Supported | Supported |
+| Orthogonal routing | Always orthogonal | Orthogonal by default (`ortho = FALSE` to disable) |
+| Interactivity | Static | Static (binary) or HTML widget (DiagrammeR) |
+
+The `grid` engine is recommended for manuscript figures, where inch-precise dimensional control, colored phase strips, and publication-quality typography matter; its layout is the calibration reference against which the DOT engine is tuned. The `dot` engine delegates layout to Graphviz, which suits rapid iteration, web-based reports, and pipelines that consume or post-process the DOT source; its automatic layout also accommodates very wide or deeply nested diagrams without manual dimensioning.
+
+---
+
+# Further Reading
+
+- [Enrollment Diagrams](enrollment_diagrams.html): CONSORT, STROBE, and STARD diagrams with permanent parallel arms
+- [Systematic Reviews](systematic_reviews.html): PRISMA and MOOSE diagrams with top-level source convergence
+- [Split-and-Recombine Diagrams](split_recombine.html): Hybrid topologies for screening validation and exposure classification
+- [Advanced Workflows](advanced_workflows.html): Factorial (nested-split) designs and hierarchical exclusion reasons
+- [Gallery](gallery.html): General gallery showing all figure types

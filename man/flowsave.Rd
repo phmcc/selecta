@@ -21,26 +21,26 @@ flowsave(
 \item{file}{Character string. Output file path. The format is inferred
 from the file extension. Supported extensions: \code{.pdf},
 \code{.png}, \code{.svg}, \code{.tif}/\code{.tiff} (all engines);
-\code{.dot} (DOT engine only, writes the raw DOT source).}
+\code{.dot} (\code{dot} engine only, writes the raw DOT source).}
 
 \item{engine}{Character string. One of \code{"grid"} (the default,
 uses R's grid graphics) or \code{"dot"} (uses the system Graphviz
-binary). The DOT engine requires \code{dot} to be installed and on
-the system \code{PATH}.}
+binary). The \code{dot} engine requires \code{dot} to be installed and
+on the system \code{PATH}.}
 
 \item{width}{Numeric or \code{NULL}. Width in inches. If \code{NULL}
-(default), computed automatically. For the DOT engine, omit to let
-Graphviz determine dimensions from layout.}
+(default), computed automatically. For the \code{dot} engine, omit to
+let Graphviz determine dimensions from layout.}
 
 \item{height}{Numeric or \code{NULL}. Height in inches. If \code{NULL}
-(default), computed automatically. For the DOT engine, omit to let
-Graphviz determine dimensions from layout.}
+(default), computed automatically. For the \code{dot} engine, omit to
+let Graphviz determine dimensions from layout.}
 
 \item{dpi}{Integer. Resolution in dots per inch for raster formats
 (PNG, TIFF). Default 300. Honored by both engines. Mirrors the
 \code{dpi} argument of \code{ggplot2::ggsave()}.}
 
-\item{sans_serif}{Logical. DOT engine only. If \code{TRUE} (default),
+\item{sans_serif}{Logical. \code{dot} engine only. If \code{TRUE} (default),
 the rendered SVG/PDF text is displayed in a sans-serif fallback
 chain (\code{Helvetica, Arial, "Liberation Sans", "DejaVu Sans",
 sans-serif}) regardless of the layout font. Layout boxes are still
@@ -48,15 +48,21 @@ sized using the metrics of the font set via \code{font_family}, so
 the result preserves all margins. Set to \code{FALSE} to retain
 the layout font as the displayed font.}
 
-\item{...}{Additional arguments passed to the rendering engine. For
-\code{engine = "grid"}: passed to \code{\link{draw_grid}} (\emph{e.g.,}
-\code{cex}, \code{box_fill}, \code{vpad}). For \code{engine = "dot"}:
-\code{formatting}, \code{count_first}, \code{number_format},
-\code{ortho}, \code{font_family}, \code{padding_pt},
-\code{padding_adjust}, and the color parameters \code{box_fill},
-\code{side_fill}, \code{border_col}, \code{arrow_col},
-\code{source_fill}, \code{source_header_fill},
-\code{source_header_text} are honored (see \code{\link{flowchart}}).}
+\item{...}{Additional styling and formatting arguments forwarded to the
+selected engine; see \code{flowchart()} for the full descriptions.
+\describe{
+  \item{\code{engine = "grid"}}{\code{cex}, \code{cex_side},
+    \code{cex_phase}, \code{box_fill}, \code{phase_fill}, \code{vpad},
+    \code{margin}, \code{font_family}, \code{number_format}}
+  \item{\code{engine = "dot"}}{\code{formatting}, \code{bullets},
+    \code{count_first}, \code{number_format}, \code{ortho},
+    \code{font_family}, \code{padding_pt}, \code{padding_adjust},
+    \code{box_fill}, \code{side_fill}, \code{border_col},
+    \code{arrow_col}, \code{source_fill}, \code{source_header_fill},
+    \code{source_header_text}, \code{phase_labels}, \code{phase_fill},
+    \code{phase_text_col}, \code{side_gap_in}, \code{rank_sep},
+    \code{node_sep}}
+}}
 }
 \value{
 Invisibly returns the output file path.
@@ -64,36 +70,38 @@ Invisibly returns the output file path.
 \description{
 Renders the enrollment diagram and saves it to a file. Supported
 formats are PDF, PNG, SVG, and TIFF (inferred from the file
-extension). The grid engine renders via R graphics devices; the DOT
-engine pipes Graphviz output through the system \code{dot} binary.
-Dimensions are computed automatically from diagram content via
-\code{\link{recdims}} unless overridden.
+extension). The \code{grid} engine renders via R graphics devices; the
+\code{dot} engine pipes Graphviz output through the system \code{dot}
+binary. Dimensions are computed automatically from diagram content via
+\code{recdims()} unless overridden.
 }
 \details{
-For the grid engine, the vector formats (PDF, SVG) use R's standard
-devices and are recommended where a vector figure is acceptable, as
-their font model renders the italic \code{n} and \code{N} of the count
-lines reliably. The raster formats (PNG, TIFF) are produced with the
-\pkg{ragg} device when it is installed---the same device the package
-vignettes use---and fall back to the base \code{png()}/\code{tiff()}
-devices otherwise; installing \pkg{ragg} is advised for raster output,
-since some cairo-based device configurations drop the plotmath italics.
-
-
 \code{flowsave()} renders a flow directly to a file, inferring the format
 from the extension and choosing dimensions automatically unless
 \code{width} and \code{height} are given. With \code{engine = "grid"} it
-draws through R's graphics devices (vector \code{.pdf}/\code{.svg} or
-raster \code{.png}/\code{.tiff}); raster output prefers the \pkg{ragg}
-device when installed, since some cairo configurations drop the plotmath
-italics in the count labels. With \code{engine = "dot"} it emits Graphviz
-DOT: a \code{.dot} extension writes the source text directly and needs no
-external software, whereas image output shells out to the system
-\code{dot} binary and therefore requires Graphviz on the \code{PATH}.
-When sizing automatically, \code{flowsave()} calls \code{\link{recdims}}
+draws through R's graphics devices, producing either vector formats
+(\code{.pdf}, \code{.svg}) or raster formats (\code{.png}, \code{.tiff}).
+
+For raster formats, \code{flowsave()} prefers the \pkg{ragg} device when
+installed, with fallback to the base \code{png()}/\code{tiff()} devices
+otherwise. Using these devices is generally advised for raster output
+over other devices such as cairo since some cairo configurations drop
+the plotmath italics in the count labels. The \code{dpi} argument mirrors
+\code{ggplot2::ggsave()} for raster resolution.
+
+With \code{engine = "dot"}, \code{flowsave()} renders a graphic based on
+a Graphviz DOT string: a \code{.dot} extension writes the source text
+directly and needs no external software, whereas image output shells out
+to the system \code{dot} binary and therefore requires Graphviz on the
+\code{PATH}.
+
+When sizing automatically, \code{flowsave()} calls \code{recdims()}
 once and reuses the computed layout, so a separate \code{recdims()} call
-is unnecessary. The \code{dpi} argument mirrors \code{ggplot2::ggsave()}
-for raster resolution.
+is unnecessary. With the \code{grid} engine, leaving either dimension at
+its default also reports the content-derived recommendation through a
+\code{message()}; supply both \code{width} and \code{height} to size
+manually and silence it. The \code{dot} engine instead lets Graphviz size
+the output from the layout, so no recommendation is reported.
 }
 \examples{
 flow <- enroll(n = 500) |>
@@ -114,7 +122,7 @@ flowsave(flow, file.path(tempdir(), "consort.png"),
 flowsave(flow, file.path(tempdir(), "consort.dot"), engine = "dot")
 
 # Rasterized DOT output (.svg, .png, .pdf) requires the Graphviz 'dot'
-# binary on the system PATH, so guard on its availability.
+# binary on the system PATH.
 if (nzchar(Sys.which("dot"))) {
   flowsave(flow, file.path(tempdir(), "consort.svg"), engine = "dot")
 
