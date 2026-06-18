@@ -1,6 +1,6 @@
 Package: selecta
 Type: Package
-Title: EQUATOR-Style Enrollment Diagrams for Clinical Studies
+Title: Declarative EQUATOR-Style Flow Diagrams for Clinical Studies
 Version: 0.6.0
 Authors@R: c(
     person(

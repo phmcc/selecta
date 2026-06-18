@@ -4,7 +4,7 @@
 \name{selecta-package}
 \alias{selecta}
 \alias{selecta-package}
-\title{selecta: EQUATOR-Style Enrollment Diagrams for Clinical Studies}
+\title{selecta: Declarative EQUATOR-Style Flow Diagrams for Clinical Studies}
 \description{
 Build EQUATOR-style flowcharts for clinical studies by sequentially defining inclusion and exclusion criteria, study arms, and endpoints. The pipe-friendly API supports CONSORT (randomized trials), STROBE (observational cohorts), STARD (diagnostic accuracy), PRISMA (systematic reviews), and MOOSE (observational meta-analysis) diagram layouts, as well as multi-source convergence, split-and-recombine, factorial, and hybrid topologies. Diagrams are rendered via 'grid' graphics in both data-driven (automatic counting) and manual-count modes, with optional 'DiagrammeR'/'Graphviz' output.
 }

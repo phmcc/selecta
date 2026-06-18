@@ -17,7 +17,7 @@
 ^man/figures/README_
 ^vignettes/figures$
 ^vignettes/articles/figures$
-^tests/benchmarks/^
+^tests/testthat/test_output$
 ^\.lintr$
 ^CRAN-SUBMISSION$
 ^todo
