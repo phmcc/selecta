@@ -21,8 +21,30 @@
 library(testthat)
 library(selecta)
 
-outdir <- file.path(tempdir(), "test_output")
+## Render only off-CRAN. testthat::skip_on_cran() skips when !interactive()
+## and the NOT_CRAN environment variable is unset; mirror that exactly so
+## rendering and the assertions below stay in lockstep. On CRAN the suite
+## still builds the (cheap) flow objects but writes nothing and costs
+## effectively no time; run interactively or on CI (where devtools/rcmdcheck
+## set NOT_CRAN=true) it renders the full gallery for visual inspection.
+.render <- interactive() ||
+    identical(tolower(Sys.getenv("NOT_CRAN")), "true")
+
+## Output directory. Defaults to the session temp directory: CRAN-safe, and
+## inspectable for the life of the session (the path is printed in the summary
+## below). Set SELECTA_TEST_OUTPUT to a stable absolute path to retain renders
+## across sessions for run-to-run visual comparison.
+outdir <- Sys.getenv("SELECTA_TEST_OUTPUT",
+                     unset = file.path(tempdir(), "test_output"))
 dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
+
+## On CRAN, shadow flowsave() with a no-op so the scattered grid render calls
+## below write nothing and cost nothing. flowsave() is called by bare name
+## throughout, so a global binding masks the package export for the rest of the
+## script; the DOT path is short-circuited inside render_dot() likewise.
+if (!.render) {
+    flowsave <- function(...) invisible(NULL)
+}
 
 ### * CONSORT / STROBE — Data-driven (package datasets)
 
@@ -1006,6 +1028,7 @@ render_dot_file <- function(dot_str, stem, fmt = "pdf", dpi = 150) {
 ## skipped rather than aborting the whole regression, so every other diagram
 ## still renders and the gap is visible (and caught by the assertions below).
 render_dot <- function(flow, stem, ...) {
+    if (!.render) return(invisible(NULL))
     dot <- tryCatch(flowchart(flow, engine = "dot", ...),
                     error = function(e) {
                         cat(sprintf("  [DOT FAILED] %s: %s\n",
@@ -1151,24 +1174,29 @@ expect_outputs <- function(stems) {
 }
 
 test_that("all grid diagram variants render to non-empty files", {
+    skip_on_cran()
     pdfs <- list.files(outdir, pattern = "\\.pdf$", full.names = TRUE)
     expect_true(length(pdfs) > 0)
     expect_true(all(file.size(pdfs) > 0))
 })
 
 test_that("the DOT engine renders the full core gallery", {
+    skip_on_cran()
     expect_outputs(paste0("dot_", names(dot_core)))
 })
 
 test_that("the DOT engine renders split-and-recombine diagrams", {
+    skip_on_cran()
     expect_outputs(paste0("dot_", names(dot_recombine)))
 })
 
 test_that("the DOT engine renders factorial (two-level) diagrams", {
+    skip_on_cran()
     expect_outputs(paste0("dot_", names(dot_factorial)))
 })
 
 test_that("factorial (two-level) diagrams render to non-empty grid files", {
+    skip_on_cran()
     ## Grid is the reference engine; every factorial shape -- 2 x 2 (manual and
     ## data-driven), the geometrically limited 3-arm and asymmetric splits, the
     ## single combine peel, and the double recombine to one cohort -- must
@@ -1187,6 +1215,7 @@ test_that("factorial (two-level) diagrams render to non-empty grid files", {
 })
 
 test_that("DOT styling variants render to non-empty files", {
+    skip_on_cran()
     expect_outputs(c("dot_style_plain", "dot_style_rich", "dot_style_ortho",
                      "dot_style_countfirst", "dot_style_times",
                      "dot_style_prisma_rich", "dot_style_prisma_ortho",
@@ -1194,6 +1223,7 @@ test_that("DOT styling variants render to non-empty files", {
 })
 
 test_that("grid and DOT engines cover the same core diagram set", {
+    skip_on_cran()
     ## Each core flow produced a grid PDF and a DOT output, so the two engines
     ## are exercised on an identical breadth of diagram types.
     grid_stems <- c("dd_0arm", "dd_2arm", "dd_3arm", "dd_6arm",

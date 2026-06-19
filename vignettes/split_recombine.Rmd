@@ -339,4 +339,3 @@ flowsave(example1, "screening_validation_cf.pdf",
 - [Systematic Reviews](systematic_reviews.html): PRISMA and MOOSE diagrams with top-level source convergence
 - [Advanced Workflows](advanced_workflows.html): Factorial (nested-split) designs and hierarchical exclusion reasons
 - [Graphviz Export](graphviz_export.html): DOT output for Graphviz/DiagrammeR rendering
-- [Gallery](gallery.html): General gallery showing all figure types

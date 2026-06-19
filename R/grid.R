@@ -1812,7 +1812,7 @@ phase_band_deficits <- function(nodes, edges, phases, row_h_in, pair_gap_in,
 #' \itemize{
 #'   \item \strong{no deficit} -- natural node positions are preserved
 #'         (so the terminal overhang stays exactly \code{vpad/4}); the
-#'         block is simply translated into its grown/recenterd band.
+#'         block is simply translated into its grown/recentered band.
 #'   \item \strong{deficit} -- the band's elements (distinct rows, a
 #'         two-arm row counting as one) are spread to \emph{equal gaps}:
 #'         with \eqn{m} elements there are \eqn{m+1} equal slots (above,

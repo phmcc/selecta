@@ -594,4 +594,3 @@ A label short enough to sit beside its boxes is left untouched, and the strip re
 - [Systematic Reviews](systematic_reviews.html): PRISMA and MOOSE diagrams with top-level source convergence
 - [Split-and-Recombine Diagrams](split_recombine.html): Split topologies that fan out and converge back to a single stream
 - [Graphviz Export](graphviz_export.html): DOT output for Graphviz/DiagrammeR rendering
-- [Gallery](gallery.html): General gallery showing all figure types

@@ -688,7 +688,7 @@ combine <- function(.flow, label, sublabel = NULL, n = NULL,
 #' exclusive. \code{breakdown} itemizes a single box's total as text lines
 #' inside that box (the STARD final-diagnosis form, reporting each box's
 #' target-condition composition). Conversely, \code{groups} divides the
-#' endpointinto separate side-by-side boxes, one per group, fanning from a
+#' endpoint into separate side-by-side boxes, one per group, fanning from a
 #' shared distributor; this design favors study diagrams that end by
 #' displaying the groups to be analyzed. The completed object is then passed
 #' to \code{flowchart()}, \code{flowsave()}, or \code{recdims()}.

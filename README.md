@@ -1,10 +1,9 @@
-# <span class="pkg-name">selecta</span> <a href="https://phmcc.codeberg.page/selecta/"><img src="man/figures/selecta.svg" align="right" height="139" alt="selecta website" /></a>
+# <span class="pkg-name">selecta</span> <a href="https://phmcc.codeberg.page/selecta/"><img src="man/figures/selecta.png" align="right" height="139" alt="selecta website" /></a>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/phmcc/selecta/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/phmcc/selecta/actions/workflows/R-CMD-check.yaml)
 [![test-coverage](https://github.com/phmcc/selecta/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/phmcc/selecta/actions/workflows/test-coverage.yaml)
 [![lint](https://github.com/phmcc/selecta/actions/workflows/lint.yaml/badge.svg)](https://github.com/phmcc/selecta/actions/workflows/lint.yaml)
-[![CRAN status](https://www.r-pkg.org/badges/version/selecta)](https://CRAN.R-project.org/package=selecta)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 

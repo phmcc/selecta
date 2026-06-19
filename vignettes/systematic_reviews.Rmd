@@ -323,4 +323,3 @@ flowsave(example1, "prisma_poster.pdf",
 - [Split-and-Recombine Diagrams](split_recombine.html): Hybrid topologies for screening validation and exposure classification
 - [Advanced Workflows](advanced_workflows.html): Factorial (nested-split) designs and hierarchical exclusion reasons
 - [Graphviz Export](graphviz_export.html): DOT output for Graphviz/DiagrammeR rendering
-- [Gallery](gallery.html): General gallery showing all figure types

@@ -315,7 +315,7 @@ library(DiagrammeR)
 grViz(dot_str)
 ```
 
-The widget embeds in HTML output, but its content is a static SVG: nodes are not clickable and carry no hover tooltips unless `tooltip=` / `URL=` attributes are added to the DOT first. Emitting those attributes from the DOT engine directly is a planned feature (see the [Development Roadmap](development_roadmap.html)).
+The widget embeds in HTML output, but its content is a static SVG: nodes are not clickable and carry no hover tooltips unless `tooltip=` / `URL=` attributes are added to the DOT first. Emitting those attributes from the DOT engine directly is a planned feature (see the development roadmap).
 
 ## Saving as HTML
 
@@ -365,4 +365,3 @@ The `grid` engine is recommended for manuscript figures, where inch-precise dime
 - [Systematic Reviews](systematic_reviews.html): PRISMA and MOOSE diagrams with top-level source convergence
 - [Split-and-Recombine Diagrams](split_recombine.html): Hybrid topologies for screening validation and exposure classification
 - [Advanced Workflows](advanced_workflows.html): Factorial (nested-split) designs and hierarchical exclusion reasons
-- [Gallery](gallery.html): General gallery showing all figure types
