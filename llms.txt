@@ -1,4 +1,4 @@
-# selecta [![selecta website](reference/figures/selecta.svg)](https://phmcc.codeberg.page/selecta/)
+# selecta [![selecta website](reference/figures/selecta.png)](https://phmcc.codeberg.page/selecta/)
 
 > ***selecta*** \| /seˈlɛk.ta/ \| *Latin, n. pl. of* selectum*, past
 > participle of* seligere*: things chosen out*

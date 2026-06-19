@@ -438,8 +438,8 @@ grViz(dot_str)
 The widget embeds in HTML output, but its content is a static SVG: nodes
 are not clickable and carry no hover tooltips unless `tooltip=` / `URL=`
 attributes are added to the DOT first. Emitting those attributes from
-the DOT engine directly is a planned feature (see the [Development
-Roadmap](https://phmcc.codeberg.page/selecta/articles/development_roadmap.md)).
+the DOT engine directly is a planned feature (see the development
+roadmap).
 
 ### Saving as HTML
 
@@ -509,5 +509,3 @@ without manual dimensioning.
 - [Advanced
   Workflows](https://phmcc.codeberg.page/selecta/articles/advanced_workflows.md):
   Factorial (nested-split) designs and hierarchical exclusion reasons
-- [Gallery](https://phmcc.codeberg.page/selecta/articles/gallery.md):
-  General gallery showing all figure types

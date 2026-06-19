@@ -380,5 +380,3 @@ flowsave(example1, "screening_validation_cf.pdf",
 - [Graphviz
   Export](https://phmcc.codeberg.page/selecta/articles/graphviz_export.md):
   DOT output for Graphviz/DiagrammeR rendering
-- [Gallery](https://phmcc.codeberg.page/selecta/articles/gallery.md):
-  General gallery showing all figure types
