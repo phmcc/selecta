@@ -100,8 +100,11 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>This package is not yet available on CRAN. Install it from GitHub (stable) or Codeberg (development):</p>
+<p>The stable release of this package can be installed from CRAN.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"selecta"</span><span class="op">)</span></span></code></pre></div>
+<p>Alternatively, install it directly from GitHub (stable) or Codeberg (development):</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Stable release</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install-deprecated.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"phmcc/selecta"</span><span class="op">)</span></span>
 <span></span>
@@ -122,13 +125,13 @@
 <li><p><strong>Minimal dependencies.</strong> The package requires only <code>data.table</code> for data manipulation and <code>grid</code> (part of base R) for rendering. No external graphics libraries, web frameworks, or layout engines are imposed.</p></li>
 </ol>
 <p>These principles manifest in the standard calling convention:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>flow <span class="ot">&lt;-</span> <span class="fu">enroll</span>(data, <span class="at">id =</span> <span class="st">"patient_id"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="fu">exclude</span>(<span class="st">"Excluded"</span>, <span class="at">criterion =</span> <span class="sc">&lt;</span>condition<span class="sc">&gt;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="fu">allocate</span>(<span class="st">"treatment_variable"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="fu">endpoint</span>(<span class="st">"Final Analysis"</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">flowchart</span>(flow)  <span class="co"># render the diagram</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">cohort</span>(flow)     <span class="co"># extract the analysis-ready dataset</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>flow <span class="ot">&lt;-</span> <span class="fu">enroll</span>(data, <span class="at">id =</span> <span class="st">"patient_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="fu">exclude</span>(<span class="st">"Excluded"</span>, <span class="at">criterion =</span> <span class="sc">&lt;</span>condition<span class="sc">&gt;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="fu">allocate</span>(<span class="st">"treatment_variable"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="fu">endpoint</span>(<span class="st">"Final Analysis"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="fu">flowchart</span>(flow)  <span class="co"># render the diagram</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="fu">cohort</span>(flow)     <span class="co"># extract the analysis-ready dataset</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="supported-guidelines">Supported Guidelines<a class="anchor" aria-label="anchor" href="#supported-guidelines"></a>
@@ -502,7 +505,7 @@
 <h3 id="regional-number-formatting">Regional number formatting<a class="anchor" aria-label="anchor" href="#regional-number-formatting"></a>
 </h3>
 <p>The <code>number_format</code> argument accepts named presets (<code>"us"</code>, <code>"eu"</code>, <code>"space"</code>, <code>"none"</code>) or a custom <code>c(big.mark, decimal.mark)</code> vector. The choice may be set globally for a session:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>selecta.number_format <span class="op">=</span> <span class="st">"eu"</span><span class="op">)</span>   <span class="co"># 1.234 instead of 1,234</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>selecta.vpad <span class="op">=</span> <span class="fl">0.35</span><span class="op">)</span>            <span class="co"># increase default vertical spacing</span></span></code></pre></div>
 </div>
@@ -510,7 +513,7 @@
 <h3 id="diagnostic-output">Diagnostic output<a class="anchor" aria-label="anchor" href="#diagnostic-output"></a>
 </h3>
 <p>For inspecting flow diagram layout specifics, <code>selecta</code> can emit a structured trace of its internal computation. The trace is controlled by a single session option:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>selecta.debug_layout <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
@@ -639,7 +642,7 @@
 <strong>Step 0:</strong> Data Preparation<a class="anchor" aria-label="anchor" href="#step-0-data-preparation"></a>
 </h3>
 <p>Prior to analysis, load the package and the dataset:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://phmcc.codeberg.page/selecta">selecta</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Load example data</span></span>
@@ -650,7 +653,7 @@
 <strong>Step 1:</strong> Flowchart Creation<a class="anchor" aria-label="anchor" href="#step-1-flowchart-creation"></a>
 </h3>
 <p>Use a pipe-based workflow to sequentially string together the various elements of the flowchart, from top to bottom. The <code><a href="reference/exclude.html">exclude()</a></code> function pares down the dataset based on the condition supplied to the <code>criterion</code> parameter, whereas <code><a href="reference/stratify.html">allocate()</a></code>/<code><a href="reference/stratify.html">stratify()</a></code> sets arms. Export the output using the <code><a href="reference/flowsave.html">flowsave()</a></code> function.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">flow</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/enroll.html">enroll</a></span><span class="op">(</span><span class="va">selectaex2</span>, id <span class="op">=</span> <span class="st">"patient_id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="reference/phase.html">phase</a></span><span class="op">(</span><span class="st">"Screening"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="reference/exclude.html">exclude</a></span><span class="op">(</span><span class="st">"Duplicate records"</span>, criterion <span class="op">=</span> <span class="va">is_duplicate</span> <span class="op">==</span> <span class="cn">TRUE</span>,</span>
@@ -675,7 +678,7 @@
 <strong>Step 2:</strong> Cohort Extraction<a class="anchor" aria-label="anchor" href="#step-2-cohort-extraction"></a>
 </h3>
 <p>The diagram is not merely a figure—<code>selecta</code> maintains the dataset state at every step, allowing direct extraction of the analysis-ready cohort:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The final cohort</span></span>
 <span><span class="va">final</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cohort.html">cohort</a></span><span class="op">(</span><span class="va">flow</span><span class="op">)</span></span>
 <span></span>
@@ -685,7 +688,7 @@
 <span><span class="co"># A single arm</span></span>
 <span><span class="va">drug_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cohort.html">cohort</a></span><span class="op">(</span><span class="va">flow</span>, arm <span class="op">=</span> <span class="st">"Drug A"</span><span class="op">)</span></span></code></pre></div>
 <p>Moreover, every intermediate stage is accessible via <code><a href="reference/cohorts.html">cohorts()</a></code>, enabling inspection of participants removed at each step:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">stages</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cohorts.html">cohorts</a></span><span class="op">(</span><span class="va">flow</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Participants excluded for failing eligibility</span></span>
@@ -741,23 +744,23 @@
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">"selecta"</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>To cite selecta <span class="cf">in</span> publications, use<span class="sc">:</span></span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  McClelland <span class="fu">PH</span> (<span class="dv">2026</span>). _selecta<span class="sc">:</span> EQUATOR<span class="sc">-</span>Style Enrollment Diagrams</span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="cf">for</span> Clinical Studies_. R package version <span class="dv">0</span>.<span class="fl">6.0</span>,</span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="sc">&lt;</span>https<span class="sc">:</span><span class="er">//</span>phmcc.codeberg.page<span class="sc">/</span>selecta<span class="sc">/</span><span class="er">&gt;</span>.</span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>A BibTeX entry <span class="cf">for</span> LaTeX users is</span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a></span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="sc">@</span>Manual{,</span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>    title <span class="ot">=</span> {selecta<span class="sc">:</span> EQUATOR<span class="sc">-</span>Style Enrollment Diagrams <span class="cf">for</span> Clinical Studies},</span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>    author <span class="ot">=</span> {Paul Hsin<span class="sc">-</span>ti McClelland},</span>
-<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>    year <span class="ot">=</span> {<span class="dv">2026</span>},</span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>    note <span class="ot">=</span> {R package version <span class="dv">0</span>.<span class="fl">6.0</span>},</span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>    url <span class="ot">=</span> {https<span class="sc">:</span><span class="er">//</span>phmcc.codeberg.page<span class="sc">/</span>selecta<span class="sc">/</span>},</span>
-<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>  }</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">"selecta"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>To cite selecta <span class="cf">in</span> publications, use<span class="sc">:</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  McClelland <span class="fu">PH</span> (<span class="dv">2026</span>). _selecta<span class="sc">:</span> EQUATOR<span class="sc">-</span>Style Enrollment Diagrams</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="cf">for</span> Clinical Studies_. R package version <span class="dv">0</span>.<span class="fl">6.0</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="sc">&lt;</span>https<span class="sc">:</span><span class="er">//</span>phmcc.codeberg.page<span class="sc">/</span>selecta<span class="sc">/</span><span class="er">&gt;</span>.</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>A BibTeX entry <span class="cf">for</span> LaTeX users is</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="sc">@</span>Manual{,</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>    title <span class="ot">=</span> {selecta<span class="sc">:</span> EQUATOR<span class="sc">-</span>Style Enrollment Diagrams <span class="cf">for</span> Clinical Studies},</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>    author <span class="ot">=</span> {Paul Hsin<span class="sc">-</span>ti McClelland},</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>    year <span class="ot">=</span> {<span class="dv">2026</span>},</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>    note <span class="ot">=</span> {R package version <span class="dv">0</span>.<span class="fl">6.0</span>},</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>    url <span class="ot">=</span> {https<span class="sc">:</span><span class="er">//</span>phmcc.codeberg.page<span class="sc">/</span>selecta<span class="sc">/</span>},</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>  }</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="further-resources">Further Resources<a class="anchor" aria-label="anchor" href="#further-resources"></a>
@@ -779,6 +782,7 @@
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=selecta" class="external-link">View on CRAN</a></li>
 <li><a href="https://codeberg.org/phmcc/selecta/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/phmcc/selecta/issues" class="external-link">Report a bug</a></li>
 </ul>
@@ -818,7 +822,8 @@
 <li><a href="https://github.com/phmcc/selecta/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/phmcc/selecta/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://github.com/phmcc/selecta/actions/workflows/test-coverage.yaml" class="external-link"><img src="https://github.com/phmcc/selecta/actions/workflows/test-coverage.yaml/badge.svg" alt="test-coverage"></a></li>
 <li><a href="https://github.com/phmcc/selecta/actions/workflows/lint.yaml" class="external-link"><img src="https://github.com/phmcc/selecta/actions/workflows/lint.yaml/badge.svg" alt="lint"></a></li>
-<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+<li><a href="https://CRAN.R-project.org/package=selecta" class="external-link"><img src="https://www.r-pkg.org/badges/version/selecta" alt="CRAN status"></a></li>
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle: stable"></a></li>
 </ul>
 </div>
 

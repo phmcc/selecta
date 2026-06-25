@@ -2,6 +2,8 @@
 
 ## *selecta* 0.6.0 (2026-06-17)
 
+CRAN release: 2026-06-24
+
 - Enhance Graphviz (DOT) output for publication-quality figures. The DOT
   engine now renders full flow diagrams for complete feature parity with
   `grid` (default) outputs.

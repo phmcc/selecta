@@ -27,8 +27,14 @@ flow, and factorial topology](reference/figures/README_hero.png)
 
 ## Installation
 
-This package is not yet available on CRAN. Install it from GitHub
-(stable) or Codeberg (development):
+The stable release of this package can be installed from CRAN.
+
+``` r
+install.packages("selecta")
+```
+
+Alternatively, install it directly from GitHub (stable) or Codeberg
+(development):
 
 ``` r
 # Stable release
