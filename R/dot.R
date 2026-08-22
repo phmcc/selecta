@@ -272,7 +272,7 @@ export_dot <- function(graph, number_format = NULL, count_first = FALSE,
     inject_width <- function(line, role) {
         if (!isTRUE(role == "arm") || !is.finite(arm_w_in) || arm_w_in <= 0)
             return(line)
-        sub("\\];\\s*$", sprintf(', width=%.3f];', arm_w_in), line)
+        sub("\\];\\s*$", sprintf(", width=%.3f];", arm_w_in), line)
     }
 
     if (formatting == "rich") {

@@ -33,7 +33,7 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -45,10 +45,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: |
-            any::rcmdcheck
-            any::covr
-            any::lintr
+          extra-packages: any::rcmdcheck
           needs: check
 
       - name: Setup LaTeX (for PDF vignettes and manual)
@@ -74,7 +71,7 @@ jobs:
 
       - name: Upload check results
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: check
