@@ -17,8 +17,10 @@ flowsave(
   engine = c("grid", "dot"),
   width = NULL,
   height = NULL,
+  units = c("in", "cm", "mm"),
   dpi = 300,
   sans_serif = TRUE,
+  quiet = FALSE,
   ...
 )
 ```
@@ -44,15 +46,23 @@ flowsave(
 
 - width:
 
-  Numeric or `NULL`. Width in inches. If `NULL` (default), computed
+  Numeric or `NULL`. Width in `units`. If `NULL` (default), computed
   automatically. For the `dot` engine, omit to let Graphviz determine
   dimensions from layout.
 
 - height:
 
-  Numeric or `NULL`. Height in inches. If `NULL` (default), computed
+  Numeric or `NULL`. Height in `units`. If `NULL` (default), computed
   automatically. For the `dot` engine, omit to let Graphviz determine
   dimensions from layout.
+
+- units:
+
+  Character string giving the units of `width` and `height`, and of the
+  dimensions computed when either is left unspecified: `"in"` (inches,
+  the default), `"cm"`, or `"mm"`. Graphics devices are driven in inches
+  regardless, so the conversion is internal. Ignored by the `dot`
+  engine, which takes no dimensions.
 
 - dpi:
 
@@ -69,6 +79,12 @@ flowsave(
   metrics of the font set via `font_family`, so the result preserves all
   margins. Set to `FALSE` to retain the layout font as the displayed
   font.
+
+- quiet:
+
+  Logical. Suppress the message reporting the file written and the
+  dimensions used. The `dot` engine reports neither, so the setting has
+  no effect there. Default `FALSE`.
 
 - ...:
 
@@ -88,8 +104,7 @@ flowsave(
       `font_family`, `padding_pt`, `padding_adjust`, `box_fill`,
       `side_fill`, `border_col`, `arrow_col`, `source_fill`,
       `source_header_fill`, `source_header_text`, `phase_labels`,
-      `phase_fill`, `phase_text_col`, `side_gap_in`, `rank_sep`,
-      `node_sep`
+      `phase_fill`, `phase_text_col`, `rank_sep`, `node_sep`
 
 ## Value
 
@@ -122,12 +137,13 @@ When sizing automatically, `flowsave()` calls
 [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
 once and reuses the computed layout, so a separate
 [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
-call is unnecessary. With the `grid` engine, leaving either dimension at
-its default also reports the content-derived recommendation through a
-[`message()`](https://rdrr.io/r/base/message.html); supply both `width`
-and `height` to size manually and silence it. The `dot` engine instead
-lets Graphviz size the output from the layout, so no recommendation is
-reported.
+call is unnecessary. With the `grid` engine, the file written and the
+dimensions used are reported through a
+[`message()`](https://rdrr.io/r/base/message.html) unless
+`quiet = TRUE`, whether those dimensions were computed or supplied, so
+that a figure written at an unexpected size is apparent at the point it
+is written. The `dot` engine instead lets Graphviz size the output from
+the layout, so it reports nothing.
 
 ## See also
 
@@ -154,9 +170,18 @@ flow <- enroll(n = 500) |>
 # the example respects CRAN's no-write policy; in practice any
 # desired path may be supplied.
 flowsave(flow, file.path(tempdir(), "consort.pdf"))
-#> Recommended plot dimensions: width = 3.4 in, height = 2.5 in
+#> Flowchart saved to /tmp/RtmpjE74Cz/consort.pdf (width = 3.4 in, height = 2.5 in)
 flowsave(flow, file.path(tempdir(), "consort.png"),
          width = 8, height = 10)
+#> Flowchart saved to /tmp/RtmpjE74Cz/consort.png (width = 8.0 in, height = 10.0 in)
+
+# Dimensions may be given, or computed, in metric units.
+flowsave(flow, file.path(tempdir(), "consort_metric.pdf"),
+         width = 180, height = 240, units = "mm")
+#> Flowchart saved to /tmp/RtmpjE74Cz/consort_metric.pdf (width = 180.0 mm, height = 240.0 mm)
+
+# Suppress the message reporting the file written.
+flowsave(flow, file.path(tempdir(), "consort_quiet.pdf"), quiet = TRUE)
 # }
 
 # \donttest{

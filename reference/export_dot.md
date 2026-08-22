@@ -31,7 +31,6 @@ export_dot(
   phase_labels = NULL,
   phase_fill = "#000000",
   phase_text_col = "#FFFFFF",
-  side_gap_in = 0.4,
   rank_sep = 0.4,
   node_sep = 0.5
 )
@@ -145,14 +144,6 @@ export_dot(
 - phase_text_col:
 
   Character. Text color for phase labels. Default `"#FFFFFF"` (white).
-
-- side_gap_in:
-
-  Numeric. Horizontal gap, in inches, between the vertical spine and the
-  left edge of a side box hanging off a tick. Default 0.4. Realized as a
-  narrow invisible spacer on the joint's rank; Graphviz's node
-  separation also contributes, so the effective gap is slightly larger.
-  Lower values pull side boxes toward the spine.
 
 - rank_sep:
 

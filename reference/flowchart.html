@@ -19,7 +19,7 @@ dimensions, see flowsave()."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">selecta</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,7 @@ dimensions, see <code><a href="flowsave.html">flowsave()</a></code>.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">flowchart</span><span class="op">(</span><span class="va">.flow</span>, engine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grid"</span>, <span class="st">"dot"</span><span class="op">)</span>, count_first <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">flowchart</span><span class="op">(</span><span class="va">.flow</span>, engine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grid"</span>, <span class="st">"dot"</span><span class="op">)</span>, count_first <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'selecta'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, engine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grid"</span>, <span class="st">"dot"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
@@ -95,7 +95,8 @@ base R graphics, or <code>"dot"</code> to return a Graphviz DOT string
 <dd><p>Logical. If <code>TRUE</code>, side-box labels are rendered
 as <code>"214  Discontinued"</code> (bold count before label) rather than the
 default <code>"Discontinued (n = 214)"</code>. Applies to all box types.
-Default <code>FALSE</code>.</p></dd>
+Default <code>FALSE</code>, supplied by the drawing routine rather than
+restated here, so this argument shows as <code>NULL</code> in the usage.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -153,9 +154,8 @@ Default <code>FALSE</code>.</p></dd>
       <code>dot</code> engine draws them as horizontal left-margin bands rather
       than the <code>grid</code> engine's vertical strips)</p></dd>
 
-    <dt>side_gap_in, rank_sep, node_sep</dt>
-<dd><p>Spacing of side boxes, ranks,
-      and nodes, in inches</p></dd>
+    <dt>rank_sep, node_sep</dt>
+<dd><p>Spacing of ranks and nodes, in inches</p></dd>
 
     <dt>number_format</dt>
 <dd><p>Locale-aware count formatter, shared with the
@@ -251,7 +251,7 @@ is normally the last call in a pipeline; for direct file output use
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0. <a href="https://phmcc.github.io/selecta/LICENSE.html" class="external-link">GPLv3 License</a> | <a href="https://phmcc.github.io/selecta/CODE_OF_CONDUCT.html" class="external-link">Code of Conduct</a></p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1. <a href="https://phmcc.github.io/selecta/LICENSE.html" class="external-link">GPLv3 License</a> | <a href="https://phmcc.github.io/selecta/CODE_OF_CONDUCT.html" class="external-link">Code of Conduct</a></p>
 </div>
 
     </footer></div>

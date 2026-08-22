@@ -23,7 +23,7 @@ recdims() unless overridden."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">selecta</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,8 +82,10 @@ binary. Dimensions are computed automatically from diagram content via
 <span>  engine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grid"</span>, <span class="st">"dot"</span><span class="op">)</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  height <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  units <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"in"</span>, <span class="st">"cm"</span>, <span class="st">"mm"</span><span class="op">)</span>,</span>
 <span>  dpi <span class="op">=</span> <span class="fl">300</span>,</span>
 <span>  sans_serif <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -111,15 +113,24 @@ on the system <code>PATH</code>.</p></dd>
 
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
-<dd><p>Numeric or <code>NULL</code>. Width in inches. If <code>NULL</code>
+<dd><p>Numeric or <code>NULL</code>. Width in <code>units</code>. If <code>NULL</code>
 (default), computed automatically. For the <code>dot</code> engine, omit to
 let Graphviz determine dimensions from layout.</p></dd>
 
 
 <dt id="arg-height">height<a class="anchor" aria-label="anchor" href="#arg-height"></a></dt>
-<dd><p>Numeric or <code>NULL</code>. Height in inches. If <code>NULL</code>
-(default), computed automatically. For the <code>dot</code> engine, omit to
-let Graphviz determine dimensions from layout.</p></dd>
+<dd><p>Numeric or <code>NULL</code>. Height in <code>units</code>. If
+<code>NULL</code> (default), computed automatically. For the <code>dot</code>
+engine, omit to let Graphviz determine dimensions from layout.</p></dd>
+
+
+<dt id="arg-units">units<a class="anchor" aria-label="anchor" href="#arg-units"></a></dt>
+<dd><p>Character string giving the units of <code>width</code> and
+<code>height</code>, and of the dimensions computed when either is left
+unspecified: <code>"in"</code> (inches, the default), <code>"cm"</code>, or
+<code>"mm"</code>. Graphics devices are driven in inches regardless, so the
+conversion is internal. Ignored by the <code>dot</code> engine, which takes
+no dimensions.</p></dd>
 
 
 <dt id="arg-dpi">dpi<a class="anchor" aria-label="anchor" href="#arg-dpi"></a></dt>
@@ -138,6 +149,12 @@ the result preserves all margins. Set to <code>FALSE</code> to retain
 the layout font as the displayed font.</p></dd>
 
 
+<dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
+<dd><p>Logical. Suppress the message reporting the file written and
+the dimensions used. The <code>dot</code> engine reports neither, so the
+setting has no effect there. Default <code>FALSE</code>.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional styling and formatting arguments forwarded to the
 selected engine; see <code><a href="flowchart.html">flowchart()</a></code> for the full descriptions.</p><dl><dt><code>engine = "grid"</code></dt>
@@ -152,8 +169,7 @@ selected engine; see <code><a href="flowchart.html">flowchart()</a></code> for t
     <code>box_fill</code>, <code>side_fill</code>, <code>border_col</code>,
     <code>arrow_col</code>, <code>source_fill</code>, <code>source_header_fill</code>,
     <code>source_header_text</code>, <code>phase_labels</code>, <code>phase_fill</code>,
-    <code>phase_text_col</code>, <code>side_gap_in</code>, <code>rank_sep</code>,
-    <code>node_sep</code></p></dd>
+    <code>phase_text_col</code>, <code>rank_sep</code>, <code>node_sep</code></p></dd>
 
 
 </dl></dd>
@@ -183,11 +199,12 @@ to the system <code>dot</code> binary and therefore requires Graphviz on the
 <code>PATH</code>.</p>
 <p>When sizing automatically, <code>flowsave()</code> calls <code><a href="recdims.html">recdims()</a></code>
 once and reuses the computed layout, so a separate <code><a href="recdims.html">recdims()</a></code> call
-is unnecessary. With the <code>grid</code> engine, leaving either dimension at
-its default also reports the content-derived recommendation through a
-<code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>; supply both <code>width</code> and <code>height</code> to size
-manually and silence it. The <code>dot</code> engine instead lets Graphviz size
-the output from the layout, so no recommendation is reported.</p>
+is unnecessary. With the <code>grid</code> engine, the file written and the
+dimensions used are reported through a <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code> unless
+<code>quiet = TRUE</code>, whether those dimensions were computed or supplied,
+so that a figure written at an unexpected size is apparent at the point it
+is written. The <code>dot</code> engine instead lets Graphviz size the output
+from the layout, so it reports nothing.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -211,9 +228,18 @@ the output from the layout, so no recommendation is reported.</p>
 <span class="r-in"><span><span class="co"># the example respects CRAN's no-write policy; in practice any</span></span></span>
 <span class="r-in"><span><span class="co"># desired path may be supplied.</span></span></span>
 <span class="r-in"><span><span class="fu">flowsave</span><span class="op">(</span><span class="va">flow</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"consort.pdf"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Recommended plot dimensions: width = 3.4 in, height = 2.5 in</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Flowchart saved to /tmp/RtmpjE74Cz/consort.pdf (width = 3.4 in, height = 2.5 in)</span>
 <span class="r-in"><span><span class="fu">flowsave</span><span class="op">(</span><span class="va">flow</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"consort.png"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>         width <span class="op">=</span> <span class="fl">8</span>, height <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Flowchart saved to /tmp/RtmpjE74Cz/consort.png (width = 8.0 in, height = 10.0 in)</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Dimensions may be given, or computed, in metric units.</span></span></span>
+<span class="r-in"><span><span class="fu">flowsave</span><span class="op">(</span><span class="va">flow</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"consort_metric.pdf"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>         width <span class="op">=</span> <span class="fl">180</span>, height <span class="op">=</span> <span class="fl">240</span>, units <span class="op">=</span> <span class="st">"mm"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Flowchart saved to /tmp/RtmpjE74Cz/consort_metric.pdf (width = 180.0 mm, height = 240.0 mm)</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Suppress the message reporting the file written.</span></span></span>
+<span class="r-in"><span><span class="fu">flowsave</span><span class="op">(</span><span class="va">flow</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"consort_quiet.pdf"</span><span class="op">)</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
@@ -243,7 +269,7 @@ the output from the layout, so no recommendation is reported.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0. <a href="https://phmcc.github.io/selecta/LICENSE.html" class="external-link">GPLv3 License</a> | <a href="https://phmcc.github.io/selecta/CODE_OF_CONDUCT.html" class="external-link">Code of Conduct</a></p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1. <a href="https://phmcc.github.io/selecta/LICENSE.html" class="external-link">GPLv3 License</a> | <a href="https://phmcc.github.io/selecta/CODE_OF_CONDUCT.html" class="external-link">Code of Conduct</a></p>
 </div>
 
     </footer></div>

@@ -9,19 +9,20 @@ measurements, then closed immediately.
 ``` r
 recdims(
   x,
-  vpad = getOption("selecta.vpad", 0.25),
-  pad = 0.08,
-  line_height = 0.2,
-  count_first = FALSE,
-  cex = 0.85,
+  vpad = NULL,
+  pad = NULL,
+  line_height = NULL,
+  count_first = NULL,
+  cex = NULL,
   cex_side = NULL,
-  cex_phase = 0.9,
-  phase_width = 0.22,
-  margin = 0.25,
-  phase_multiline = TRUE,
-  phase_max_lines = 3L,
-  font_family = "Helvetica",
+  cex_phase = NULL,
+  phase_width = NULL,
+  margin = NULL,
+  phase_multiline = NULL,
+  phase_max_lines = NULL,
+  font_family = NULL,
   number_format = NULL,
+  units = c("in", "cm", "mm"),
   ...,
   .measure_dev = NULL,
   .return_graph = FALSE
@@ -36,8 +37,9 @@ recdims(
 
 - vpad:
 
-  Numeric. Vertical spacing between elements in inches. Default 0.25;
-  override globally with `options(selecta.vpad = 0.35)`.
+  Numeric. Vertical spacing between elements in inches. Controls the
+  uniform gap between any box edge and the next adjacent element.
+  Default 0.25; override globally with `options(selecta.vpad = 0.35)`.
 
 - pad:
 
@@ -45,16 +47,19 @@ recdims(
 
 - line_height:
 
-  Numeric. Vertical line spacing in inches. Default 0.20.
+  Numeric. Vertical line spacing in inches, controlling box heights for
+  both main and side boxes. Scales proportionally with `cex`. Default
+  0.20.
 
 - count_first:
 
-  Logical. If `TRUE`, measure using the count-first label layout.
-  Default `FALSE`.
+  Logical. If `TRUE`, side-box labels are rendered as
+  `"214 Discontinued"` (bold count before label) rather than the default
+  `"Discontinued (n = 214)"`. Default `FALSE`.
 
 - cex:
 
-  Numeric. Font size multiplier for main text. Default 0.85.
+  Numeric. Font size multiplier for main box text. Default 0.85.
 
 - cex_side:
 
@@ -67,36 +72,51 @@ recdims(
 
 - phase_width:
 
-  Numeric. Width of phase label boxes in inches. Default 0.22.
+  Numeric. Width of phase label boxes in inches. Default 0.22. When
+  `phase_multiline = TRUE` the strip is widened automatically to fit the
+  wrapped lines, so this acts as a per-line minimum rather than a hard
+  cap.
 
 - margin:
 
-  Numeric. Fixed margin on all four sides in inches. Default 0.25.
+  Numeric. Fixed margin on all four sides of the canvas in inches.
+  Default 0.25.
 
 - phase_multiline:
 
-  Logical. If `TRUE` (the default), long phase labels wrap across
-  stacked lines to fit their band; must match the draw-time value for
-  accurate dimensions. Default `TRUE`.
+  Logical. If `TRUE` (the default), a phase label longer than the
+  vertical extent of the boxes it spans is word-wrapped across multiple
+  stacked lines (drawn rotated in the strip), trading strip width for
+  height so the diagram is not stretched vertically to fit a long
+  rotated label. Set to `FALSE` to force every label onto a single line,
+  in which case a label taller than its band stretches the diagram
+  instead. A label that cannot be wrapped (a single word taller than its
+  band) falls back to stretching either way. Labels containing an
+  explicit newline (`"\n"`) are always split on it regardless of this
+  setting. Default `TRUE`.
 
 - phase_max_lines:
 
-  Integer. Maximum wrapped lines per phase label when wrapping is
-  active. Default 3.
+  Integer. Maximum number of wrapped lines per phase label when wrapping
+  is active; any overflow is collapsed into the final line. Default 3.
 
 - font_family:
 
-  Character. Font family for text measurement. Default `"Helvetica"`.
-  Must match the value used at draw time for accurate dimensions.
+  Character. Font family used for all text in the diagram. Default
+  `"Helvetica"`. Set to `""` to use the device default.
 
 - number_format:
 
-  Character string or two-element character vector. Locale-aware count
-  formatter passed through to
-  [`export_grid()`](https://phmcc.codeberg.page/selecta/reference/export_grid.md)
-  for accurate text measurement. See
-  [`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
-  for accepted values.
+  Character string or two-element character vector. Locale-aware
+  formatting for participant counts: `"us"` (default, `1,234`), `"eu"`
+  (`1.234`), `"space"` (`1\u202F234`), `"none"` (`1234`), or a custom
+  `c(big.mark, decimal.mark)` pair. Falls back to
+  `getOption("selecta.number_format", "us")` when `NULL`.
+
+- units:
+
+  Character string giving the units the dimensions are returned in:
+  `"in"` (inches, the default), `"cm"`, or `"mm"`.
 
 - ...:
 
@@ -123,23 +143,29 @@ recdims(
 
 ## Value
 
-A named numeric vector with elements `width` and `height` (in inches),
-rounded up to the nearest tenth.
+A named numeric vector with elements `width` and `height`, expressed in
+`units` and rounded up to the nearest tenth. The units are recorded on
+the result as a `"units"` attribute, so a value carried between
+functions remains self-describing.
 
 ## Details
 
 `recdims()` computes the canvas size a flow needs at a given typography
 and layout, so the figure is neither clipped nor surrounded by excess
 whitespace. It lays the diagram out and measures it on a throwaway
-graphics device, returning width and height in inches without drawing
-anything visible. Because text metrics are font- and device-dependent,
-any sizing parameter passed here (`cex`, `font_family`,
-`phase_multiline`, `number_format`, and so on) should match the values
-used at render time; styling-only parameters are ignored so the same
-call can be shared across `recdims()`,
+graphics device, returning width and height without drawing anything
+visible. Measurement is performed in inches and the result converted to
+`units`, with the rounding applied after conversion so the returned
+tenth is a tenth of the reported unit. Because text metrics are font-
+and device-dependent, any sizing parameter passed here (`cex`,
+`font_family`, `phase_multiline`, `number_format`, and so on) should
+match the values used at render time; styling-only parameters are
+ignored so the same call can be shared across `recdims()`,
 [`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md),
 and
 [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md).
+A parameter left unspecified is not defaulted here but forwarded unset,
+so it is measured at exactly the value the drawing routine will apply.
 The advanced `.measure_dev` argument supplies a custom device opener
 when measurement must match a non-default device.
 [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
@@ -171,4 +197,13 @@ flow <- enroll(n = 500) |>
 recdims(flow)
 #>  width height 
 #>    3.6    4.4 
+#> attr(,"units")
+#> [1] "in"
+
+# Journals commonly specify figure widths in millimeters.
+recdims(flow, units = "mm")
+#>  width height 
+#>   90.8  110.5 
+#> attr(,"units")
+#> [1] "mm"
 ```

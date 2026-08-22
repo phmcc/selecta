@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">selecta</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,6 +54,17 @@
       <small>Source: <a href="https://codeberg.org/phmcc/selecta/tree/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.1" id="selecta-061-2026-08-22">
+<em>selecta</em> 0.6.1 (2026-08-22)<a class="anchor" aria-label="anchor" href="#selecta-061-2026-08-22"></a></h2>
+<ul><li>Add <code>quiet</code> argument to <code><a href="../reference/flowsave.html">flowsave()</a></code> to suppress the message reporting the file written and the dimensions used.</li>
+<li>Add <code>units</code> argument to <code><a href="../reference/flowsave.html">flowsave()</a></code> and <code><a href="../reference/recdims.html">recdims()</a></code>, accepting “in” (default), “cm”, and “mm”; graphics devices are driven in inches internally.</li>
+<li>Edited <code><a href="../reference/flowsave.html">flowsave()</a></code> to report the file written and the dimensions used, as well as whether those dimensions were computed or supplied, matching the reporting convention of <code><a href="https://rdrr.io/pkg/summata/man/forestsave.html" class="external-link">summata::forestsave()</a></code>. Previously, the message was emitted only when a dimension was left unspecified.</li>
+<li>Changed <code><a href="../reference/flowsave.html">flowsave()</a></code> argument order: <code>units</code> follows <code>height</code> and <code>quiet</code> follows <code>sans_serif</code>. Calls passing <code>dpi</code> or <code>sans_serif</code> positionally require updating.</li>
+<li>Edited <code><a href="../reference/recdims.html">recdims()</a></code> records the units on its result as a “units” attribute.</li>
+<li>Removed <code>side_gap_in</code> argument in the DOT engine exporter; redundant with <code>node_sep</code>.</li>
+<li>Internal: removed unreachable spacer-geometry code from the DOT engine.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.0" id="selecta-060-2026-06-17">
 <em>selecta</em> 0.6.0 (2026-06-17)<a class="anchor" aria-label="anchor" href="#selecta-060-2026-06-17"></a></h2><p class="text-muted">CRAN release: 2026-06-24</p>
@@ -133,7 +144,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0. <a href="https://phmcc.github.io/selecta/LICENSE.html" class="external-link">GPLv3 License</a> | <a href="https://phmcc.github.io/selecta/CODE_OF_CONDUCT.html" class="external-link">Code of Conduct</a></p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1. <a href="https://phmcc.github.io/selecta/LICENSE.html" class="external-link">GPLv3 License</a> | <a href="https://phmcc.github.io/selecta/CODE_OF_CONDUCT.html" class="external-link">Code of Conduct</a></p>
 </div>
 
     </footer></div>

@@ -17,7 +17,7 @@ text measurements, then closed immediately."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">selecta</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,19 +69,20 @@ text measurements, then closed immediately.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">recdims</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
-<span>  vpad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"selecta.vpad"</span>, <span class="fl">0.25</span><span class="op">)</span>,</span>
-<span>  pad <span class="op">=</span> <span class="fl">0.08</span>,</span>
-<span>  line_height <span class="op">=</span> <span class="fl">0.2</span>,</span>
-<span>  count_first <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  cex <span class="op">=</span> <span class="fl">0.85</span>,</span>
+<span>  vpad <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pad <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  line_height <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  count_first <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cex <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cex_side <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  cex_phase <span class="op">=</span> <span class="fl">0.9</span>,</span>
-<span>  phase_width <span class="op">=</span> <span class="fl">0.22</span>,</span>
-<span>  margin <span class="op">=</span> <span class="fl">0.25</span>,</span>
-<span>  phase_multiline <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  phase_max_lines <span class="op">=</span> <span class="fl">3L</span>,</span>
-<span>  font_family <span class="op">=</span> <span class="st">"Helvetica"</span>,</span>
+<span>  cex_phase <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  phase_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  margin <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  phase_multiline <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  phase_max_lines <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  font_family <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  number_format <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  units <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"in"</span>, <span class="st">"cm"</span>, <span class="st">"mm"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  .measure_dev <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  .return_graph <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -97,33 +98,35 @@ text measurements, then closed immediately.</p>
 
 
 <dt id="arg-vpad">vpad<a class="anchor" aria-label="anchor" href="#arg-vpad"></a></dt>
-<dd><p>Numeric. Vertical spacing between elements in inches.
+<dd><p>Numeric. Vertical spacing between elements in inches. Controls
+the uniform gap between any box edge and the next adjacent element.
 Default 0.25; override globally with
 <code>options(selecta.vpad = 0.35)</code>.</p></dd>
 
 
 <dt id="arg-pad">pad<a class="anchor" aria-label="anchor" href="#arg-pad"></a></dt>
-<dd><p>Numeric. Internal padding within boxes in inches.
-Default 0.08.</p></dd>
+<dd><p>Numeric. Internal padding within boxes in inches. Default 0.08.</p></dd>
 
 
 <dt id="arg-line-height">line_height<a class="anchor" aria-label="anchor" href="#arg-line-height"></a></dt>
-<dd><p>Numeric. Vertical line spacing in inches.
-Default 0.20.</p></dd>
+<dd><p>Numeric. Vertical line spacing in inches, controlling
+box heights for both main and side boxes. Scales proportionally with
+<code>cex</code>. Default 0.20.</p></dd>
 
 
 <dt id="arg-count-first">count_first<a class="anchor" aria-label="anchor" href="#arg-count-first"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, measure using the
-count-first label layout. Default <code>FALSE</code>.</p></dd>
+<dd><p>Logical. If <code>TRUE</code>, side-box labels are rendered
+as <code>"214  Discontinued"</code> (bold count before label) rather than the
+default <code>"Discontinued (n = 214)"</code>. Default <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-cex">cex<a class="anchor" aria-label="anchor" href="#arg-cex"></a></dt>
-<dd><p>Numeric. Font size multiplier for main text. Default 0.85.</p></dd>
+<dd><p>Numeric. Font size multiplier for main box text. Default 0.85.</p></dd>
 
 
 <dt id="arg-cex-side">cex_side<a class="anchor" aria-label="anchor" href="#arg-cex-side"></a></dt>
-<dd><p>Numeric. Font size multiplier for side box text.
-Defaults to the value of <code>cex</code>.</p></dd>
+<dd><p>Numeric. Font size multiplier for side box text. Defaults
+to the value of <code>cex</code>.</p></dd>
 
 
 <dt id="arg-cex-phase">cex_phase<a class="anchor" aria-label="anchor" href="#arg-cex-phase"></a></dt>
@@ -133,36 +136,54 @@ Default 0.9.</p></dd>
 
 <dt id="arg-phase-width">phase_width<a class="anchor" aria-label="anchor" href="#arg-phase-width"></a></dt>
 <dd><p>Numeric. Width of phase label boxes in inches.
-Default 0.22.</p></dd>
+Default 0.22. When <code>phase_multiline = TRUE</code> the strip is widened
+automatically to fit the wrapped lines, so this acts as a per-line
+minimum rather than a hard cap.</p></dd>
 
 
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
-<dd><p>Numeric. Fixed margin on all four sides in inches.
-Default 0.25.</p></dd>
+<dd><p>Numeric. Fixed margin on all four sides of the canvas in
+inches. Default 0.25.</p></dd>
 
 
 <dt id="arg-phase-multiline">phase_multiline<a class="anchor" aria-label="anchor" href="#arg-phase-multiline"></a></dt>
-<dd><p>Logical. If <code>TRUE</code> (the default), long phase
-labels wrap across stacked lines to fit their band; must match the
-draw-time value for accurate dimensions. Default <code>TRUE</code>.</p></dd>
+<dd><p>Logical. If <code>TRUE</code> (the default), a phase
+label longer than the vertical extent of the boxes it spans is
+word-wrapped across multiple stacked lines (drawn rotated in the strip),
+trading strip width for height so the diagram is not stretched
+vertically to fit a long rotated label. Set to <code>FALSE</code> to force
+every label onto a single line, in which case a label taller than its
+band stretches the diagram instead. A label that cannot be wrapped (a
+single word taller than its band) falls back to stretching either way.
+Labels containing an explicit newline (<code>"\n"</code>) are always split on
+it regardless of this setting. Default <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-phase-max-lines">phase_max_lines<a class="anchor" aria-label="anchor" href="#arg-phase-max-lines"></a></dt>
-<dd><p>Integer. Maximum wrapped lines per phase label
-when wrapping is active. Default 3.</p></dd>
+<dd><p>Integer. Maximum number of wrapped lines per phase
+label when wrapping is active; any overflow is collapsed into the final
+line. Default 3.</p></dd>
 
 
 <dt id="arg-font-family">font_family<a class="anchor" aria-label="anchor" href="#arg-font-family"></a></dt>
-<dd><p>Character. Font family for text measurement.
-Default <code>"Helvetica"</code>. Must match the value used at draw time
-for accurate dimensions.</p></dd>
+<dd><p>Character. Font family used for all text in the
+diagram. Default <code>"Helvetica"</code>. Set to <code>""</code> to use the
+device default.</p></dd>
 
 
 <dt id="arg-number-format">number_format<a class="anchor" aria-label="anchor" href="#arg-number-format"></a></dt>
 <dd><p>Character string or two-element character vector.
-Locale-aware count formatter passed through to <code><a href="export_grid.html">export_grid()</a></code>
-for accurate text measurement. See <code><a href="flowchart.html">flowchart()</a></code> for
-accepted values.</p></dd>
+Locale-aware formatting for participant counts: <code>"us"</code> (default,
+<code>1,234</code>), <code>"eu"</code> (<code>1.234</code>), <code>"space"</code>
+(<code>1\u202F234</code>), <code>"none"</code> (<code>1234</code>), or a custom
+<code>c(big.mark, decimal.mark)</code> pair. Falls back to
+<code>getOption("selecta.number_format", "us")</code> when <code>NULL</code>.</p></dd>
+
+
+<dt id="arg-units">units<a class="anchor" aria-label="anchor" href="#arg-units"></a></dt>
+<dd><p>Character string giving the units the dimensions are
+returned in: <code>"in"</code> (inches, the default), <code>"cm"</code>, or
+<code>"mm"</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -189,22 +210,30 @@ Default <code>FALSE</code>. Internal use only.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A named numeric vector with elements <code>width</code> and
-  <code>height</code> (in inches), rounded up to the nearest tenth.</p>
+  <code>height</code>, expressed in <code>units</code> and rounded up to the nearest
+  tenth. The units are recorded on the result as a <code>"units"</code>
+  attribute, so a value carried between functions remains
+  self-describing.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><code>recdims()</code> computes the canvas size a flow needs at a given
 typography and layout, so the figure is neither clipped nor surrounded by
 excess whitespace. It lays the diagram out and measures it on a throwaway
-graphics device, returning width and height in inches without drawing
-anything visible. Because text metrics are font- and device-dependent,
-any sizing parameter passed here (<code>cex</code>, <code>font_family</code>,
-<code>phase_multiline</code>, <code>number_format</code>, and so on) should match the
-values used at render time; styling-only parameters are ignored so the
-same call can be shared across <code>recdims()</code>, <code><a href="flowchart.html">flowchart()</a></code>,
-and <code><a href="flowsave.html">flowsave()</a></code>. The advanced <code>.measure_dev</code> argument
-supplies a custom device opener when measurement must match a non-default
-device. <code><a href="flowsave.html">flowsave()</a></code> calls <code>recdims()</code> internally when
+graphics device, returning width and height without drawing anything
+visible. Measurement is performed in inches and the result converted to
+<code>units</code>, with the rounding applied after conversion so the returned
+tenth is a tenth of the reported unit. Because text metrics are font- and
+device-dependent, any sizing parameter passed here (<code>cex</code>,
+<code>font_family</code>, <code>phase_multiline</code>, <code>number_format</code>, and so
+on) should match the values used at render time; styling-only parameters
+are ignored so the same call can be shared across <code>recdims()</code>,
+<code><a href="flowchart.html">flowchart()</a></code>, and <code><a href="flowsave.html">flowsave()</a></code>. A parameter left unspecified
+is not defaulted here but forwarded unset, so it is measured at exactly
+the value the drawing routine will apply. The advanced
+<code>.measure_dev</code> argument supplies a custom device opener when
+measurement must match a non-default device.
+<code><a href="flowsave.html">flowsave()</a></code> calls <code>recdims()</code> internally when
 <code>width</code> or <code>height</code> is left unspecified, so explicit use is
 only needed when the dimensions themselves are wanted.</p>
     </div>
@@ -229,6 +258,15 @@ only needed when the dimensions themselves are wanted.</p>
 <span class="r-in"><span><span class="fu">recdims</span><span class="op">(</span><span class="va">flow</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  width height </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    3.6    4.4 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"units")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "in"</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Journals commonly specify figure widths in millimeters.</span></span></span>
+<span class="r-in"><span><span class="fu">recdims</span><span class="op">(</span><span class="va">flow</span>, units <span class="op">=</span> <span class="st">"mm"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  width height </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   90.8  110.5 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"units")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "mm"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -241,7 +279,7 @@ only needed when the dimensions themselves are wanted.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0. <a href="https://phmcc.github.io/selecta/LICENSE.html" class="external-link">GPLv3 License</a> | <a href="https://phmcc.github.io/selecta/CODE_OF_CONDUCT.html" class="external-link">Code of Conduct</a></p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1. <a href="https://phmcc.github.io/selecta/LICENSE.html" class="external-link">GPLv3 License</a> | <a href="https://phmcc.github.io/selecta/CODE_OF_CONDUCT.html" class="external-link">Code of Conduct</a></p>
 </div>
 
     </footer></div>

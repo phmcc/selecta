@@ -1,5 +1,38 @@
 # Changelog
 
+## *selecta* 0.6.1 (2026-08-22)
+
+- Add `quiet` argument to
+  [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+  to suppress the message reporting the file written and the dimensions
+  used.
+- Add `units` argument to
+  [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+  and
+  [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md),
+  accepting “in” (default), “cm”, and “mm”; graphics devices are driven
+  in inches internally.
+- Edited
+  [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+  to report the file written and the dimensions used, as well as whether
+  those dimensions were computed or supplied, matching the reporting
+  convention of
+  [`summata::forestsave()`](https://rdrr.io/pkg/summata/man/forestsave.html).
+  Previously, the message was emitted only when a dimension was left
+  unspecified.
+- Changed
+  [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+  argument order: `units` follows `height` and `quiet` follows
+  `sans_serif`. Calls passing `dpi` or `sans_serif` positionally require
+  updating.
+- Edited
+  [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+  records the units on its result as a “units” attribute.
+- Removed `side_gap_in` argument in the DOT engine exporter; redundant
+  with `node_sep`.
+- Internal: removed unreachable spacer-geometry code from the DOT
+  engine.
+
 ## *selecta* 0.6.0 (2026-06-17)
 
 CRAN release: 2026-06-24

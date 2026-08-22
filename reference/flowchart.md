@@ -8,7 +8,7 @@ for interactive use; for saving to file with auto-sized dimensions, see
 ## Usage
 
 ``` r
-flowchart(.flow, engine = c("grid", "dot"), count_first = FALSE, ...)
+flowchart(.flow, engine = c("grid", "dot"), count_first = NULL, ...)
 
 # S3 method for class 'selecta'
 plot(x, engine = c("grid", "dot"), ...)
@@ -34,7 +34,9 @@ plot(x, engine = c("grid", "dot"), ...)
 
   Logical. If `TRUE`, side-box labels are rendered as
   `"214 Discontinued"` (bold count before label) rather than the default
-  `"Discontinued (n = 214)"`. Applies to all box types. Default `FALSE`.
+  `"Discontinued (n = 214)"`. Applies to all box types. Default `FALSE`,
+  supplied by the drawing routine rather than restated here, so this
+  argument shows as `NULL` in the usage.
 
 - ...:
 
@@ -101,9 +103,9 @@ plot(x, engine = c("grid", "dot"), ...)
       flow defines phases; the `dot` engine draws them as horizontal
       left-margin bands rather than the `grid` engine's vertical strips)
 
-  side_gap_in, rank_sep, node_sep
+  rank_sep, node_sep
 
-  :   Spacing of side boxes, ranks, and nodes, in inches
+  :   Spacing of ranks and nodes, in inches
 
   number_format
 
