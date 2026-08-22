@@ -98,11 +98,6 @@
 #'   labels.
 #' @param phase_text_col Character. Text color for phase labels. Default
 #'   \code{"#FFFFFF"} (white).
-#' @param side_gap_in Numeric. Horizontal gap, in inches, between the
-#'   vertical spine and the left edge of a side box hanging off a tick.
-#'   Default 0.4. Realized as a narrow invisible spacer on the joint's
-#'   rank; Graphviz's node separation also contributes, so the effective
-#'   gap is slightly larger. Lower values pull side boxes toward the spine.
 #' @param rank_sep Numeric. Graphviz \code{ranksep} in inches, the vertical
 #'   separation between successive rows (and the half-rows introduced by
 #'   tick joints). Default 0.4. Lower values produce a more compact diagram.
@@ -130,7 +125,6 @@ export_dot <- function(graph, number_format = NULL, count_first = FALSE,
                        phase_labels       = NULL,
                        phase_fill         = "#000000",
                        phase_text_col     = "#FFFFFF",
-                       side_gap_in        = 0.4,
                        rank_sep           = 0.4,
                        node_sep           = 0.5) {
 
@@ -190,11 +184,9 @@ export_dot <- function(graph, number_format = NULL, count_first = FALSE,
     arm_ids_sorted <- sort(unique(nodes$arm_id[!is.na(nodes$arm_id)]))
     n_arms_total   <- length(arm_ids_sorted)
 
-    ## ---- Right-offset for side ticks ----
-    ## A side box hangs just outside its column's widest box plus padding (based
-    ## on grid outputs): the spacer is half that box (boxes centered, joint at center)
-    ## plus side_gap_in. Box widths are estimated from a Helvetica advance-width
-    ## table over the longest line; plain DOT auto-sizes the real boxes.
+    ## ---- Box width estimation ----
+    ## Box widths are estimated from a Helvetica advance-width table over the
+    ## longest line; plain DOT auto-sizes the real boxes.
     hv_w <- c(278,278,355,556,556,889,667,222,333,333,389,584,278,333,278,278,
               556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,
               1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,
@@ -213,26 +205,11 @@ export_dot <- function(graph, number_format = NULL, count_first = FALSE,
         parts <- strsplit(text, "\\n", fixed = FALSE)[[1L]]
         max(vapply(parts, line_w_in, numeric(1L))) + 2 * margin_x_in
     }
-    ## Max box width per column group (trunk / arm_N / src_N), over the boxes
-    ## actually in that column (main/alloc/arm/source, not side boxes).
-    col_max_w <- list()
-    for (g in unique(nodes$grp[!is.na(nodes$grp)])) {
-        in_col <- which(nodes$grp == g &
-                        nodes$role %in% c("main", "alloc", "arm", "source"))
-        col_max_w[[g]] <- if (length(in_col))
-                              max(vapply(nodes$text[in_col], box_w_in, numeric(1L))) else 1.5
-    }
     ## Force a common minimum (widest arm label, plain), which never clips and
     ## matches the grid. Plain only---rich measures wider bold text.
     arm_idx  <- which(nodes$role == "arm")
     arm_w_in <- if (length(arm_idx))
                     max(vapply(nodes$text[arm_idx], box_w_in, numeric(1L))) else NA_real_
-    ## Spacer from the column center to a side box's near edge
-    spacer_for_parent <- function(parent_id) {
-        g <- nodes$grp[match(parent_id, nodes$node_id)]
-        half <- if (!is.na(g) && !is.null(col_max_w[[g]])) col_max_w[[g]] / 2 else 0.75
-        max(0.10, half + side_gap_in)
-    }
 
     is_times   <- grepl("^Times",   font_family, ignore.case = TRUE)
     is_courier <- grepl("^Courier", font_family, ignore.case = TRUE)
@@ -344,8 +321,6 @@ export_dot <- function(graph, number_format = NULL, count_first = FALSE,
     ## Joint ids P1, P2, ... never collide with the numeric-suffixed nN box ids.
     joint_seq <- 0L
     next_joint <- function() { joint_seq <<- joint_seq + 1L; sprintf("P%d", joint_seq) }
-    spacer_seq <- 0L
-    next_spacer <- function() { spacer_seq <<- spacer_seq + 1L; sprintf("W%d", spacer_seq) }
 
     grp_of   <- function(node_id) nodes$grp[match(node_id, nodes$node_id)]
     ## Edge color attribute (no leading space). Sites that follow another
@@ -382,7 +357,7 @@ export_dot <- function(graph, number_format = NULL, count_first = FALSE,
     ## interleaving boxes and joints (Pj1 .. b1 .. Pj2 .. b2 .. ... .. PjN .. bN).
     ## Each box sits just right of its arm, and the shared rank reserves the
     ## inter-arm channels (arms splay to fit).
-    
+
     ## Applies when every arm parents exactly one exclusion and continues to its
     ## own box; other rows fall to the per-parent loop below.
     fan_handled_parents <- integer(0)   # arm parents emitted by the fan

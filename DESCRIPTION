@@ -1,7 +1,7 @@
 Package: selecta
 Type: Package
 Title: Declarative EQUATOR-Style Flow Diagrams for Clinical Studies
-Version: 0.6.0
+Version: 0.6.1
 Authors@R: c(
     person(
         given = c("Paul", "Hsin-ti"), 
@@ -28,7 +28,11 @@ Depends:
     R (>= 4.1.0)
 Imports:
     data.table,
-    grid
+    grDevices,
+    grid,
+    stats,
+    tools,
+    utils
 Suggests:
     DiagrammeR,
     knitr,

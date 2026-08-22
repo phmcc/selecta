@@ -6,19 +6,20 @@
 \usage{
 recdims(
   x,
-  vpad = getOption("selecta.vpad", 0.25),
-  pad = 0.08,
-  line_height = 0.2,
-  count_first = FALSE,
-  cex = 0.85,
+  vpad = NULL,
+  pad = NULL,
+  line_height = NULL,
+  count_first = NULL,
+  cex = NULL,
   cex_side = NULL,
-  cex_phase = 0.9,
-  phase_width = 0.22,
-  margin = 0.25,
-  phase_multiline = TRUE,
-  phase_max_lines = 3L,
-  font_family = "Helvetica",
+  cex_phase = NULL,
+  phase_width = NULL,
+  margin = NULL,
+  phase_multiline = NULL,
+  phase_max_lines = NULL,
+  font_family = NULL,
   number_format = NULL,
+  units = c("in", "cm", "mm"),
   ...,
   .measure_dev = NULL,
   .return_graph = FALSE
@@ -27,48 +28,66 @@ recdims(
 \arguments{
 \item{x}{A \code{selecta} object.}
 
-\item{vpad}{Numeric. Vertical spacing between elements in inches.
+\item{vpad}{Numeric. Vertical spacing between elements in inches. Controls
+the uniform gap between any box edge and the next adjacent element.
 Default 0.25; override globally with
 \code{options(selecta.vpad = 0.35)}.}
 
-\item{pad}{Numeric. Internal padding within boxes in inches.
-Default 0.08.}
+\item{pad}{Numeric. Internal padding within boxes in inches. Default 0.08.}
 
-\item{line_height}{Numeric. Vertical line spacing in inches.
-Default 0.20.}
+\item{line_height}{Numeric. Vertical line spacing in inches, controlling
+box heights for both main and side boxes. Scales proportionally with
+\code{cex}. Default 0.20.}
 
-\item{count_first}{Logical. If \code{TRUE}, measure using the
-count-first label layout. Default \code{FALSE}.}
+\item{count_first}{Logical. If \code{TRUE}, side-box labels are rendered
+as \code{"214  Discontinued"} (bold count before label) rather than the
+default \code{"Discontinued (n = 214)"}. Default \code{FALSE}.}
 
-\item{cex}{Numeric. Font size multiplier for main text. Default 0.85.}
+\item{cex}{Numeric. Font size multiplier for main box text. Default 0.85.}
 
-\item{cex_side}{Numeric. Font size multiplier for side box text.
-Defaults to the value of \code{cex}.}
+\item{cex_side}{Numeric. Font size multiplier for side box text. Defaults
+to the value of \code{cex}.}
 
 \item{cex_phase}{Numeric. Font size multiplier for phase labels.
 Default 0.9.}
 
 \item{phase_width}{Numeric. Width of phase label boxes in inches.
-Default 0.22.}
+Default 0.22. When \code{phase_multiline = TRUE} the strip is widened
+automatically to fit the wrapped lines, so this acts as a per-line
+minimum rather than a hard cap.}
 
-\item{margin}{Numeric. Fixed margin on all four sides in inches.
-Default 0.25.}
+\item{margin}{Numeric. Fixed margin on all four sides of the canvas in
+inches. Default 0.25.}
 
-\item{phase_multiline}{Logical. If \code{TRUE} (the default), long phase
-labels wrap across stacked lines to fit their band; must match the
-draw-time value for accurate dimensions. Default \code{TRUE}.}
+\item{phase_multiline}{Logical. If \code{TRUE} (the default), a phase
+label longer than the vertical extent of the boxes it spans is
+word-wrapped across multiple stacked lines (drawn rotated in the strip),
+trading strip width for height so the diagram is not stretched
+vertically to fit a long rotated label. Set to \code{FALSE} to force
+every label onto a single line, in which case a label taller than its
+band stretches the diagram instead. A label that cannot be wrapped (a
+single word taller than its band) falls back to stretching either way.
+Labels containing an explicit newline (\code{"\\n"}) are always split on
+it regardless of this setting. Default \code{TRUE}.}
 
-\item{phase_max_lines}{Integer. Maximum wrapped lines per phase label
-when wrapping is active. Default 3.}
+\item{phase_max_lines}{Integer. Maximum number of wrapped lines per phase
+label when wrapping is active; any overflow is collapsed into the final
+line. Default 3.}
 
-\item{font_family}{Character. Font family for text measurement.
-Default \code{"Helvetica"}. Must match the value used at draw time
-for accurate dimensions.}
+\item{font_family}{Character. Font family used for all text in the
+diagram. Default \code{"Helvetica"}. Set to \code{""} to use the
+device default.}
 
 \item{number_format}{Character string or two-element character vector.
-Locale-aware count formatter passed through to \code{export_grid()}
-for accurate text measurement. See \code{flowchart()} for
-accepted values.}
+Locale-aware formatting for participant counts: \code{"us"} (default,
+\code{1,234}), \code{"eu"} (\code{1.234}), \code{"space"}
+(\code{1\\u202F234}), \code{"none"} (\code{1234}), or a custom
+\code{c(big.mark, decimal.mark)} pair. Falls back to
+\code{getOption("selecta.number_format", "us")} when \code{NULL}.}
+
+\item{units}{Character string giving the units the dimensions are
+returned in: \code{"in"} (inches, the default), \code{"cm"}, or
+\code{"mm"}.}
 
 \item{...}{Additional arguments. Styling-only parameters that do not
 affect text measurement (such as \code{box_fill}, \code{phase_fill},
@@ -87,7 +106,10 @@ Default \code{FALSE}. Internal use only.}
 }
 \value{
 A named numeric vector with elements \code{width} and
-  \code{height} (in inches), rounded up to the nearest tenth.
+  \code{height}, expressed in \code{units} and rounded up to the nearest
+  tenth. The units are recorded on the result as a \code{"units"}
+  attribute, so a value carried between functions remains
+  self-describing.
 }
 \description{
 Computes recommended width and height in inches based on diagram
@@ -98,15 +120,20 @@ text measurements, then closed immediately.
 \code{recdims()} computes the canvas size a flow needs at a given
 typography and layout, so the figure is neither clipped nor surrounded by
 excess whitespace. It lays the diagram out and measures it on a throwaway
-graphics device, returning width and height in inches without drawing
-anything visible. Because text metrics are font- and device-dependent,
-any sizing parameter passed here (\code{cex}, \code{font_family},
-\code{phase_multiline}, \code{number_format}, and so on) should match the
-values used at render time; styling-only parameters are ignored so the
-same call can be shared across \code{recdims()}, \code{flowchart()},
-and \code{flowsave()}. The advanced \code{.measure_dev} argument
-supplies a custom device opener when measurement must match a non-default
-device. \code{flowsave()} calls \code{recdims()} internally when
+graphics device, returning width and height without drawing anything
+visible. Measurement is performed in inches and the result converted to
+\code{units}, with the rounding applied after conversion so the returned
+tenth is a tenth of the reported unit. Because text metrics are font- and
+device-dependent, any sizing parameter passed here (\code{cex},
+\code{font_family}, \code{phase_multiline}, \code{number_format}, and so
+on) should match the values used at render time; styling-only parameters
+are ignored so the same call can be shared across \code{recdims()},
+\code{flowchart()}, and \code{flowsave()}. A parameter left unspecified
+is not defaulted here but forwarded unset, so it is measured at exactly
+the value the drawing routine will apply. The advanced
+\code{.measure_dev} argument supplies a custom device opener when
+measurement must match a non-default device.
+\code{flowsave()} calls \code{recdims()} internally when
 \code{width} or \code{height} is left unspecified, so explicit use is
 only needed when the dimensions themselves are wanted.
 }
@@ -117,6 +144,9 @@ flow <- enroll(n = 500) |>
   endpoint("Analyzed")
 
 recdims(flow)
+
+# Journals commonly specify figure widths in millimeters.
+recdims(flow, units = "mm")
 
 }
 \seealso{

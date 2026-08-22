@@ -305,7 +305,7 @@ compute <- function(x) {
             streams <- list()
             n_streams <- 0L
             last_main <- merge_id
-            
+
             ## Reset the arm-id allocator
             arm_seq <- 0L
 

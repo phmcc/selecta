@@ -53,6 +53,24 @@ NULL
 #' @noRd
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
+#' Convert a Length Between Measurement Units
+#'
+#' Converts a numeric length between the units accepted by \code{recdims()}
+#' and \code{flowsave()}. Inches are the package's internal representation, so
+#' conversion is routed through inches in both directions.
+#'
+#' @param value Numeric length, or a vector of lengths.
+#' @param from,to Character strings naming the source and target units, each
+#'   one of \code{"in"}, \code{"cm"}, or \code{"mm"}.
+#' @return A numeric vector parallel to \code{value}, expressed in \code{to}.
+#' @keywords internal
+convert_units <- function(value, from = "in", to = "in") {
+    if (identical(from, to)) return(value)
+    ## Units per inch, so division reaches inches and multiplication leaves them
+    per_inch <- c("in" = 1, "cm" = 2.54, "mm" = 25.4)
+    value / per_inch[[from]] * per_inch[[to]]
+}
+
 #' Emit a Debug Section When Layout Debugging Is Enabled
 #'
 #' Prints a titled section followed by one or more objects via

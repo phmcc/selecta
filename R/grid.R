@@ -555,7 +555,7 @@ export_grid <- function(graph,
             col_w       <- max_main_w +
                 ifelse(max_side_w > 0, hpad_in + max_side_w, 0)
 
-            ## Center parent arm over children 
+            ## Center parent arm over children
             for (p in par_ids) {
                 kids <- intersect(
                     arm_tree$arm_id[which(arm_tree$arm_parent == p)], leaf_seq)

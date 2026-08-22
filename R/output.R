@@ -15,10 +15,11 @@
 #' @param count_first Logical. If \code{TRUE}, side-box labels are rendered
 #'   as \code{"214  Discontinued"} (bold count before label) rather than the
 #'   default \code{"Discontinued (n = 214)"}. Applies to all box types.
-#'   Default \code{FALSE}.
+#'   Default \code{FALSE}, supplied by the drawing routine rather than
+#'   restated here, so this argument shows as \code{NULL} in the usage.
 #' @param ... Additional styling and formatting arguments forwarded to the
 #'   selected engine; arguments an engine does not recognize are ignored.
-#' 
+#'
 #'   For \code{engine = "grid"}:
 #'   \describe{
 #'     \item{cex, cex_side, cex_phase}{Font-size multipliers for the main,
@@ -51,8 +52,7 @@
 #'       phase-band labels (on by default when the flow defines phases; the
 #'       \code{dot} engine draws them as horizontal left-margin bands rather
 #'       than the \code{grid} engine's vertical strips)}
-#'     \item{side_gap_in, rank_sep, node_sep}{Spacing of side boxes, ranks,
-#'       and nodes, in inches}
+#'     \item{rank_sep, node_sep}{Spacing of ranks and nodes, in inches}
 #'     \item{number_format}{Locale-aware count formatter, shared with the
 #'       \code{grid} engine}
 #'   }
@@ -118,7 +118,7 @@
 #' @family flowchart output functions
 #' @export
 flowchart <- function(.flow, engine = c("grid", "dot"),
-                      count_first = FALSE, ...) {
+                      count_first = NULL, ...) {
 
     if (!inherits(.flow, "selecta"))
         stop("'.flow' must be a selecta object", call. = FALSE)
@@ -131,21 +131,26 @@ flowchart <- function(.flow, engine = c("grid", "dot"),
     graph  <- layout_nodes(graph)
 
     if (engine == "grid") {
-        export_grid(graph, count_first = count_first, ...)
+        ## Forwarded only when supplied, so export_grid()'s default stays
+        ## authoritative rather than being restated here. A plain call rather
+        ## than do.call keeps the graph out of deparsed error messages.
+        if (is.null(count_first)) export_grid(graph, ...)
+        else                      export_grid(graph, count_first = count_first, ...)
     } else {
         ## DOT engine: forward only supported options via do.call with a
         ## list of present arguments, so export_dot()'s defaults stay authoritative
         ## unless explicitly overridden.
-        td_args <- list(graph         = graph,
-                        number_format = dots$number_format,
-                        count_first   = count_first)
+        td_args <- list(graph = graph)
+        if (!is.null(dots$number_format))
+            td_args$number_format <- dots$number_format
+        if (!is.null(count_first)) td_args$count_first <- count_first
         for (p in c("ortho", "formatting", "bullets", "font_family",
                     "padding_pt", "padding_adjust",
                     "box_fill", "side_fill", "border_col", "arrow_col",
                     "source_fill", "source_header_fill",
                     "source_header_text",
                     "phase_labels", "phase_fill", "phase_text_col",
-                    "side_gap_in", "rank_sep", "node_sep"))
+                    "rank_sep", "node_sep"))
             if (!is.null(dots[[p]])) td_args[[p]] <- dots[[p]]
         return(do.call(export_dot, td_args))
     }
@@ -311,7 +316,7 @@ print.selecta <- function(x, ...) {
 #'   endpoint("Analyzed")
 #' summary(flow)
 #' \dontshow{options(.old)}
-#' 
+#'
 #' @family flowchart output functions
 #' @export
 summary.selecta <- function(object, ...) {
@@ -322,43 +327,30 @@ summary.selecta <- function(object, ...) {
 }
 
 
+## The subset of export_grid() parameters that affect text measurement and
+## must therefore hold identical values when a diagram is measured and when it
+## is drawn. Named once here and consumed by recdims(), which forwards them,
+## and by flowsave(), which collects them from its dots. The default values
+## themselves are not restated: they live only in export_grid()'s formals, so
+## measurement and rendering cannot drift apart. Styling-only parameters are
+## deliberately absent, as they do not change any dimension.
+.measure_params <- c("vpad", "pad", "line_height", "count_first",
+                     "cex", "cex_side", "cex_phase", "phase_width",
+                     "margin", "phase_multiline", "phase_max_lines",
+                     "font_family", "number_format")
+
+
 #' Recommended Figure Dimensions
 #'
 #' Computes recommended width and height in inches based on diagram
 #' content. A throwaway graphics device is opened to obtain accurate
 #' text measurements, then closed immediately.
 #'
+#' @inheritParams export_grid
 #' @param x A \code{selecta} object.
-#' @param vpad Numeric. Vertical spacing between elements in inches.
-#'   Default 0.25; override globally with
-#'   \code{options(selecta.vpad = 0.35)}.
-#' @param pad Numeric. Internal padding within boxes in inches.
-#'   Default 0.08.
-#' @param line_height Numeric. Vertical line spacing in inches.
-#'   Default 0.20.
-#' @param count_first Logical. If \code{TRUE}, measure using the
-#'   count-first label layout. Default \code{FALSE}.
-#' @param cex Numeric. Font size multiplier for main text. Default 0.85.
-#' @param cex_side Numeric. Font size multiplier for side box text.
-#'   Defaults to the value of \code{cex}.
-#' @param cex_phase Numeric. Font size multiplier for phase labels.
-#'   Default 0.9.
-#' @param phase_width Numeric. Width of phase label boxes in inches.
-#'   Default 0.22.
-#' @param margin Numeric. Fixed margin on all four sides in inches.
-#'   Default 0.25.
-#' @param phase_multiline Logical. If \code{TRUE} (the default), long phase
-#'   labels wrap across stacked lines to fit their band; must match the
-#'   draw-time value for accurate dimensions. Default \code{TRUE}.
-#' @param phase_max_lines Integer. Maximum wrapped lines per phase label
-#'   when wrapping is active. Default 3.
-#' @param font_family Character. Font family for text measurement.
-#'   Default \code{"Helvetica"}. Must match the value used at draw time
-#'   for accurate dimensions.
-#' @param number_format Character string or two-element character vector.
-#'   Locale-aware count formatter passed through to \code{export_grid()}
-#'   for accurate text measurement. See \code{flowchart()} for
-#'   accepted values.
+#' @param units Character string giving the units the dimensions are
+#'   returned in: \code{"in"} (inches, the default), \code{"cm"}, or
+#'   \code{"mm"}.
 #' @param ... Additional arguments. Styling-only parameters that do not
 #'   affect text measurement (such as \code{box_fill}, \code{phase_fill},
 #'   \code{border_col}) are silently ignored, allowing the same call
@@ -373,21 +365,29 @@ summary.selecta <- function(object, ...) {
 #'   Default \code{FALSE}. Internal use only.
 #'
 #' @return A named numeric vector with elements \code{width} and
-#'   \code{height} (in inches), rounded up to the nearest tenth.
+#'   \code{height}, expressed in \code{units} and rounded up to the nearest
+#'   tenth. The units are recorded on the result as a \code{"units"}
+#'   attribute, so a value carried between functions remains
+#'   self-describing.
 #'
 #' @details
 #' \code{recdims()} computes the canvas size a flow needs at a given
 #' typography and layout, so the figure is neither clipped nor surrounded by
 #' excess whitespace. It lays the diagram out and measures it on a throwaway
-#' graphics device, returning width and height in inches without drawing
-#' anything visible. Because text metrics are font- and device-dependent,
-#' any sizing parameter passed here (\code{cex}, \code{font_family},
-#' \code{phase_multiline}, \code{number_format}, and so on) should match the
-#' values used at render time; styling-only parameters are ignored so the
-#' same call can be shared across \code{recdims()}, \code{flowchart()},
-#' and \code{flowsave()}. The advanced \code{.measure_dev} argument
-#' supplies a custom device opener when measurement must match a non-default
-#' device. \code{flowsave()} calls \code{recdims()} internally when
+#' graphics device, returning width and height without drawing anything
+#' visible. Measurement is performed in inches and the result converted to
+#' \code{units}, with the rounding applied after conversion so the returned
+#' tenth is a tenth of the reported unit. Because text metrics are font- and
+#' device-dependent, any sizing parameter passed here (\code{cex},
+#' \code{font_family}, \code{phase_multiline}, \code{number_format}, and so
+#' on) should match the values used at render time; styling-only parameters
+#' are ignored so the same call can be shared across \code{recdims()},
+#' \code{flowchart()}, and \code{flowsave()}. A parameter left unspecified
+#' is not defaulted here but forwarded unset, so it is measured at exactly
+#' the value the drawing routine will apply. The advanced
+#' \code{.measure_dev} argument supplies a custom device opener when
+#' measurement must match a non-default device.
+#' \code{flowsave()} calls \code{recdims()} internally when
 #' \code{width} or \code{height} is left unspecified, so explicit use is
 #' only needed when the dimensions themselves are wanted.
 #'
@@ -402,25 +402,29 @@ summary.selecta <- function(object, ...) {
 #'
 #' recdims(flow)
 #'
+#' # Journals commonly specify figure widths in millimeters.
+#' recdims(flow, units = "mm")
+#'
 #' @family flowchart output functions
 #' @export
-recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
-                    pad = 0.08, line_height = 0.20,
-                    count_first = FALSE, cex = 0.85, cex_side = NULL,
-                    cex_phase = 0.9, phase_width = 0.22, margin = 0.25,
-                    phase_multiline = TRUE, phase_max_lines = 3L,
-                    font_family = "Helvetica",
+recdims <- function(x,
+                    vpad = NULL, pad = NULL, line_height = NULL,
+                    count_first = NULL, cex = NULL, cex_side = NULL,
+                    cex_phase = NULL, phase_width = NULL, margin = NULL,
+                    phase_multiline = NULL, phase_max_lines = NULL,
+                    font_family = NULL,
                     number_format = NULL,
+                    units = c("in", "cm", "mm"),
                     ...,
                     .measure_dev = NULL, .return_graph = FALSE) {
 
     if (!inherits(x, "selecta"))
         stop("'x' must be a selecta object", call. = FALSE)
 
+    units <- match.arg(units)
+
     ## Fail fast on an invalid number_format before measuring or drawing.
     validate_number_format(number_format)
-
-    if (is.null(cex_side)) cex_side <- cex
 
     graph <- compute(x)
 
@@ -432,15 +436,15 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
     } else {
         tf_h <- .measure_dev()
     }
-    draw_args <- list(graph = graph_full, newpage = TRUE,
-                      vpad = vpad, pad = pad, line_height = line_height,
-                      count_first = count_first, cex = cex, cex_side = cex_side,
-                      cex_phase = cex_phase, phase_width = phase_width,
-                      phase_multiline = phase_multiline,
-                      phase_max_lines = phase_max_lines,
-                      margin = margin, font_family = font_family,
-                      number_format = number_format,
-                      measure_only = TRUE)
+
+    ## Only values the caller supplied are forwarded, leaving every unsupplied
+    ## parameter at the drawing routine's own default. Measurement therefore
+    ## cannot disagree with rendering, since neither default is restated here.
+    draw_args <- list(graph = graph_full, newpage = TRUE, measure_only = TRUE)
+    for (p in .measure_params) {
+        v <- get(p, envir = environment())
+        if (!is.null(v)) draw_args[[p]] <- v
+    }
     g <- do.call(export_grid, draw_args)
     grDevices::dev.off()
     if (!is.null(tf_h) && file.exists(tf_h)) unlink(tf_h)
@@ -451,14 +455,25 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
     w <- g$diagram_width_in
     if (is.null(w) || is.na(w)) w <- 6.0
 
-    result <- c(width = ceiling(w * 10) / 10, height = ceiling(h * 10) / 10)
+    ## Convert before rounding so the rounded-up tenth is a tenth of the
+    ## reported unit rather than of an inch.
+    w_out <- convert_units(w, from = "in", to = units)
+    h_out <- convert_units(h, from = "in", to = units)
+
+    result <- c(width  = ceiling(w_out * 10) / 10,
+                height = ceiling(h_out * 10) / 10)
+
+    ## Recorded so a consumer that assumed inches cannot mis-size the output
+    ## by the conversion factor.
+    attr(result, "units") <- units
 
     ## Optional debug: recommended canvas dimensions and their raw inputs.
     debug_emit("recdims() dimensions",
                raw_width_in = w, raw_height_in = h,
                phase_strip_w_in = g$phase_strip_w %||% NA_real_,
-               width_in = unname(result["width"]),
-               height_in = unname(result["height"]))
+               units = units,
+               width = unname(result["width"]),
+               height = unname(result["height"]))
 
     if (isTRUE(.return_graph)) attr(result, "graph") <- graph_full
     result
@@ -483,12 +498,18 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
 #'   uses R's grid graphics) or \code{"dot"} (uses the system Graphviz
 #'   binary). The \code{dot} engine requires \code{dot} to be installed and
 #'   on the system \code{PATH}.
-#' @param width Numeric or \code{NULL}. Width in inches. If \code{NULL}
+#' @param width Numeric or \code{NULL}. Width in \code{units}. If \code{NULL}
 #'   (default), computed automatically. For the \code{dot} engine, omit to
 #'   let Graphviz determine dimensions from layout.
-#' @param height Numeric or \code{NULL}. Height in inches. If \code{NULL}
-#'   (default), computed automatically. For the \code{dot} engine, omit to
-#'   let Graphviz determine dimensions from layout.
+#' @param height Numeric or \code{NULL}. Height in \code{units}. If
+#'   \code{NULL} (default), computed automatically. For the \code{dot}
+#'   engine, omit to let Graphviz determine dimensions from layout.
+#' @param units Character string giving the units of \code{width} and
+#'   \code{height}, and of the dimensions computed when either is left
+#'   unspecified: \code{"in"} (inches, the default), \code{"cm"}, or
+#'   \code{"mm"}. Graphics devices are driven in inches regardless, so the
+#'   conversion is internal. Ignored by the \code{dot} engine, which takes
+#'   no dimensions.
 #' @param dpi Integer. Resolution in dots per inch for raster formats
 #'   (PNG, TIFF). Default 300. Honored by both engines. Mirrors the
 #'   \code{dpi} argument of \code{ggplot2::ggsave()}.
@@ -499,6 +520,9 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
 #'   sized using the metrics of the font set via \code{font_family}, so
 #'   the result preserves all margins. Set to \code{FALSE} to retain
 #'   the layout font as the displayed font.
+#' @param quiet Logical. Suppress the message reporting the file written and
+#'   the dimensions used. The \code{dot} engine reports neither, so the
+#'   setting has no effect there. Default \code{FALSE}.
 #' @param ... Additional styling and formatting arguments forwarded to the
 #'   selected engine; see \code{flowchart()} for the full descriptions.
 #'   \describe{
@@ -511,8 +535,7 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
 #'       \code{box_fill}, \code{side_fill}, \code{border_col},
 #'       \code{arrow_col}, \code{source_fill}, \code{source_header_fill},
 #'       \code{source_header_text}, \code{phase_labels}, \code{phase_fill},
-#'       \code{phase_text_col}, \code{side_gap_in}, \code{rank_sep},
-#'       \code{node_sep}}
+#'       \code{phase_text_col}, \code{rank_sep}, \code{node_sep}}
 #'   }
 #'
 #' @return Invisibly returns the output file path.
@@ -536,14 +559,15 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
 #' directly and needs no external software, whereas image output shells out
 #' to the system \code{dot} binary and therefore requires Graphviz on the
 #' \code{PATH}.
-#' 
+#'
 #' When sizing automatically, \code{flowsave()} calls \code{recdims()}
 #' once and reuses the computed layout, so a separate \code{recdims()} call
-#' is unnecessary. With the \code{grid} engine, leaving either dimension at
-#' its default also reports the content-derived recommendation through a
-#' \code{message()}; supply both \code{width} and \code{height} to size
-#' manually and silence it. The \code{dot} engine instead lets Graphviz size
-#' the output from the layout, so no recommendation is reported. 
+#' is unnecessary. With the \code{grid} engine, the file written and the
+#' dimensions used are reported through a \code{message()} unless
+#' \code{quiet = TRUE}, whether those dimensions were computed or supplied,
+#' so that a figure written at an unexpected size is apparent at the point it
+#' is written. The \code{dot} engine instead lets Graphviz size the output
+#' from the layout, so it reports nothing.
 #'
 #' @seealso \code{\link{flowchart}} for interactive rendering,
 #'   \code{\link{recdims}} for dimension recommendations
@@ -560,6 +584,13 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
 #' flowsave(flow, file.path(tempdir(), "consort.pdf"))
 #' flowsave(flow, file.path(tempdir(), "consort.png"),
 #'          width = 8, height = 10)
+#'
+#' # Dimensions may be given, or computed, in metric units.
+#' flowsave(flow, file.path(tempdir(), "consort_metric.pdf"),
+#'          width = 180, height = 240, units = "mm")
+#'
+#' # Suppress the message reporting the file written.
+#' flowsave(flow, file.path(tempdir(), "consort_quiet.pdf"), quiet = TRUE)
 #' }
 #'
 #' \donttest{
@@ -582,12 +613,14 @@ recdims <- function(x, vpad = getOption("selecta.vpad", 0.25),
 #' @export
 flowsave <- function(x, file, engine = c("grid", "dot"),
                      width = NULL, height = NULL,
-                     dpi = 300, sans_serif = TRUE, ...) {
+                     units = c("in", "cm", "mm"),
+                     dpi = 300, sans_serif = TRUE, quiet = FALSE, ...) {
 
     if (!inherits(x, "selecta"))
         stop("'x' must be a selecta object", call. = FALSE)
 
     engine <- match.arg(engine)
+    units  <- match.arg(units)
     dots   <- list(...)
     ## Fail fast on an invalid number_format before any computation or drawing.
     validate_number_format(dots$number_format)
@@ -603,44 +636,55 @@ flowsave <- function(x, file, engine = c("grid", "dot"),
     if (ext == "dot")
         stop("'.dot' output requires engine = 'dot'", call. = FALSE)
 
+    ## Checked before measuring or reporting, so an unsupported extension
+    ## fails fast rather than after a message announcing the file written.
+    if (!ext %in% c("pdf", "svg", "png", "tif", "tiff"))
+        stop(sprintf("Unsupported format: '%s'", ext), call. = FALSE)
+
     cached_graph <- NULL
 
     if (is.null(width) || is.null(height)) {
         ## Forward layout parameters to recdims for consistent canvas sizing,
         ## requesting the pre-computed graph to reuse compute() + layout_nodes().
-        sz_args <- list(x = x, .return_graph = TRUE)
-        for (p in c("vpad", "pad", "line_height", "count_first", "cex", "cex_side",
-                    "cex_phase", "phase_width", "phase_multiline", "phase_max_lines",
-                    "margin", "font_family", "number_format"))
+        sz_args <- list(x = x, units = units, .return_graph = TRUE)
+        for (p in .measure_params)
             if (!is.null(dots[[p]])) sz_args[[p]] <- dots[[p]]
         sz <- do.call(recdims, sz_args)
-        if (is.null(width))  width  <- sz["width"]
-        if (is.null(height)) height <- sz["height"]
+        if (is.null(width))  width  <- unname(sz["width"])
+        if (is.null(height)) height <- unname(sz["height"])
         cached_graph <- attr(sz, "graph")
-        ## Report the content-derived recommendation when either dimension was
-        ## left to default, mirroring the summata export convention.
-        message(sprintf(
-            "Recommended plot dimensions: width = %.1f in, height = %.1f in",
-            unname(sz["width"]), unname(sz["height"])))
     }
+
+    ## Reported whether the dimensions were computed or supplied, so a figure
+    ## written at an unexpected size is apparent at the point it is written.
+    if (!quiet)
+        message(sprintf(
+            "Flowchart saved to %s (width = %.1f %s, height = %.1f %s)",
+            file, width, units, height, units))
+
+    ## Graphics devices are driven in inches whatever units the dimensions
+    ## were supplied or computed in.
+    width_in  <- convert_units(width,  from = units, to = "in")
+    height_in <- convert_units(height, from = units, to = "in")
 
     ## Device selection
     has_ragg <- requireNamespace("ragg", quietly = TRUE)
     switch(ext,
-           pdf  = pdf(file, width = width, height = height),
-           svg  = svg(file, width = width, height = height),
+           pdf  = pdf(file, width = width_in, height = height_in),
+           svg  = svg(file, width = width_in, height = height_in),
            png  = if (has_ragg) {
-                      ragg::agg_png(file, width = width, height = height,
+                      ragg::agg_png(file, width = width_in, height = height_in,
                                     units = "in", res = dpi)
                   } else {
-                      png(file, width = width, height = height, units = "in", res = dpi)
+                      png(file, width = width_in, height = height_in, units = "in", res = dpi)
                   },
            tiff =, tif = if (has_ragg) {
-                             ragg::agg_tiff(file, width = width, height = height,
+                             ragg::agg_tiff(file, width = width_in, height = height_in,
                                             units = "in", res = dpi)
                          } else {
-                             tiff(file, width = width, height = height, units = "in", res = dpi)
+                             tiff(file, width = width_in, height = height_in, units = "in", res = dpi)
                          },
+           ## Unreachable given the check above; retained as a guard.
            stop(sprintf("Unsupported format: '%s'", ext), call. = FALSE)
            )
     on.exit(dev.off())

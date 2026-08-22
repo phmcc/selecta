@@ -5,7 +5,7 @@
 \alias{plot.selecta}
 \title{Render an Enrollment Flowchart}
 \usage{
-flowchart(.flow, engine = c("grid", "dot"), count_first = FALSE, ...)
+flowchart(.flow, engine = c("grid", "dot"), count_first = NULL, ...)
 
 \method{plot}{selecta}(x, engine = c("grid", "dot"), ...)
 }
@@ -20,7 +20,8 @@ base R graphics, or \code{"dot"} to return a Graphviz DOT string
 \item{count_first}{Logical. If \code{TRUE}, side-box labels are rendered
 as \code{"214  Discontinued"} (bold count before label) rather than the
 default \code{"Discontinued (n = 214)"}. Applies to all box types.
-Default \code{FALSE}.}
+Default \code{FALSE}, supplied by the drawing routine rather than
+restated here, so this argument shows as \code{NULL} in the usage.}
 
 \item{...}{Additional styling and formatting arguments forwarded to the
   selected engine; arguments an engine does not recognize are ignored.
@@ -57,8 +58,7 @@ Default \code{FALSE}.}
       phase-band labels (on by default when the flow defines phases; the
       \code{dot} engine draws them as horizontal left-margin bands rather
       than the \code{grid} engine's vertical strips)}
-    \item{side_gap_in, rank_sep, node_sep}{Spacing of side boxes, ranks,
-      and nodes, in inches}
+    \item{rank_sep, node_sep}{Spacing of ranks and nodes, in inches}
     \item{number_format}{Locale-aware count formatter, shared with the
       \code{grid} engine}
   }}

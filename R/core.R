@@ -584,14 +584,14 @@ allocate <- function(.flow, variable = NULL, labels = NULL, n = NULL,
 #' pools the identification streams of a systematic review; after
 #' \code{stratify()} (or \code{allocate()}), it recombines strata
 #' that were handled independently, producing a split-and-recombine diagram.
-#' 
+#'
 #' By default, the merged count is the sum of the incoming streams after
 #' any per-arm exclusions applied since the split---an explicit \code{n}
 #' overrides this in manual mode. In such situations, an additional option
 #' is provided (\code{getOption("selecta.check_arithmetic")}, default
 #' \code{TRUE}), which will check arithmetic and raise an advisory warning
 #' if there is a discrepancy between counts.
-#' 
+#'
 #' The optional \code{sublabel} parameter prints on a second line inside the
 #' merged box, which is convenient for naming the recombined cohort.
 #'

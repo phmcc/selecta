@@ -4,7 +4,8 @@
 [![R-CMD-check](https://github.com/phmcc/selecta/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/phmcc/selecta/actions/workflows/R-CMD-check.yaml)
 [![test-coverage](https://github.com/phmcc/selecta/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/phmcc/selecta/actions/workflows/test-coverage.yaml)
 [![lint](https://github.com/phmcc/selecta/actions/workflows/lint.yaml/badge.svg)](https://github.com/phmcc/selecta/actions/workflows/lint.yaml)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![CRAN status](https://www.r-pkg.org/badges/version/selecta)](https://CRAN.R-project.org/package=selecta)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
 
 > ***selecta*** | /seˈlɛk.ta/ | *Latin, n. pl. of* selectum*, past participle of* seligere*: things chosen out*
@@ -23,7 +24,13 @@ For a more comprehensive description of this package and its features, see the [
 
 ## Installation
 
-This package is not yet available on CRAN. Install it from GitHub (stable) or Codeberg (development):
+The stable release of this package can be installed from CRAN.
+
+```r
+install.packages("selecta")
+```
+
+Alternatively, install it directly from GitHub (stable) or Codeberg (development):
 
 ```r
 # Stable release

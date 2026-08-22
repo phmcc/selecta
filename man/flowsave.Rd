@@ -10,8 +10,10 @@ flowsave(
   engine = c("grid", "dot"),
   width = NULL,
   height = NULL,
+  units = c("in", "cm", "mm"),
   dpi = 300,
   sans_serif = TRUE,
+  quiet = FALSE,
   ...
 )
 }
@@ -28,13 +30,20 @@ uses R's grid graphics) or \code{"dot"} (uses the system Graphviz
 binary). The \code{dot} engine requires \code{dot} to be installed and
 on the system \code{PATH}.}
 
-\item{width}{Numeric or \code{NULL}. Width in inches. If \code{NULL}
+\item{width}{Numeric or \code{NULL}. Width in \code{units}. If \code{NULL}
 (default), computed automatically. For the \code{dot} engine, omit to
 let Graphviz determine dimensions from layout.}
 
-\item{height}{Numeric or \code{NULL}. Height in inches. If \code{NULL}
-(default), computed automatically. For the \code{dot} engine, omit to
-let Graphviz determine dimensions from layout.}
+\item{height}{Numeric or \code{NULL}. Height in \code{units}. If
+\code{NULL} (default), computed automatically. For the \code{dot}
+engine, omit to let Graphviz determine dimensions from layout.}
+
+\item{units}{Character string giving the units of \code{width} and
+\code{height}, and of the dimensions computed when either is left
+unspecified: \code{"in"} (inches, the default), \code{"cm"}, or
+\code{"mm"}. Graphics devices are driven in inches regardless, so the
+conversion is internal. Ignored by the \code{dot} engine, which takes
+no dimensions.}
 
 \item{dpi}{Integer. Resolution in dots per inch for raster formats
 (PNG, TIFF). Default 300. Honored by both engines. Mirrors the
@@ -48,6 +57,10 @@ sized using the metrics of the font set via \code{font_family}, so
 the result preserves all margins. Set to \code{FALSE} to retain
 the layout font as the displayed font.}
 
+\item{quiet}{Logical. Suppress the message reporting the file written and
+the dimensions used. The \code{dot} engine reports neither, so the
+setting has no effect there. Default \code{FALSE}.}
+
 \item{...}{Additional styling and formatting arguments forwarded to the
 selected engine; see \code{flowchart()} for the full descriptions.
 \describe{
@@ -60,8 +73,7 @@ selected engine; see \code{flowchart()} for the full descriptions.
     \code{box_fill}, \code{side_fill}, \code{border_col},
     \code{arrow_col}, \code{source_fill}, \code{source_header_fill},
     \code{source_header_text}, \code{phase_labels}, \code{phase_fill},
-    \code{phase_text_col}, \code{side_gap_in}, \code{rank_sep},
-    \code{node_sep}}
+    \code{phase_text_col}, \code{rank_sep}, \code{node_sep}}
 }}
 }
 \value{
@@ -97,11 +109,12 @@ to the system \code{dot} binary and therefore requires Graphviz on the
 
 When sizing automatically, \code{flowsave()} calls \code{recdims()}
 once and reuses the computed layout, so a separate \code{recdims()} call
-is unnecessary. With the \code{grid} engine, leaving either dimension at
-its default also reports the content-derived recommendation through a
-\code{message()}; supply both \code{width} and \code{height} to size
-manually and silence it. The \code{dot} engine instead lets Graphviz size
-the output from the layout, so no recommendation is reported.
+is unnecessary. With the \code{grid} engine, the file written and the
+dimensions used are reported through a \code{message()} unless
+\code{quiet = TRUE}, whether those dimensions were computed or supplied,
+so that a figure written at an unexpected size is apparent at the point it
+is written. The \code{dot} engine instead lets Graphviz size the output
+from the layout, so it reports nothing.
 }
 \examples{
 flow <- enroll(n = 500) |>
@@ -115,6 +128,13 @@ flow <- enroll(n = 500) |>
 flowsave(flow, file.path(tempdir(), "consort.pdf"))
 flowsave(flow, file.path(tempdir(), "consort.png"),
          width = 8, height = 10)
+
+# Dimensions may be given, or computed, in metric units.
+flowsave(flow, file.path(tempdir(), "consort_metric.pdf"),
+         width = 180, height = 240, units = "mm")
+
+# Suppress the message reporting the file written.
+flowsave(flow, file.path(tempdir(), "consort_quiet.pdf"), quiet = TRUE)
 }
 
 \donttest{
