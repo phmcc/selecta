@@ -360,7 +360,7 @@ citation("selecta")
 To cite selecta in publications, use:
 
   McClelland PH (2026). _selecta: EQUATOR-Style Enrollment Diagrams
-  for Clinical Studies_. R package version 0.6.0,
+  for Clinical Studies_. R package version 0.6.1,
   <https://phmcc.codeberg.page/selecta/>.
 
 A BibTeX entry for LaTeX users is
@@ -369,7 +369,7 @@ A BibTeX entry for LaTeX users is
     title = {selecta: EQUATOR-Style Enrollment Diagrams for Clinical Studies},
     author = {Paul Hsin-ti McClelland},
     year = {2026},
-    note = {R package version 0.6.0},
+    note = {R package version 0.6.1},
     url = {https://phmcc.codeberg.page/selecta/},
   }
 ```

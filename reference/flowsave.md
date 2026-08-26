@@ -170,15 +170,15 @@ flow <- enroll(n = 500) |>
 # the example respects CRAN's no-write policy; in practice any
 # desired path may be supplied.
 flowsave(flow, file.path(tempdir(), "consort.pdf"))
-#> Flowchart saved to /tmp/RtmpjE74Cz/consort.pdf (width = 3.4 in, height = 2.5 in)
+#> Flowchart saved to /tmp/RtmpE9xe9K/consort.pdf (width = 3.4 in, height = 2.5 in)
 flowsave(flow, file.path(tempdir(), "consort.png"),
          width = 8, height = 10)
-#> Flowchart saved to /tmp/RtmpjE74Cz/consort.png (width = 8.0 in, height = 10.0 in)
+#> Flowchart saved to /tmp/RtmpE9xe9K/consort.png (width = 8.0 in, height = 10.0 in)
 
 # Dimensions may be given, or computed, in metric units.
 flowsave(flow, file.path(tempdir(), "consort_metric.pdf"),
          width = 180, height = 240, units = "mm")
-#> Flowchart saved to /tmp/RtmpjE74Cz/consort_metric.pdf (width = 180.0 mm, height = 240.0 mm)
+#> Flowchart saved to /tmp/RtmpE9xe9K/consort_metric.pdf (width = 180.0 mm, height = 240.0 mm)
 
 # Suppress the message reporting the file written.
 flowsave(flow, file.path(tempdir(), "consort_quiet.pdf"), quiet = TRUE)

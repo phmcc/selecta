@@ -2,6 +2,8 @@
 
 ## *selecta* 0.6.1 (2026-08-22)
 
+CRAN release: 2026-08-22
+
 - Add `quiet` argument to
   [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
   to suppress the message reporting the file written and the dimensions
