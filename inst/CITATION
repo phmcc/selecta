@@ -6,5 +6,5 @@ bibentry(
     author   = c(person(given = c("Paul", "Hsin-ti"), family = "McClelland")),
     year     = format(Sys.Date(), "%Y"),
     note     = sprintf("R package version %s", meta$Version),
-    url      = "https://phmcc.codeberg.page/selecta/"
+    url      = "https://phmcc.codefloe.page/selecta/"
 )

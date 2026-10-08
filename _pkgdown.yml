@@ -1,16 +1,16 @@
 env:
   IN_PKGDOWN: "true"
 
-url: https://phmcc.codeberg.page/selecta/
+url: https://phmcc.codefloe.page/selecta/
 
 destination: docs
 
 repo:
   url:
-    home: https://codeberg.org/phmcc/selecta/
-    source: https://codeberg.org/phmcc/selecta/tree/main/
-    issue: https://codeberg.org/phmcc/selecta/issues/
-    user: https://codeberg.org/phmcc/
+    home: https://codefloe.com/phmcc/selecta/
+    source: https://codefloe.com/phmcc/selecta/tree/main/
+    issue: https://codefloe.com/phmcc/selecta/issues/
+    user: https://codefloe.com/phmcc/
 
 template:
   assets: pkgdown
@@ -47,7 +47,7 @@ home:
 navbar:
   structure:
     left: [home, vignettes, articles, news, reference]
-    right: [search, codeberg, github]
+    right: [search, codefloe, github]
   components:
     home:
       icon: fa-home
@@ -81,10 +81,10 @@ navbar:
     reference:
       text: Functions
       href: reference/index.html
-    codeberg:
+    codefloe:
       icon: fa-code-branch
-      href: https://codeberg.org/phmcc/selecta
-      aria-label: Codeberg
+      href: https://codefloe.com/phmcc/selecta
+      aria-label: Codefloe
     github:
       icon: fa-github
       href: https://github.com/phmcc/selecta

@@ -52,17 +52,17 @@ Features under consideration for future releases:
 
 # Contributing
 
-Contributions to `selecta` are welcome. Prospective contributors interested in implementing a roadmap feature or proposing a new one are directed to the contributing guidelines in the [package repository](https://codeberg.org/phmcc/selecta).
+Contributions to `selecta` are welcome. Prospective contributors interested in implementing a roadmap feature or proposing a new one are directed to the contributing guidelines in the [package repository](https://codefloe.com/phmcc/selecta).
 
 ## Bug Reports
 
-Bug reports and feature requests may be submitted via the issue tracker, either on [Codeberg](https://codeberg.org/phmcc/selecta/issues) or [GitHub](https://github.com/phmcc/selecta/issues).
+Bug reports and feature requests may be submitted via the issue tracker, either on [Codefloe](https://codefloe.com/phmcc/selecta/issues) or [GitHub](https://github.com/phmcc/selecta/issues).
 
 A report concerning diagram layout—cropping, spacing, phase-label wrapping, or figure dimensions—is most useful when accompanied by the package's layout trace. Setting `options(selecta.debug_layout = TRUE)` before calling `flowchart()`, `flowsave()`, or `recdims()` causes the computation and rendering functions to print the resolved node and edge tables, the computed positions, the recommended dimensions, the per-phase band heights, and the generated DOT source. The trace is emitted through `message()` and is disabled by default; pasting it into the report, together with a minimal reproducible pipeline, allows a layout issue to be diagnosed without a round trip.
 
 ## Development Repository
 
-- **Primary development**: [codeberg.org/phmcc/selecta](https://codeberg.org/phmcc/selecta)
+- **Primary development**: [codefloe.com/phmcc/selecta](https://codefloe.com/phmcc/selecta)
 - **GitHub mirror**: [github.com/phmcc/selecta](https://github.com/phmcc/selecta)
 
 ---

@@ -1,4 +1,4 @@
-# <span class="pkg-name">selecta</span> <a href="https://phmcc.codeberg.page/selecta/"><img src="man/figures/selecta.png" align="right" height="139" alt="selecta website" /></a>
+# <span class="pkg-name">selecta</span> <a href="https://phmcc.codefloe.page/selecta/"><img src="man/figures/selecta.png" align="right" height="139" alt="selecta website" /></a>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/phmcc/selecta/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/phmcc/selecta/actions/workflows/R-CMD-check.yaml)
@@ -16,7 +16,7 @@
 
 The `selecta` package provides a pipe-friendly, declarative interface for constructing EQUATOR-style flow diagrams. A diagram is specified as a sequence of operations—enrollment, exclusion, stratification, recombination, and endpoint—that mirrors the natural language description of a study's participant flow. The package supports multiple reporting guidelines (CONSORT, STROBE, STARD, PRISMA, MOOSE), hybrid or custom topologies, automatic count computation, arithmetic checking, diagram render via `grid` graphics or Graphviz DOT, and optionally return of the analysis-ready cohort at any stage of the selection process.
 
-For a more comprehensive description of this package and its features, see the [full documentation and vignettes](https://phmcc.codeberg.page/selecta/).
+For a more comprehensive description of this package and its features, see the [full documentation and vignettes](https://phmcc.codefloe.page/selecta/).
 
 <p align="center">
   <img src="man/figures/README_hero.png" alt="Flow diagram showcasing multi-source confluence, split-and-recombine flow, and factorial topology" width="80%">
@@ -30,14 +30,14 @@ The stable release of this package can be installed from CRAN.
 install.packages("selecta")
 ```
 
-Alternatively, install it directly from GitHub (stable) or Codeberg (development):
+Alternatively, install it directly from GitHub (stable) or Codefloe (development):
 
 ```r
 # Stable release
 devtools::install_github("phmcc/selecta")
 
 # Development version
-devtools::install_git("https://codeberg.org/phmcc/selecta.git")
+devtools::install_git("https://codefloe.com/phmcc/selecta.git")
 ```
 
 ## Package Composition
@@ -199,7 +199,7 @@ The R ecosystem includes several packages for generating CONSORT diagrams. The f
 
 <sub>✓ Full support | ◐ Partial support | — Not available</sub>
 
-A detailed feature comparison is available in the [package documentation](https://phmcc.codeberg.page/selecta/articles/feature_comparison.html).
+A detailed feature comparison is available in the [package documentation](https://phmcc.codefloe.page/selecta/articles/feature_comparison.html).
 
 ## Illustrative Example
 
@@ -274,12 +274,12 @@ stages[["Failed eligibility"]]$included
 
 ### Repository
 
-- **Primary development**: [codeberg.org/phmcc/selecta](https://codeberg.org/phmcc/selecta)
+- **Primary development**: [codefloe.com/phmcc/selecta](https://codefloe.com/phmcc/selecta)
 - **GitHub releases**: [github.com/phmcc/selecta](https://github.com/phmcc/selecta)
 
 ### Contributing
 
-Bug reports and feature requests may be submitted via the issue tracker ([Codeberg](https://codeberg.org/phmcc/selecta/issues) or [GitHub](https://github.com/phmcc/selecta/issues)). Contributions are welcome; prospective contributors are directed to the contributing guidelines prior to submitting pull requests.
+Bug reports and feature requests may be submitted via the issue tracker ([Codefloe](https://codefloe.com/phmcc/selecta/issues) or [GitHub](https://github.com/phmcc/selecta/issues)). Contributions are welcome; prospective contributors are directed to the contributing guidelines prior to submitting pull requests.
 
 ## Acknowledgments
 
@@ -304,7 +304,7 @@ To cite selecta in publications, use:
 
   McClelland PH (2026). _selecta: EQUATOR-Style Enrollment Diagrams
   for Clinical Studies_. R package version 0.6.1,
-  <https://phmcc.codeberg.page/selecta/>.
+  <https://phmcc.codefloe.page/selecta/>.
 
 A BibTeX entry for LaTeX users is
 
@@ -313,15 +313,15 @@ A BibTeX entry for LaTeX users is
     author = {Paul Hsin-ti McClelland},
     year = {2026},
     note = {R package version 0.6.1},
-    url = {https://phmcc.codeberg.page/selecta/},
+    url = {https://phmcc.codefloe.page/selecta/},
   }
 ```
 
 ## Further Resources
 
-- **Function documentation**: `?function_name` or the [reference index](https://phmcc.codeberg.page/selecta/reference/index.html)
-- **Companion package**: [`summata`](https://phmcc.codeberg.page/summata/) for publication-ready summary tables
-- **Issue tracker**: [Codeberg Issues](https://codeberg.org/phmcc/selecta/issues), [GitHub Issues](https://github.com/phmcc/selecta/issues)
+- **Function documentation**: `?function_name` or the [reference index](https://phmcc.codefloe.page/selecta/reference/index.html)
+- **Companion package**: [`summata`](https://phmcc.codefloe.page/summata/) for publication-ready summary tables
+- **Issue tracker**: [Codefloe Issues](https://codefloe.com/phmcc/selecta/issues), [GitHub Issues](https://github.com/phmcc/selecta/issues)
 
 ---
 
