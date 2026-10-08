@@ -45,7 +45,7 @@ export_dot(
 - number_format:
 
   Locale-aware count formatter (see
-  [`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)).
+  [`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)).
   Defaults to the `selecta.number_format` option.
 
 - count_first:
@@ -131,7 +131,7 @@ export_dot(
   Logical or `NULL`. Whether to render phase labels as left-margin band
   labels. `NULL` (default) auto-selects: on whenever the flow defines
   any phases via
-  [`phase()`](https://phmcc.codeberg.page/selecta/reference/phase.md),
+  [`phase()`](https://phmcc.codefloe.page/selecta/reference/phase.md),
   off otherwise. Unlike the grid engine's rotated vertical strips, the
   DOT labels are horizontal (Graphviz cannot rotate node text), placed
   in a left-hand column and rank-aligned to the first row of each band.

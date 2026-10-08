@@ -15,8 +15,8 @@ core functions:
 
 | Function | Purpose |
 |:---|:---|
-| [`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md) | Define parallel identification streams (the entry point, replacing [`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md)) |
-| [`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md) | Merge streams into a single flow after deduplication |
+| [`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md) | Define parallel identification streams (the entry point, replacing [`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md)) |
+| [`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md) | Merge streams into a single flow after deduplication |
 
 Thus, the systematic review pipeline adheres to the following basic
 structure:
@@ -34,9 +34,9 @@ sources(...) |>
 ```
 
 where
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)
 is the entry point, and
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 merges parallel columns into a single downstream flow. This vignette
 demonstrates the full range of systematic review diagrams supported by
 `selecta`.
@@ -44,14 +44,14 @@ demonstrates the full range of systematic review diagrams supported by
 > *n.b.:* To ensure correct font rendering and figure sizing, the
 > diagrams below are displayed using a vignette-only helper function
 > (`queue_flow()`) that applies recommended dimensions from
-> [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+> [`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 > via the [`ragg`](https://ragg.r-lib.org/) graphics device, with the
 > standard output function applied afterwards
-> ([`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)).
+> ([`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)).
 > In practice, replace this
-> `queue_flow()`/[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+> `queue_flow()`/[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 > workflow with a call to
-> [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+> [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 > for equivalent printed results:
 >
 > ``` r
@@ -60,7 +60,7 @@ demonstrates the full range of systematic review diagrams supported by
 > ```
 >
 > Using
-> [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+> [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 > ensures that the figure dimensions are always large enough to
 > accommodate the diagram content, and it is the preferred method for
 > saving flow diagram outputs in `selecta`.
@@ -91,7 +91,7 @@ box listing individual databases or methods with their counts.
 ### **Example 1:** Full Three-Column PRISMA Diagram
 
 The
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)
 function accepts named vector arguments, where each argument defines a
 source group (column) and its named elements list the individual
 sources:
@@ -134,7 +134,7 @@ headers. If omitted, the argument names are title-cased and used
 directly (*e.g.,* `databases` becomes “Databases”).
 
 The
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 function inserts an inverted-Y convergence arrow connecting the parallel
 source columns into a single downstream node. All subsequent pipeline
 steps operate on the merged record pool.
@@ -188,7 +188,7 @@ flowchart(example3)
 
 For simple reviews that search a single set of databases without
 grouping,
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)
 accepts individual scalar arguments. These are consolidated into a
 single source box with no column header:
 
@@ -222,9 +222,9 @@ appears as a single centered node above the convergence point.
 The MOOSE (Meta-analysis of Observational Studies in Epidemiology)
 guidelines prescribe a flow diagram structurally similar to PRISMA,
 tailored for observational evidence synthesis. The same
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)
 and
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 functions are used; only the labels and exclusion reasons reflect the
 observational context:
 
@@ -266,7 +266,7 @@ flowchart(example5)
 ## Source Group Structure
 
 The
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)
 function distinguishes between two input patterns based on the structure
 of its arguments:
 
@@ -294,7 +294,7 @@ omitted, group names are title-cased automatically.
 ## Saving to File
 
 The
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 function saves the diagram to a file (PDF, PNG, SVG, or TIFF) with
 auto-computed dimensions:
 
@@ -310,9 +310,9 @@ flowsave(example1, "prisma_3col.pdf", width = 10, height = 12)
 ```
 
 All visual parameters accepted by
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 are also accepted by
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md):
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md):
 
 ``` r
 flowsave(example1, "prisma_poster.pdf",
@@ -324,14 +324,14 @@ flowsave(example1, "prisma_poster.pdf",
 ## Further Reading
 
 - [Enrollment
-  Diagrams](https://phmcc.codeberg.page/selecta/articles/enrollment_diagrams.md):
+  Diagrams](https://phmcc.codefloe.page/selecta/articles/enrollment_diagrams.md):
   CONSORT, STROBE, and STARD diagrams with permanent parallel arms
 - [Split-and-Recombine
-  Diagrams](https://phmcc.codeberg.page/selecta/articles/split_recombine.md):
+  Diagrams](https://phmcc.codefloe.page/selecta/articles/split_recombine.md):
   Hybrid topologies for screening validation and exposure classification
 - [Advanced
-  Workflows](https://phmcc.codeberg.page/selecta/articles/advanced_workflows.md):
+  Workflows](https://phmcc.codefloe.page/selecta/articles/advanced_workflows.md):
   Factorial (nested-split) designs and hierarchical exclusion reasons
 - [Graphviz
-  Export](https://phmcc.codeberg.page/selecta/articles/graphviz_export.md):
+  Export](https://phmcc.codefloe.page/selecta/articles/graphviz_export.md):
   DOT output for Graphviz/DiagrammeR rendering

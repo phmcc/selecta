@@ -3,7 +3,7 @@
 Computes counts from the pipeline, lays out nodes, and draws an
 EQUATOR-style enrollment diagram. This is the primary rendering function
 for interactive use; for saving to file with auto-sized dimensions, see
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md).
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md).
 
 ## Usage
 
@@ -19,9 +19,9 @@ plot(x, engine = c("grid", "dot"), ...)
 - .flow:
 
   A `selecta` object created by
-  [`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md)
+  [`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md)
   or
-  [`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+  [`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)
   and populated with pipeline steps.
 
 - engine:
@@ -134,21 +134,21 @@ number-format options are forwarded to the chosen engine through `...`;
 options unsupported by an engine (for example the phase strips, which
 the `dot` engine does not draw) are ignored. `flowchart()` is normally
 the last call in a pipeline; for direct file output use
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md),
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md),
 and to size a canvas use `recdims`.
 
 ## See also
 
-[`flowsave`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+[`flowsave`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 for saving to file,
-[`recdims`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+[`recdims`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 for dimension recommendations, `plot.selecta` for S3 plot method
 
 Other flowchart output functions:
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md),
-[`print.selecta()`](https://phmcc.codeberg.page/selecta/reference/print.selecta.md),
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md),
-[`summary.selecta()`](https://phmcc.codeberg.page/selecta/reference/summary.selecta.md)
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md),
+[`print.selecta()`](https://phmcc.codefloe.page/selecta/reference/print.selecta.md),
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md),
+[`summary.selecta()`](https://phmcc.codefloe.page/selecta/reference/summary.selecta.md)
 
 ## Examples
 

@@ -69,7 +69,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://codeberg.org/phmcc/selecta" aria-label="Codeberg"><span class="fa fa-code-branch"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://codefloe.com/phmcc/selecta" aria-label="Codefloe"><span class="fa fa-code-branch"></span></a></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/phmcc/selecta" aria-label="GitHub"><span class="fa fa-github"></span></a></li>
       </ul>
 </div>
@@ -80,7 +80,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="selecta-">
-<span class="pkg-name">selecta</span> <a href="https://phmcc.codeberg.page/selecta/"><img src="reference/figures/selecta.png" align="right" height="139" alt="selecta website"></a>
+<span class="pkg-name">selecta</span> <a href="https://phmcc.codefloe.page/selecta/"><img src="reference/figures/selecta.png" align="right" height="139" alt="selecta website"></a>
 <a class="anchor" aria-label="anchor" href="#selecta-"></a>
 </h1></div>
 <!-- badges: start -->
@@ -93,7 +93,7 @@
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
 <p>The <code>selecta</code> package provides a pipe-friendly, declarative interface for constructing EQUATOR-style flow diagrams. A diagram is specified as a sequence of operations—enrollment, exclusion, stratification, recombination, and endpoint—that mirrors the natural language description of a study’s participant flow. The package supports multiple reporting guidelines (CONSORT, STROBE, STARD, PRISMA, MOOSE), hybrid or custom topologies, automatic count computation, arithmetic checking, diagram render via <code>grid</code> graphics or Graphviz DOT, and optionally return of the analysis-ready cohort at any stage of the selection process.</p>
-<p>For a more comprehensive description of this package and its features, see the <a href="https://phmcc.codeberg.page/selecta/">full documentation and vignettes</a>.</p>
+<p>For a more comprehensive description of this package and its features, see the <a href="https://phmcc.codefloe.page/selecta/">full documentation and vignettes</a>.</p>
 <p align="center">
 <img src="reference/figures/README_hero.png" alt="Flow diagram showcasing multi-source confluence, split-and-recombine flow, and factorial topology" width="80%"></p>
 </div>
@@ -103,13 +103,13 @@
 <p>The stable release of this package can be installed from CRAN.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"selecta"</span><span class="op">)</span></span></code></pre></div>
-<p>Alternatively, install it directly from GitHub (stable) or Codeberg (development):</p>
+<p>Alternatively, install it directly from GitHub (stable) or Codefloe (development):</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Stable release</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install-deprecated.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"phmcc/selecta"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Development version</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install-deprecated.html" class="external-link">install_git</a></span><span class="op">(</span><span class="st">"https://codeberg.org/phmcc/selecta.git"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install-deprecated.html" class="external-link">install_git</a></span><span class="op">(</span><span class="st">"https://codefloe.com/phmcc/selecta.git"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="package-composition">Package Composition<a class="anchor" aria-label="anchor" href="#package-composition"></a>
@@ -631,7 +631,7 @@
 </tbody>
 </table>
 <p><sub>✓ Full support | ◐ Partial support | — Not available</sub></p>
-<p>A detailed feature comparison is available in the <a href="https://phmcc.codeberg.page/selecta/articles/feature_comparison.html">package documentation</a>.</p>
+<p>A detailed feature comparison is available in the <a href="https://phmcc.codefloe.page/selecta/articles/feature_comparison.html">package documentation</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="illustrative-example">Illustrative Example<a class="anchor" aria-label="anchor" href="#illustrative-example"></a>
@@ -643,7 +643,7 @@
 </h3>
 <p>Prior to analysis, load the package and the dataset:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://phmcc.codeberg.page/selecta">selecta</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://phmcc.codefloe.page/selecta">selecta</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Load example data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"selectaex2"</span><span class="op">)</span></span></code></pre></div>
@@ -706,7 +706,7 @@
 </h3>
 <ul>
 <li>
-<strong>Primary development</strong>: <a href="https://codeberg.org/phmcc/selecta" class="external-link">codeberg.org/phmcc/selecta</a>
+<strong>Primary development</strong>: <a href="https://codefloe.com/phmcc/selecta" class="external-link">codefloe.com/phmcc/selecta</a>
 </li>
 <li>
 <strong>GitHub releases</strong>: <a href="https://github.com/phmcc/selecta" class="external-link">github.com/phmcc/selecta</a>
@@ -716,7 +716,7 @@
 <div class="section level3">
 <h3 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
 </h3>
-<p>Bug reports and feature requests may be submitted via the issue tracker (<a href="https://codeberg.org/phmcc/selecta/issues" class="external-link">Codeberg</a> or <a href="https://github.com/phmcc/selecta/issues" class="external-link">GitHub</a>). Contributions are welcome; prospective contributors are directed to the contributing guidelines prior to submitting pull requests.</p>
+<p>Bug reports and feature requests may be submitted via the issue tracker (<a href="https://codefloe.com/phmcc/selecta/issues" class="external-link">Codefloe</a> or <a href="https://github.com/phmcc/selecta/issues" class="external-link">GitHub</a>). Contributions are welcome; prospective contributors are directed to the contributing guidelines prior to submitting pull requests.</p>
 </div>
 </div>
 <div class="section level2">
@@ -750,7 +750,7 @@
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a></span>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  McClelland <span class="fu">PH</span> (<span class="dv">2026</span>). _selecta<span class="sc">:</span> EQUATOR<span class="sc">-</span>Style Enrollment Diagrams</span>
 <span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="cf">for</span> Clinical Studies_. R package version <span class="dv">0</span>.<span class="fl">6.1</span>,</span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="sc">&lt;</span>https<span class="sc">:</span><span class="er">//</span>phmcc.codeberg.page<span class="sc">/</span>selecta<span class="sc">/</span><span class="er">&gt;</span>.</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="sc">&lt;</span>https<span class="sc">:</span><span class="er">//</span>phmcc.codefloe.page<span class="sc">/</span>selecta<span class="sc">/</span><span class="er">&gt;</span>.</span>
 <span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
 <span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>A BibTeX entry <span class="cf">for</span> LaTeX users is</span>
 <span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a></span>
@@ -759,7 +759,7 @@
 <span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>    author <span class="ot">=</span> {Paul Hsin<span class="sc">-</span>ti McClelland},</span>
 <span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>    year <span class="ot">=</span> {<span class="dv">2026</span>},</span>
 <span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>    note <span class="ot">=</span> {R package version <span class="dv">0</span>.<span class="fl">6.1</span>},</span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>    url <span class="ot">=</span> {https<span class="sc">:</span><span class="er">//</span>phmcc.codeberg.page<span class="sc">/</span>selecta<span class="sc">/</span>},</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>    url <span class="ot">=</span> {https<span class="sc">:</span><span class="er">//</span>phmcc.codefloe.page<span class="sc">/</span>selecta<span class="sc">/</span>},</span>
 <span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>  }</span></code></pre></div>
 </div>
 <div class="section level2">
@@ -767,12 +767,12 @@
 </h2>
 <ul>
 <li>
-<strong>Function documentation</strong>: <code>?function_name</code> or the <a href="https://phmcc.codeberg.page/selecta/reference/index.html">reference index</a>
+<strong>Function documentation</strong>: <code>?function_name</code> or the <a href="https://phmcc.codefloe.page/selecta/reference/index.html">reference index</a>
 </li>
 <li>
-<strong>Companion package</strong>: <a href="https://phmcc.codeberg.page/summata/" class="external-link"><code>summata</code></a> for publication-ready summary tables</li>
+<strong>Companion package</strong>: <a href="https://phmcc.codefloe.page/summata/" class="external-link"><code>summata</code></a> for publication-ready summary tables</li>
 <li>
-<strong>Issue tracker</strong>: <a href="https://codeberg.org/phmcc/selecta/issues" class="external-link">Codeberg Issues</a>, <a href="https://github.com/phmcc/selecta/issues" class="external-link">GitHub Issues</a>
+<strong>Issue tracker</strong>: <a href="https://codefloe.com/phmcc/selecta/issues" class="external-link">Codefloe Issues</a>, <a href="https://github.com/phmcc/selecta/issues" class="external-link">GitHub Issues</a>
 </li>
 </ul>
 <hr>
@@ -783,7 +783,7 @@
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
 <li><a href="https://cloud.r-project.org/package=selecta" class="external-link">View on CRAN</a></li>
-<li><a href="https://codeberg.org/phmcc/selecta/" class="external-link">Browse source code</a></li>
+<li><a href="https://codefloe.com/phmcc/selecta/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/phmcc/selecta/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>

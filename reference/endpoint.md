@@ -2,7 +2,7 @@
 
 Adds the terminal node(s) to the enrollment flow. If arms have been
 defined via
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md),
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md),
 one endpoint box appears per arm.
 
 ## Usage
@@ -46,9 +46,9 @@ endpoint(
   diagrams that end by displaying the groups to be analyzed (“Group A”,
   “Group B”, ...). A split endpoint requires a single incoming stream;
   it cannot follow an unrecombined
-  [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+  [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
   or
-  [`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md).
+  [`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md).
   Mutually exclusive with `breakdown`.
 
 - n:
@@ -71,9 +71,9 @@ The updated `selecta` object with an endpoint step appended.
 
 `endpoint()` closes the flow with its terminal node(s) and is usually
 the last step in a pipeline. When the flow has been split with
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 or
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 and not recombined, one endpoint box is drawn per arm, and `label` and
 `breakdown` may be supplied per arm.
 
@@ -84,26 +84,26 @@ target-condition composition). Conversely, `groups` divides the endpoint
 into separate side-by-side boxes, one per group, fanning from a shared
 distributor; this design favors study diagrams that end by displaying
 the groups to be analyzed. The completed object is then passed to
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md),
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md),
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md),
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md),
 or
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md).
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md).
 
 ## See also
 
-[`assess`](https://phmcc.codeberg.page/selecta/reference/assess.md) for
+[`assess`](https://phmcc.codefloe.page/selecta/reference/assess.md) for
 the diagnostic test-receipt steps that precede a STARD endpoint,
-[`flowchart`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 for rendering
 
 Other flow construction functions:
-[`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md),
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md),
-[`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md),
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md),
-[`phase()`](https://phmcc.codeberg.page/selecta/reference/phase.md),
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md),
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md),
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md),
+[`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md),
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md),
+[`phase()`](https://phmcc.codefloe.page/selecta/reference/phase.md),
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md),
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 
 ## Examples
 

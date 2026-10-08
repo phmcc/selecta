@@ -123,9 +123,9 @@ recdims(
   Additional arguments. Styling-only parameters that do not affect text
   measurement (such as `box_fill`, `phase_fill`, `border_col`) are
   silently ignored, allowing the same call signature to be shared with
-  [`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+  [`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
   and
-  [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md).
+  [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md).
 
 - .measure_dev:
 
@@ -138,7 +138,7 @@ recdims(
 
   Logical. If `TRUE`, attaches the pre-computed graph as an attribute
   for reuse by
-  [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md).
+  [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md).
   Default `FALSE`. Internal use only.
 
 ## Value
@@ -161,30 +161,30 @@ and device-dependent, any sizing parameter passed here (`cex`,
 `font_family`, `phase_multiline`, `number_format`, and so on) should
 match the values used at render time; styling-only parameters are
 ignored so the same call can be shared across `recdims()`,
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md),
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md),
 and
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md).
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md).
 A parameter left unspecified is not defaulted here but forwarded unset,
 so it is measured at exactly the value the drawing routine will apply.
 The advanced `.measure_dev` argument supplies a custom device opener
 when measurement must match a non-default device.
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 calls `recdims()` internally when `width` or `height` is left
 unspecified, so explicit use is only needed when the dimensions
 themselves are wanted.
 
 ## See also
 
-[`flowsave`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+[`flowsave`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 for saving to file,
-[`flowchart`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 for interactive rendering
 
 Other flowchart output functions:
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md),
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md),
-[`print.selecta()`](https://phmcc.codeberg.page/selecta/reference/print.selecta.md),
-[`summary.selecta()`](https://phmcc.codeberg.page/selecta/reference/summary.selecta.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md),
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md),
+[`print.selecta()`](https://phmcc.codefloe.page/selecta/reference/print.selecta.md),
+[`summary.selecta()`](https://phmcc.codefloe.page/selecta/reference/summary.selecta.md)
 
 ## Examples
 

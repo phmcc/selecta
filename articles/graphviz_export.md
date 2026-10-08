@@ -25,7 +25,7 @@ library(selecta)
 ```
 
 The DOT engine is available through the `engine` argument of
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 and [`plot()`](https://rdrr.io/r/graphics/plot.default.html). No
 additional packages are required to generate DOT strings; however,
 rendering them as an HTML widget requires `DiagrammeR`:
@@ -41,7 +41,7 @@ library(DiagrammeR)
 ### **Example 1:** Basic DOT String
 
 The `engine = "dot"` argument causes
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 to return a character string in the Graphviz DOT language rather than
 drawing to a graphics device:
 
@@ -215,7 +215,7 @@ cat(dot_prisma)
 
 Because the DOT string is plain text, it can be modified before
 rendering. This enables customization beyond what
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 exposes directly.
 
 ### **Example 4:** Changing Node Colors
@@ -351,7 +351,7 @@ plain formatting remains the safer default for them.
 
 The S3 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method
 dispatches to
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 and accepts the same `engine` argument:
 
 ``` r
@@ -368,7 +368,7 @@ This provides a convenient shorthand for interactive use.
 
 Left-aligned breakdowns inside side and source boxes—the sub-reasons of
 an
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 step, whether flat or nested, and the per-source counts of a PRISMA
 flow—are prefixed with a bullet under plain formatting, where
 indentation alone barely separates a sub-item from its parent. Passing
@@ -382,14 +382,14 @@ labels otherwise carry the hierarchy unaided. The default,
 ## Saving to File
 
 The
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 function accepts `engine = "dot"`, piping the diagram through the system
 Graphviz binary and bypassing R’s graphics devices. This requires `dot`
 on the system `PATH`; the function raises an error otherwise. Output
 format follows the file extension—PDF, PNG, SVG, TIFF, or `.dot` (the
 raw source). The `count_first`, `number_format`, `ortho`, `bullets`,
 `formatting`, `font_family`, and `padding_pt` arguments accepted by
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 are forwarded:
 
 ``` r
@@ -474,8 +474,8 @@ The choice between them is primarily one of layout philosophy:
 
 | Feature | `engine = "grid"` | `engine = "dot"` |
 |:---|:---|:---|
-| [`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md) output | Draws to the graphics device | Returns a DOT-language string |
-| [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md) formats | PDF, PNG, SVG, TIFF | PDF, PNG, SVG, TIFF, `.dot` |
+| [`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md) output | Draws to the graphics device | Returns a DOT-language string |
+| [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md) formats | PDF, PNG, SVG, TIFF | PDF, PNG, SVG, TIFF, `.dot` |
 | Rendering tool | Base R (`grid`) | System Graphviz (`dot`), or DiagrammeR |
 | Layout | Inch-precise, hand-calibrated | Automatic Graphviz layout |
 | Phase labels | Colored vertical strips | Left-margin band labels |
@@ -498,14 +498,14 @@ without manual dimensioning.
 ## Further Reading
 
 - [Enrollment
-  Diagrams](https://phmcc.codeberg.page/selecta/articles/enrollment_diagrams.md):
+  Diagrams](https://phmcc.codefloe.page/selecta/articles/enrollment_diagrams.md):
   CONSORT, STROBE, and STARD diagrams with permanent parallel arms
 - [Systematic
-  Reviews](https://phmcc.codeberg.page/selecta/articles/systematic_reviews.md):
+  Reviews](https://phmcc.codefloe.page/selecta/articles/systematic_reviews.md):
   PRISMA and MOOSE diagrams with top-level source convergence
 - [Split-and-Recombine
-  Diagrams](https://phmcc.codeberg.page/selecta/articles/split_recombine.md):
+  Diagrams](https://phmcc.codefloe.page/selecta/articles/split_recombine.md):
   Hybrid topologies for screening validation and exposure classification
 - [Advanced
-  Workflows](https://phmcc.codeberg.page/selecta/articles/advanced_workflows.md):
+  Workflows](https://phmcc.codefloe.page/selecta/articles/advanced_workflows.md):
   Factorial (nested-split) designs and hierarchical exclusion reasons

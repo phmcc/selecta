@@ -25,14 +25,14 @@ exclude(
 - .flow:
 
   A `selecta` object (piped from
-  [`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md)
+  [`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md)
   or a previous step).
 
 - label:
 
   Character. Human-readable description for the side box (*e.g.,*
   `"Excluded"` or `"Lost to follow-up"`). After
-  [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md),
+  [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md),
   may be a character vector with one label per arm (*e.g.,*
   `c("Treatment discontinued", "Initiated treatment")`).
 
@@ -47,7 +47,7 @@ exclude(
 - n:
 
   Integer. Number of participants removed at this step. After a
-  [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+  [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
   step, supply a vector with one value per arm. Manual mode only.
 
 - reasons:
@@ -67,7 +67,7 @@ exclude(
     and its sub-reasons).
 
   - A *list* of any of the above (data or manual mode after
-    [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)):
+    [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)):
     one entry per arm.
 
 - show_zero:
@@ -83,17 +83,17 @@ exclude(
   Set to `TRUE` to force a count box. Overridden by `included_label`:
   providing any `included_label` always creates a count box regardless
   of `show_count`. Also automatically suppressed when the next step is
-  [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md),
-  [`endpoint()`](https://phmcc.codeberg.page/selecta/reference/endpoint.md),
+  [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md),
+  [`endpoint()`](https://phmcc.codefloe.page/selecta/reference/endpoint.md),
   or
-  [`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md).
+  [`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md).
 
 - included_label:
 
   Character string (or vector). Optional text for the box showing the
   count remaining after exclusion. When provided, a count box is always
   rendered regardless of `show_count`. After
-  [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md),
+  [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md),
   may be a character vector with one label per arm.
 
 - collapse_singletons:
@@ -118,9 +118,9 @@ are removed) and `reasons` may name one column (a flat breakdown) or two
 columns (a reason and a sub-reason, cross-tabulated into a two-level
 breakdown); in manual mode, `n` gives the number removed and `reasons`
 may be a named numeric vector. After a
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 or
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 split the exclusion applies per arm, in which case `n`, `reasons`, and
 `included_label` accept per-arm vectors or lists. By default the running
 count box is suppressed between consecutive exclusions for a compact
@@ -133,8 +133,8 @@ over-exclusion, a split or combine whose parts do not match the running
 total, and sub-reasons that do not sum to their exclusion total each
 raise an advisory warning without altering the figures. The audit runs
 whenever the flow is computed; this includes calls to
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md),
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md),
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md),
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md),
 and [`summary()`](https://rdrr.io/r/base/summary.html), so a single call
 to any of these functions reports every discrepancy at once.
 
@@ -144,26 +144,26 @@ use `included_label` to label the retained count (*e.g.,*
 `included_label = "Eligible cohort"`).
 
 After a
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 step, both `label` and `included_label` accept character vectors (one
 element per arm) for per-arm labeling—useful in observational designs
 where attrition mechanisms differ across strata.
 
 ## See also
 
-[`assess`](https://phmcc.codeberg.page/selecta/reference/assess.md) for
+[`assess`](https://phmcc.codefloe.page/selecta/reference/assess.md) for
 assessment/procedure steps (STARD),
-[`enroll`](https://phmcc.codeberg.page/selecta/reference/enroll.md) for
+[`enroll`](https://phmcc.codefloe.page/selecta/reference/enroll.md) for
 initializing a flow
 
 Other flow construction functions:
-[`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md),
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md),
-[`endpoint()`](https://phmcc.codeberg.page/selecta/reference/endpoint.md),
-[`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md),
-[`phase()`](https://phmcc.codeberg.page/selecta/reference/phase.md),
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md),
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md),
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md),
+[`endpoint()`](https://phmcc.codefloe.page/selecta/reference/endpoint.md),
+[`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md),
+[`phase()`](https://phmcc.codefloe.page/selecta/reference/phase.md),
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md),
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 
 ## Examples
 

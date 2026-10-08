@@ -10,14 +10,14 @@ reasons, and other complex configurations.
 > *n.b.:* To ensure correct font rendering and figure sizing, the
 > `grid`-based diagrams below are displayed using a vignette-only helper
 > function (`queue_flow()`) that applies recommended dimensions from
-> [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+> [`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 > via the [`ragg`](https://ragg.r-lib.org/) graphics device, with the
 > standard output function applied afterwards
-> ([`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)).
+> ([`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)).
 > In practice, replace this
-> `queue_flow()`/[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+> `queue_flow()`/[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 > workflow with a call to
-> [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+> [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 > for equivalent printed results:
 >
 > ``` r
@@ -26,7 +26,7 @@ reasons, and other complex configurations.
 > ```
 >
 > Using
-> [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+> [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 > ensures that the figure dimensions are always large enough to
 > accommodate the diagram content, and it is the preferred method for
 > saving flow diagram outputs in `selecta`.
@@ -56,9 +56,9 @@ arms, yielding four cells.
 
 In `selecta`, a factorial layout is expressed by chaining two split
 steps. The first
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 (or
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md))
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md))
 divides the cohort into the first-factor arms; the second split then
 divides *each* of those arms into the second-factor sub-arms. The second
 split is supplied a single count vector whose entries enumerate the
@@ -77,20 +77,20 @@ enroll(n = 480) |>
 Two nested split levels are the maximum; a third consecutive split is
 refused, since deeper nesting is not part of any EQUATOR diagram and
 rarely reads clearly on a page. A level can be released with
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 (see below), after which a further split is permitted.
 
 ### **Example 1:** A Two-by-Two Factorial Trial
 
 The canonical factorial CONSORT diagram crosses two binary
 randomizations. The first
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 carries a `label`, which names the allocation box drawn between the
 randomized cohort and the first-factor arms; the second
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 needs no label, as its sub-arms hang directly beneath their parents. A
 subsequent
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 is given one count per cell, producing a side box for each leaf arm:
 
 ``` r
@@ -176,9 +176,9 @@ flowchart(example3)
 In data mode, each split step receives a column name rather than
 explicit labels and counts. A factorial layout is produced by crossing
 two categorical columns: the first
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 splits on the first factor, and the second
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 splits each resulting arm on the second. The cell counts, and any
 data-driven exclusion counts, are computed from the data. The dataset
 below cross-classifies 800 patients by antiviral assignment and adjuvant
@@ -218,13 +218,13 @@ values of the second column.
 ### **Example 5:** Pooling Twice into a Single Cohort
 
 A factorial split can be collapsed one level at a time, and
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 may be applied more than once in sequence. The first
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 after the second split draws converging arrows that pool the
 second-factor sub-arms back into their first-factor parents, releasing
 the nested level and leaving one stream per first-factor arm. A second
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 then pools those streams in turn, merging the parallel arms into a
 single analysis cohort. The optional `sublabel` prints a second line of
 explanatory text beneath the merged box:
@@ -250,14 +250,14 @@ flowchart(example5)
 ![](advanced_workflows_files/figure-html/unnamed-chunk-18-1.png)
 
 Each
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 releases one level of structure: the first returns the diagram to two
 parallel timing streams, and the second merges those streams into one.
 Because a released level permits a further split, the two operations can
 be interleaved with
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 or
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 to express designs that cross, pool, and re-split factors at successive
 stages.
 
@@ -265,7 +265,7 @@ stages.
 
 The Graphviz/DOT engine renders factorial diagrams with the same nesting
 and outboard exclusion boxes. Passing `engine = "dot"` to
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 returns the DOT source for the two-by-two trial from Example 1:
 
 ``` r
@@ -279,7 +279,7 @@ and splays the two per-cell exclusion boxes outward, matching the `grid`
 engine’s treatment. Orthogonal routing (`ortho = TRUE`), count-first
 labels (`count_first = TRUE`), and the typography options described in
 the [Graphviz
-Export](https://phmcc.codeberg.page/selecta/articles/graphviz_export.md)
+Export](https://phmcc.codefloe.page/selecta/articles/graphviz_export.md)
 vignette all apply to factorial diagrams as well.
 
 ------------------------------------------------------------------------
@@ -287,7 +287,7 @@ vignette all apply to factorial diagrams as well.
 ## Hierarchical (Nested) Exclusion Reasons
 
 An ordinary
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 step may attach a breakdown of reasons through its `reasons` argument.
 When `reasons` is a flat named vector, each entry is a single reason
 with its count. When a reason is itself composed of finer sub-reasons,
@@ -302,11 +302,11 @@ should not be confused with the nested form. A flat vector
 (`reasons = c("Reason" = n, ...)`) gives a single-level breakdown; an
 **unnamed** list (`reasons = list(vec1, vec2)`) supplies one flat vector
 *per arm* after
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 or
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 (see the
-[Split-and-Recombine](https://phmcc.codeberg.page/selecta/articles/split_recombine.md)
+[Split-and-Recombine](https://phmcc.codefloe.page/selecta/articles/split_recombine.md)
 vignette). The nested form here uses a **named** list on a single
 stream.
 
@@ -402,13 +402,13 @@ example9 <- flowchart(example7, engine = "dot")
 The plain-text label path used here centers reliably across fonts and
 backends, prefixing each parent reason with a bullet and each sub-reason
 with an en-dash. Passing `bullets = FALSE` to
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 removes those markers and separates the levels by indentation alone;
 this applies to flat and nested reason breakdowns alike, as well as to
 the per-source counts of a PRISMA flow. For inline italic and bold
 emphasis, `formatting = "rich"` switches to Graphviz’s HTML-like labels,
 as described in the [Graphviz
-Export](https://phmcc.codeberg.page/selecta/articles/graphviz_export.md)
+Export](https://phmcc.codefloe.page/selecta/articles/graphviz_export.md)
 vignette.
 
 ------------------------------------------------------------------------
@@ -416,14 +416,14 @@ vignette.
 ## Visual Customization
 
 Every `grid` rendering
-function—[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md),
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md),
+function—[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md),
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md),
 and the measurement helper
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)—accepts
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)—accepts
 a common set of parameters controlling the appearance of the diagram.
 These apply uniformly across all flow topologies. The Graphviz/DOT
 engine has its own styling arguments, documented in the [Graphviz
-Export](https://phmcc.codeberg.page/selecta/articles/graphviz_export.md)
+Export](https://phmcc.codefloe.page/selecta/articles/graphviz_export.md)
 vignette.
 
 | Parameter | Description | Default |
@@ -520,7 +520,7 @@ flowchart(example10, font_family = "serif")
 Because box dimensions are derived from the metrics of the selected
 font, the layout adjusts automatically to the chosen typeface; no manual
 resizing is required. The same argument is accepted by
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 and, for the Graphviz engine, by the DOT export functions, where the
 serif family corresponds to `"Times-Roman"`.
 
@@ -567,10 +567,10 @@ in place of a named preset.
 Two appearance settings may be fixed for an entire session rather than
 passed to every call. The number format and the vertical padding between
 elements each have a global option that propagates to every subsequent
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md),
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md),
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md),
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md),
 and
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 call, as well as to the DOT engine:
 
 ``` r
@@ -652,14 +652,14 @@ would otherwise exceed the height available to it.
 ## Further Reading
 
 - [Enrollment
-  Diagrams](https://phmcc.codeberg.page/selecta/articles/enrollment_diagrams.md):
+  Diagrams](https://phmcc.codefloe.page/selecta/articles/enrollment_diagrams.md):
   CONSORT, STROBE, and STARD diagrams with permanent parallel arms
 - [Systematic
-  Reviews](https://phmcc.codeberg.page/selecta/articles/systematic_reviews.md):
+  Reviews](https://phmcc.codefloe.page/selecta/articles/systematic_reviews.md):
   PRISMA and MOOSE diagrams with top-level source convergence
 - [Split-and-Recombine
-  Diagrams](https://phmcc.codeberg.page/selecta/articles/split_recombine.md):
+  Diagrams](https://phmcc.codefloe.page/selecta/articles/split_recombine.md):
   Split topologies that fan out and converge back to a single stream
 - [Graphviz
-  Export](https://phmcc.codeberg.page/selecta/articles/graphviz_export.md):
+  Export](https://phmcc.codefloe.page/selecta/articles/graphviz_export.md):
   DOT output for Graphviz/DiagrammeR rendering

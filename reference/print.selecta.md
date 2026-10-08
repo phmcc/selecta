@@ -33,22 +33,22 @@ mode, the starting count, and each pipeline step with its key parameters
 (exclusion reasons, arm labels, endpoint sub-items), and marks phase
 boundaries with a “— Label —” banner. It does not draw the diagram or
 open a graphics device; for that use
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 or
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md).
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md).
 
 ## See also
 
-[`summary.selecta`](https://phmcc.codeberg.page/selecta/reference/summary.selecta.md)
+[`summary.selecta`](https://phmcc.codefloe.page/selecta/reference/summary.selecta.md)
 for a tabular per-node summary,
-[`flowchart`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 for rendering
 
 Other flowchart output functions:
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md),
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md),
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md),
-[`summary.selecta()`](https://phmcc.codeberg.page/selecta/reference/summary.selecta.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md),
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md),
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md),
+[`summary.selecta()`](https://phmcc.codefloe.page/selecta/reference/summary.selecta.md)
 
 ## Examples
 

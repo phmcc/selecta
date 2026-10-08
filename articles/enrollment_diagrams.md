@@ -13,9 +13,9 @@ functions:
 
 | Function | Purpose |
 |:---|:---|
-| [`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md) | Establish the starting cohort from data or a manual count |
-| [`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md) / [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md) | Split into randomized arms (CONSORT) or strata (STROBE) |
-| [`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md) | Record receipt of a test or procedure (STARD) |
+| [`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md) | Establish the starting cohort from data or a manual count |
+| [`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md) / [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md) | Split into randomized arms (CONSORT) or strata (STROBE) |
+| [`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md) | Record receipt of a test or procedure (STARD) |
 
 Thus, the enrollment pipeline adheres to the following basic structure:
 
@@ -30,10 +30,10 @@ enroll(data, id) |>
 ```
 
 where
-[`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md)
+[`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md)
 establishes the starting cohort (from data or a manual count), pipeline
 functions define exclusion criteria and structural elements, and
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 renders the final diagram. This vignette demonstrates the package’s
 capabilities across three EQUATOR guidelines using both data-driven and
 manual construction modes.
@@ -41,14 +41,14 @@ manual construction modes.
 > *n.b.:* To ensure correct font rendering and figure sizing, the
 > diagrams below are displayed using a vignette-only helper function
 > (`queue_flow()`) that applies recommended dimensions from
-> [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+> [`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 > via the [`ragg`](https://ragg.r-lib.org/) graphics device, with the
 > standard output function applied afterwards
-> ([`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)).
+> ([`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)).
 > In practice, replace this
-> `queue_flow()`/[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+> `queue_flow()`/[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 > workflow with a call to
-> [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+> [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 > for equivalent printed results:
 >
 > ``` r
@@ -57,7 +57,7 @@ manual construction modes.
 > ```
 >
 > Using
-> [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+> [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 > ensures that the figure dimensions are always large enough to
 > accommodate the diagram content, and it is the preferred method for
 > saving flow diagram outputs in `selecta`.
@@ -94,13 +94,13 @@ The package supports two operating modes:
 
 | Mode | Entry Point | Counts | Cohort Extraction |
 |:---|:---|:---|:---|
-| Data | `enroll(data, id)` | Computed from data | Available via [`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md) |
+| Data | `enroll(data, id)` | Computed from data | Available via [`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md) |
 | Manual | `enroll(n = 500)` | Supplied by user | Not available |
 
 In **data mode**, participant counts and exclusion reasons are computed
 directly from the dataset. This approach is reproducible, auditable, and
 enables downstream cohort extraction with
-[`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md).
+[`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md).
 In **manual mode**, the analyst supplies all counts explicitly—useful
 for diagrams constructed from published summary statistics or when the
 source data are not available in R.
@@ -144,7 +144,7 @@ flowchart(example1)
 ![](enrollment_diagrams_files/figure-html/unnamed-chunk-6-1.png)
 
 Each
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 call filters the dataset according to the supplied expression, and the
 resulting counts populate the diagram automatically. The `reasons`
 argument accepts either a column name (for data-driven sub-reason
@@ -153,7 +153,7 @@ counts) or a named numeric vector (for manual specification). The
 showing the number remaining after that step.
 
 The
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 function splits the flow into parallel arms based on the named column.
 For a two-arm trial, arms are positioned symmetrically about the center
 axis with exclusion side boxes to the left and right.
@@ -216,10 +216,10 @@ flowchart(example3)
 ![](enrollment_diagrams_files/figure-html/unnamed-chunk-12-1.png)
 
 In manual mode,
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 requires explicit `labels` and `n` arguments rather than a column name.
 When
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 is called after allocation, the `n` argument accepts a vector with one
 value per arm.
 
@@ -243,9 +243,9 @@ Epidemiology) statement covers cohort, case-control, and cross-sectional
 studies. Unlike CONSORT, observational studies do not involve
 randomization; instead, participants are stratified by exposure or
 another grouping variable. The
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 function replaces
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 in this context, using the more general term appropriate to
 non-randomized designs.
 
@@ -276,9 +276,9 @@ flowchart(example5)
 ![](enrollment_diagrams_files/figure-html/unnamed-chunk-17-1.png)
 
 With no
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 or
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 call, the diagram remains a single vertical column and each exclusion is
 drawn as a side box. This is the minimal building block from which all
 other layouts extend.
@@ -314,13 +314,13 @@ flowchart(example6)
 ![](enrollment_diagrams_files/figure-html/unnamed-chunk-20-1.png)
 
 The
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 function is the guideline-agnostic generalization of
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md).
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md).
 In fact,
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 is implemented as a thin wrapper around
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 with a default label of “Randomized.” Both produce identical diagram
 structures; the distinction is semantic, reflecting whether the arm
 assignment was randomized or observational.
@@ -339,7 +339,7 @@ and terminal cross-classification of results.
 ### **Example 7:** Index Test and Reference Standard
 
 The
-[`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md)
+[`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md)
 function provides the inverted label semantics required by STARD. Given
 a label such as “Index test,” it automatically generates the side box
 label “Did not receive index test” and the count box label “Received
@@ -377,7 +377,7 @@ flowchart(example7)
 ![](enrollment_diagrams_files/figure-html/unnamed-chunk-23-1.png)
 
 The
-[`endpoint()`](https://phmcc.codeberg.page/selecta/reference/endpoint.md)
+[`endpoint()`](https://phmcc.codefloe.page/selecta/reference/endpoint.md)
 function accepts a `breakdown` argument to display sub-classifications
 within the terminal box (or boxes). A single named numeric vector
 itemizes one terminal box; a list of named numeric vectors (one per arm)
@@ -392,7 +392,7 @@ index-test result.
 ## Cohort Extraction
 
 In data mode, the
-[`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md)
+[`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md)
 function returns the dataset remaining after all exclusion criteria have
 been applied, enabling a seamless transition from diagram construction
 to statistical analysis:
@@ -404,7 +404,7 @@ dim(final_data)
 ```
 
 When arms are present,
-[`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md)
+[`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md)
 returns the combined dataset by default. Per-arm datasets are available
 via `split = TRUE` or by specifying a single arm:
 
@@ -416,7 +416,7 @@ vapply(arm_data, nrow, integer(1L))
 ```
 
 The
-[`cohorts()`](https://phmcc.codeberg.page/selecta/reference/cohorts.md)
+[`cohorts()`](https://phmcc.codefloe.page/selecta/reference/cohorts.md)
 function returns stage-by-stage snapshots of the dataset at each
 exclusion step. Each element is a list with `included`, `excluded`,
 `n_included`, and `n_excluded`, allowing inspection of either the
@@ -484,7 +484,7 @@ summary(example1)
 ```
 
 The
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 function returns the recommended figure dimensions (in inches) without
 rendering:
 
@@ -501,7 +501,7 @@ recdims(example1)
 ## Saving to File
 
 The
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 function saves the diagram to a file (PDF, PNG, SVG, or TIFF) with
 auto-computed dimensions:
 
@@ -517,9 +517,9 @@ flowsave(example1, "consort_2arm.pdf", width = 10, height = 12)
 ```
 
 All visual parameters accepted by
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 are also accepted by
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md):
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md):
 
 ``` r
 flowsave(example1, "consort_2arm_cf.pdf",
@@ -531,14 +531,14 @@ flowsave(example1, "consort_2arm_cf.pdf",
 ## Further Reading
 
 - [Systematic
-  Reviews](https://phmcc.codeberg.page/selecta/articles/systematic_reviews.md):
+  Reviews](https://phmcc.codefloe.page/selecta/articles/systematic_reviews.md):
   PRISMA and MOOSE diagrams with top-level source convergence
 - [Split-and-Recombine
-  Diagrams](https://phmcc.codeberg.page/selecta/articles/split_recombine.md):
+  Diagrams](https://phmcc.codefloe.page/selecta/articles/split_recombine.md):
   Hybrid topologies for screening validation and exposure classification
 - [Advanced
-  Workflows](https://phmcc.codeberg.page/selecta/articles/advanced_workflows.md):
+  Workflows](https://phmcc.codefloe.page/selecta/articles/advanced_workflows.md):
   Factorial (nested-split) designs and hierarchical exclusion reasons
 - [Graphviz
-  Export](https://phmcc.codeberg.page/selecta/articles/graphviz_export.md):
+  Export](https://phmcc.codefloe.page/selecta/articles/graphviz_export.md):
   DOT output for Graphviz/DiagrammeR rendering

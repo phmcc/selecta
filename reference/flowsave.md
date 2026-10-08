@@ -5,7 +5,7 @@ are PDF, PNG, SVG, and TIFF (inferred from the file extension). The
 `grid` engine renders via R graphics devices; the `dot` engine pipes
 Graphviz output through the system `dot` binary. Dimensions are computed
 automatically from diagram content via
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 unless overridden.
 
 ## Usage
@@ -90,7 +90,7 @@ flowsave(
 
   Additional styling and formatting arguments forwarded to the selected
   engine; see
-  [`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+  [`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
   for the full descriptions.
 
   `engine = "grid"`
@@ -134,9 +134,9 @@ and needs no external software, whereas image output shells out to the
 system `dot` binary and therefore requires Graphviz on the `PATH`.
 
 When sizing automatically, `flowsave()` calls
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 once and reuses the computed layout, so a separate
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 call is unnecessary. With the `grid` engine, the file written and the
 dimensions used are reported through a
 [`message()`](https://rdrr.io/r/base/message.html) unless
@@ -147,16 +147,16 @@ the layout, so it reports nothing.
 
 ## See also
 
-[`flowchart`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 for interactive rendering,
-[`recdims`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+[`recdims`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 for dimension recommendations
 
 Other flowchart output functions:
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md),
-[`print.selecta()`](https://phmcc.codeberg.page/selecta/reference/print.selecta.md),
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md),
-[`summary.selecta()`](https://phmcc.codeberg.page/selecta/reference/summary.selecta.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md),
+[`print.selecta()`](https://phmcc.codefloe.page/selecta/reference/print.selecta.md),
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md),
+[`summary.selecta()`](https://phmcc.codefloe.page/selecta/reference/summary.selecta.md)
 
 ## Examples
 
@@ -170,15 +170,15 @@ flow <- enroll(n = 500) |>
 # the example respects CRAN's no-write policy; in practice any
 # desired path may be supplied.
 flowsave(flow, file.path(tempdir(), "consort.pdf"))
-#> Flowchart saved to /tmp/RtmpE9xe9K/consort.pdf (width = 3.4 in, height = 2.5 in)
+#> Flowchart saved to /tmp/RtmpQueqYw/consort.pdf (width = 3.4 in, height = 2.5 in)
 flowsave(flow, file.path(tempdir(), "consort.png"),
          width = 8, height = 10)
-#> Flowchart saved to /tmp/RtmpE9xe9K/consort.png (width = 8.0 in, height = 10.0 in)
+#> Flowchart saved to /tmp/RtmpQueqYw/consort.png (width = 8.0 in, height = 10.0 in)
 
 # Dimensions may be given, or computed, in metric units.
 flowsave(flow, file.path(tempdir(), "consort_metric.pdf"),
          width = 180, height = 240, units = "mm")
-#> Flowchart saved to /tmp/RtmpE9xe9K/consort_metric.pdf (width = 180.0 mm, height = 240.0 mm)
+#> Flowchart saved to /tmp/RtmpQueqYw/consort_metric.pdf (width = 180.0 mm, height = 240.0 mm)
 
 # Suppress the message reporting the file written.
 flowsave(flow, file.path(tempdir(), "consort_quiet.pdf"), quiet = TRUE)

@@ -34,22 +34,22 @@ checks (confirming arm totals, extracting the final analyzed count) and
 for embedding flow figures in tables or reports. The returned object is
 a plain `data.table` and may be filtered or joined like any other. For a
 human-readable console view use
-[`print.selecta()`](https://phmcc.codeberg.page/selecta/reference/print.selecta.md);
+[`print.selecta()`](https://phmcc.codefloe.page/selecta/reference/print.selecta.md);
 to render the diagram use
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md).
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md).
 
 ## See also
 
-[`print.selecta`](https://phmcc.codeberg.page/selecta/reference/print.selecta.md)
+[`print.selecta`](https://phmcc.codefloe.page/selecta/reference/print.selecta.md)
 for a console summary,
-[`flowchart`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 for rendering
 
 Other flowchart output functions:
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md),
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md),
-[`print.selecta()`](https://phmcc.codeberg.page/selecta/reference/print.selecta.md),
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md),
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md),
+[`print.selecta()`](https://phmcc.codefloe.page/selecta/reference/print.selecta.md),
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 
 ## Examples
 

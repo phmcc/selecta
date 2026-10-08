@@ -40,17 +40,17 @@ engine limitations.
 
 ## See also
 
-[`flowchart`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 for rendering with phase labels
 
 Other flow construction functions:
-[`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md),
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md),
-[`endpoint()`](https://phmcc.codeberg.page/selecta/reference/endpoint.md),
-[`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md),
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md),
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md),
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md),
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md),
+[`endpoint()`](https://phmcc.codefloe.page/selecta/reference/endpoint.md),
+[`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md),
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md),
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md),
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 
 ## Examples
 

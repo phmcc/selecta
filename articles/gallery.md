@@ -11,31 +11,31 @@ split-and-recombine flows, and nested factorial flows, as well as
 principal options for typographic and numeric presentation. Both
 supported graphics rendering engines (`grid` and Graphviz DOT) are
 represented. All figures are rendered with
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 at default settings unless noted otherwise.
 
 For detailed usage guidance, see the package vignettes: [Enrollment
-Diagrams](https://phmcc.codeberg.page/selecta/articles/enrollment_diagrams.md)
+Diagrams](https://phmcc.codefloe.page/selecta/articles/enrollment_diagrams.md)
 (CONSORT, STROBE, STARD), [Systematic
-Reviews](https://phmcc.codeberg.page/selecta/articles/systematic_reviews.md)
+Reviews](https://phmcc.codefloe.page/selecta/articles/systematic_reviews.md)
 (PRISMA, MOOSE), [Split-and-Recombine
-Diagrams](https://phmcc.codeberg.page/selecta/articles/split_recombine.md)
+Diagrams](https://phmcc.codefloe.page/selecta/articles/split_recombine.md)
 (screening validation, exposure classification), [Graphviz
-Export](https://phmcc.codeberg.page/selecta/articles/graphviz_export.md)
+Export](https://phmcc.codefloe.page/selecta/articles/graphviz_export.md)
 (DOT/DiagrammeR), and [Advanced
-Workflows](https://phmcc.codeberg.page/selecta/articles/advanced_workflows.md).
+Workflows](https://phmcc.codefloe.page/selecta/articles/advanced_workflows.md).
 
 > *n.b.:* To ensure correct font rendering and figure sizing, the
 > `grid`-based diagrams below are displayed using a vignette-only helper
 > function (`queue_flow()`) that applies recommended dimensions from
-> [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+> [`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 > via the [`ragg`](https://ragg.r-lib.org/) graphics device, with the
 > standard output function applied afterwards
-> ([`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)).
+> ([`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)).
 > In practice, replace this
-> `queue_flow()`/[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+> `queue_flow()`/[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 > workflow with a call to
-> [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+> [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 > for equivalent printed results:
 >
 > ``` r
@@ -44,7 +44,7 @@ Workflows](https://phmcc.codeberg.page/selecta/articles/advanced_workflows.md).
 > ```
 >
 > Using
-> [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+> [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 > ensures that the figure dimensions are always large enough to
 > accommodate the diagram content, and it is the preferred method for
 > saving flow diagram outputs in `selecta`.
@@ -175,24 +175,24 @@ flowchart(flow4)
 ## Parallel-Arm Diagrams (CONSORT / STROBE / STARD)
 
 Parallel-arm diagrams use
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 or
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 to split the flow into independent columns that proceed to their own
 endpoints. This is the standard topology for CONSORT randomized trials
 and STROBE observational studies with exposure groups. Subsequent
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 calls apply within each arm independently. Diagnostic-accuracy (STARD)
 flows share this structure, splitting on the index-test result with
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md).
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md).
 
 ### **Example 5:** Data-Driven Two-Arm Randomization Flow (CONSORT)
 
 A standard two-arm CONSORT diagram derived from the `selectaex2`
 dataset. The
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 function splits on the `treatment` column; subsequent
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 calls apply independently within each arm, with discontinuation reasons
 tabulated automatically and ordered by global totals across arms.
 
@@ -291,9 +291,9 @@ flow7 <- enroll(selectaex3, id = "patient_id") |>
 ### **Example 8:** STROBE Observational Study with Per-Arm Labels, Manual
 
 A STROBE-style observational cohort study where the
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 function receives per-arm label vectors after
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md).
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md).
 The exposed and unexposed groups have distinct attrition descriptions
 (“Treatment discontinued” vs. “Initiated treatment”), and distinct
 included labels (“Continued treatment” vs. “Remained unexposed”),
@@ -330,9 +330,9 @@ flowchart(flow8)
 ### **Example 9:** Data-Driven Six-Arm Dose-Finding Flow (STROBE)
 
 A six-arm dose-finding trial from the `selectaex6` dataset, using
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 rather than
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 since dose-finding studies are not always randomized in the CONSORT
 sense.
 
@@ -362,9 +362,9 @@ flowchart(flow9)
 ### **Example 10:** Diagnostic Accuracy Study (STARD), Manual
 
 A STARD-style diagnostic accuracy flow using
-[`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md) to
+[`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md) to
 model test receipt and
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 to split by index test result. Per-arm endpoint breakdowns show the
 cross-classification of target condition status within each test result
 category.
@@ -436,10 +436,10 @@ flowchart(flow11,
 ### **Example 12:** Two-by-Two Factorial Trial
 
 A factorial design chains two
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 steps. The second receives a single count vector enumerating the cells
 in parent-major order. A subsequent
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 takes one count per cell, producing an outboard side box for each leaf
 arm:
 
@@ -465,7 +465,7 @@ flowchart(flow12)
 ### **Example 13:** Factorial with Recombination and Custom Palette
 
 A factorial allocation may be pooled on its second factor with
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md),
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md),
 returning the diagram to one stream per first-factor arm. Combined with
 multi-phase banding and a coordinated color palette, the result reports
 both the crossed allocation and the pooled primary comparison in a
@@ -506,12 +506,12 @@ flowchart(flow13,
 
 Systematic review diagrams begin with multiple parallel identification
 streams created by
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md),
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md),
 which converge via
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 into a single record pool. Subsequent exclusion steps document the
 screening cascade. The
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)
 function supports flat lists (single column), grouped sources (multiple
 columns with headers), and up to three source groups matching the PRISMA
 2020 structure.
@@ -519,7 +519,7 @@ columns with headers), and up to three source groups matching the PRISMA
 ### **Example 14:** Single-Column Systematic Review (PRISMA), Manual
 
 A compact PRISMA flow using flat (ungrouped)
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)
 to list all databases in a single column without headers. This is
 suitable for smaller reviews where the three-column PRISMA 2020 layout
 would be unnecessarily wide.
@@ -548,11 +548,11 @@ flowchart(flow14)
 
 A full PRISMA 2020 flow diagram with three source columns (previous
 studies, databases and registers, and other methods). The
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)
 function creates grouped parallel streams with column headers;
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 merges them into a single record pool. Multiple sequential
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 calls with `show_count = FALSE` stack their side boxes without
 intermediate count nodes, matching the PRISMA convention of listing
 removal reasons alongside a single screening flow.
@@ -628,10 +628,10 @@ flowchart(flow16, count_first = TRUE)
 ## Split-and-Recombine Diagrams
 
 Split-and-recombine diagrams use
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 to divide a population into strata that are characterized independently,
 then
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 to merge the strata back into a single downstream flow. This topology is
 distinct from both permanent allocation (CONSORT, where arms proceed to
 separate endpoints) and top-level source convergence (PRISMA, where
@@ -714,7 +714,7 @@ flowchart(flow18, count_first = TRUE)
 An adaptive design where patients are stratified by baseline risk,
 recombined after characterization, and then randomized, demonstrating
 re-splitting after a prior
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md).
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md).
 The layout engine correctly scopes each split-combine span so that the
 converge arrows for the first split do not interfere with the second
 split’s arm layout.
@@ -765,9 +765,9 @@ guideline.
 
 A hybrid design combining multi-source entry with downstream
 randomization. Three study sites are pooled via
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)
 and
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md),
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md),
 screening failures are documented with sub-reasons, and the remaining
 cohort is randomized into two arms with per-arm discontinuation reasons
 supplied as a list of named vectors.
@@ -808,9 +808,9 @@ flowchart(flow20)
 The preceding examples use the default Helvetica typeface and United
 States number formatting. The `grid` engine exposes both as parameters
 of
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 (and, identically, of
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)),
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)),
 allowing the diagram to match the typographic and locale conventions of
 the surrounding document. Box dimensions are recomputed from the metrics
 of the selected font, so the layout adapts automatically; no manual
@@ -950,9 +950,9 @@ suitable for rendering through the system `dot` binary, the `DiagrammeR`
 R package, or any other Graphviz-compatible tool. The examples below use
 the same source pipelines as elsewhere in the gallery but pass
 `engine = "dot"` to
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 to obtain the alternate layout. See the [Graphviz
-Export](https://phmcc.codeberg.page/selecta/articles/graphviz_export.md)
+Export](https://phmcc.codefloe.page/selecta/articles/graphviz_export.md)
 vignette for a full discussion of customization, fallback behavior, and
 the orthogonal-edge option.
 
@@ -985,7 +985,7 @@ dot25 <- flowchart(flow25, engine = "dot")
 Converging multi-source diagrams can also be rendered via the DOT
 engine. Each source column is laid out independently at the top of the
 graph with its header centered above the column, and
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 produces a fan-in to the identified cohort.
 
 ``` r
@@ -1059,7 +1059,7 @@ sub-pixel-accurate centering. The plain default (Examples 25-28) is
 recommended for prototyping and web embedding; the rich variant (this
 example) is recommended when inline typographic emphasis is essential.
 See the [Graphviz
-Export](https://phmcc.codeberg.page/selecta/articles/graphviz_export.md)
+Export](https://phmcc.codefloe.page/selecta/articles/graphviz_export.md)
 vignette for further discussion.
 
 ### **Example 30:** Two-by-Two Factorial Trial (DOT)
@@ -1155,17 +1155,17 @@ dot33 <- flowchart(flow_fac_ortho, engine = "dot", ortho = TRUE,
 ## Further Reading
 
 - [Enrollment
-  Diagrams](https://phmcc.codeberg.page/selecta/articles/enrollment_diagrams.md):
+  Diagrams](https://phmcc.codefloe.page/selecta/articles/enrollment_diagrams.md):
   CONSORT, STROBE, and STARD diagrams with permanent parallel arms
 - [Systematic
-  Reviews](https://phmcc.codeberg.page/selecta/articles/systematic_reviews.md):
+  Reviews](https://phmcc.codefloe.page/selecta/articles/systematic_reviews.md):
   PRISMA and MOOSE diagrams with top-level source convergence
 - [Split-and-Recombine
-  Diagrams](https://phmcc.codeberg.page/selecta/articles/split_recombine.md):
+  Diagrams](https://phmcc.codefloe.page/selecta/articles/split_recombine.md):
   Hybrid topologies for screening validation and exposure classification
 - [Advanced
-  Workflows](https://phmcc.codeberg.page/selecta/articles/advanced_workflows.md):
+  Workflows](https://phmcc.codefloe.page/selecta/articles/advanced_workflows.md):
   Factorial (nested-split) designs and hierarchical exclusion reasons
 - [Graphviz
-  Export](https://phmcc.codeberg.page/selecta/articles/graphviz_export.md):
+  Export](https://phmcc.codefloe.page/selecta/articles/graphviz_export.md):
   DOT output for Graphviz/DiagrammeR rendering

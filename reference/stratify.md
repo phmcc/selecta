@@ -3,7 +3,7 @@
 Divides the enrollment flow into parallel arms. This is the primary
 function for splitting a population by any characteristic: treatment
 assignment, exposure status, diagnostic test result, etc. Subsequent
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 calls apply within each arm independently. While `stratify()` is the
 primary function, `allocate()` is provided as a convenience alias with
 default label `"Randomized"`, suitable for interventional trials
@@ -53,9 +53,9 @@ subsequent pipeline steps operate independently within each arm.
 ## Details
 
 `stratify()` splits the flow into parallel arms, after which each
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 (and the eventual
-[`endpoint()`](https://phmcc.codeberg.page/selecta/reference/endpoint.md))
+[`endpoint()`](https://phmcc.codefloe.page/selecta/reference/endpoint.md))
 applies within every arm. In data mode, `variable` names a column whose
 levels define the arms, optionally relabeled through a named `labels`
 vector; in manual mode, `labels` and `n` give the arm names and per-arm
@@ -66,7 +66,7 @@ counts directly.
 naturally; both record the same step type.
 
 Parallel arms may later be merged with
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 to form a split-and-recombine diagram, and a flow may be split again
 after combining. A second `stratify()` or `allocate()` before combining
 produces a factorial (two-level) split, supported in both data and
@@ -74,19 +74,19 @@ manual modes.
 
 ## See also
 
-[`exclude`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 for per-arm exclusions after splitting,
-[`endpoint`](https://phmcc.codeberg.page/selecta/reference/endpoint.md)
+[`endpoint`](https://phmcc.codefloe.page/selecta/reference/endpoint.md)
 for per-arm endpoints
 
 Other flow construction functions:
-[`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md),
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md),
-[`endpoint()`](https://phmcc.codeberg.page/selecta/reference/endpoint.md),
-[`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md),
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md),
-[`phase()`](https://phmcc.codeberg.page/selecta/reference/phase.md),
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+[`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md),
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md),
+[`endpoint()`](https://phmcc.codefloe.page/selecta/reference/endpoint.md),
+[`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md),
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md),
+[`phase()`](https://phmcc.codefloe.page/selecta/reference/phase.md),
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)
 
 ## Examples
 

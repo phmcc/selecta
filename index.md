@@ -1,4 +1,4 @@
-# selecta [![selecta website](reference/figures/selecta.png)](https://phmcc.codeberg.page/selecta/)
+# selecta [![selecta website](reference/figures/selecta.png)](https://phmcc.codefloe.page/selecta/)
 
 > ***selecta*** \| /seˈlɛk.ta/ \| *Latin, n. pl. of* selectum*, past
 > participle of* seligere*: things chosen out*
@@ -20,7 +20,7 @@ process.
 
 For a more comprehensive description of this package and its features,
 see the [full documentation and
-vignettes](https://phmcc.codeberg.page/selecta/).
+vignettes](https://phmcc.codefloe.page/selecta/).
 
 ![Flow diagram showcasing multi-source confluence, split-and-recombine
 flow, and factorial topology](reference/figures/README_hero.png)
@@ -33,7 +33,7 @@ The stable release of this package can be installed from CRAN.
 install.packages("selecta")
 ```
 
-Alternatively, install it directly from GitHub (stable) or Codeberg
+Alternatively, install it directly from GitHub (stable) or Codefloe
 (development):
 
 ``` r
@@ -41,7 +41,7 @@ Alternatively, install it directly from GitHub (stable) or Codeberg
 devtools::install_github("phmcc/selecta")
 
 # Development version
-devtools::install_git("https://codeberg.org/phmcc/selecta.git")
+devtools::install_git("https://codefloe.com/phmcc/selecta.git")
 ```
 
 ## Package Composition
@@ -64,9 +64,9 @@ The architecture of `selecta` reflects four guiding principles:
 
 3.  **Diagram–data duality.** A `selecta` object is simultaneously a
     diagram specification and a data pipeline.
-    [`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+    [`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
     renders the visual output;
-    [`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md)
+    [`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md)
     extracts the resulting dataset. The same object serves both
     reporting and analysis.
 
@@ -95,11 +95,11 @@ framework:
 
 | Guideline | Study type | Key functions |
 |:---|:---|:---|
-| **CONSORT** | Randomized trials | [`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md), [`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md) |
-| **STROBE** | Observational cohorts | [`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md), [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md) |
-| **STARD** | Diagnostic accuracy | [`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md), [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md), [`endpoint()`](https://phmcc.codeberg.page/selecta/reference/endpoint.md) |
-| **PRISMA** | Systematic reviews | [`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md), [`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md) |
-| **MOOSE** | Meta-analyses of observational studies | [`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md), [`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md), [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md) |
+| **CONSORT** | Randomized trials | [`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md), [`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md) |
+| **STROBE** | Observational cohorts | [`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md), [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md) |
+| **STARD** | Diagnostic accuracy | [`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md), [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md), [`endpoint()`](https://phmcc.codefloe.page/selecta/reference/endpoint.md) |
+| **PRISMA** | Systematic reviews | [`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md), [`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md) |
+| **MOOSE** | Meta-analyses of observational studies | [`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md), [`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md), [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md) |
 
 ### Functional Reference
 
@@ -110,31 +110,31 @@ Functions for building the enrollment flow. Each returns a modified
 
 | Function | Purpose | Guideline |
 |:---|:---|:---|
-| [`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md) | Initialize a flow from data (`data`, `id`) or counts (`n`) | CONSORT, STROBE, STARD, split-and-recombine |
-| [`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md) | Initialize a multi-source flow with parallel columns | PRISMA, MOOSE |
-| [`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md) | Remove participants matching a criterion, with optional sub-reasons | All |
-| [`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md) | Split into randomized arms (alias for [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)) | CONSORT |
-| [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md) | Split into parallel strata by any characteristic | STROBE, STARD, MOOSE |
-| [`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md) | Record a test/procedure receipt step | STARD |
-| [`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md) | Merge parallel streams into a single flow | PRISMA, MOOSE, split-and-recombine |
-| [`endpoint()`](https://phmcc.codeberg.page/selecta/reference/endpoint.md) | Designate the terminal node(s) | All |
-| [`phase()`](https://phmcc.codeberg.page/selecta/reference/phase.md) | Label a study phase (vertical text in left margin) | All |
+| [`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md) | Initialize a flow from data (`data`, `id`) or counts (`n`) | CONSORT, STROBE, STARD, split-and-recombine |
+| [`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md) | Initialize a multi-source flow with parallel columns | PRISMA, MOOSE |
+| [`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md) | Remove participants matching a criterion, with optional sub-reasons | All |
+| [`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md) | Split into randomized arms (alias for [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)) | CONSORT |
+| [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md) | Split into parallel strata by any characteristic | STROBE, STARD, MOOSE |
+| [`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md) | Record a test/procedure receipt step | STARD |
+| [`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md) | Merge parallel streams into a single flow | PRISMA, MOOSE, split-and-recombine |
+| [`endpoint()`](https://phmcc.codefloe.page/selecta/reference/endpoint.md) | Designate the terminal node(s) | All |
+| [`phase()`](https://phmcc.codefloe.page/selecta/reference/phase.md) | Label a study phase (vertical text in left margin) | All |
 
 #### Rendering and export
 
 | Function | Purpose |
 |:---|:---|
-| [`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md) | Render the diagram (grid graphics or Graphviz DOT) |
-| [`plot()`](https://rdrr.io/r/graphics/plot.default.html) | S3 alias for [`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md) |
-| [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md) | Save to file (PDF, PNG, SVG, TIFF) with auto-computed dimensions |
-| [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md) | Compute recommended figure dimensions from diagram content |
+| [`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md) | Render the diagram (grid graphics or Graphviz DOT) |
+| [`plot()`](https://rdrr.io/r/graphics/plot.default.html) | S3 alias for [`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md) |
+| [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md) | Save to file (PDF, PNG, SVG, TIFF) with auto-computed dimensions |
+| [`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md) | Compute recommended figure dimensions from diagram content |
 
 #### Data extraction
 
 | Function | Purpose |
 |:---|:---|
-| [`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md) | Extract the final analysis-ready dataset |
-| [`cohorts()`](https://phmcc.codeberg.page/selecta/reference/cohorts.md) | Extract datasets at every intermediate stage |
+| [`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md) | Extract the final analysis-ready dataset |
+| [`cohorts()`](https://phmcc.codefloe.page/selecta/reference/cohorts.md) | Extract datasets at every intermediate stage |
 
 #### Inspection
 
@@ -147,7 +147,7 @@ Functions for building the enrollment flow. Each returns a modified
 
 `selecta` supports two modes, selected automatically by the arguments
 passed to
-[`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md):
+[`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md):
 
 | Workflow | Data mode | Manual mode |
 |:---|:---|:---|
@@ -155,7 +155,7 @@ passed to
 | **Exclusions** | `exclude("Label", criterion = <condition>)` | `exclude("Label", n = 50)` |
 | **Arms** | `allocate("treatment_column")` | `allocate(labels = c("A", "B"), n = c(300, 300))` |
 | **Sub-reasons** | Tabulated from one or two columns (`reasons`) | Named vector, or named list for nested reasons (`reasons`) |
-| **Cohort extraction** | Available via [`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md) | Not applicable |
+| **Cohort extraction** | Available via [`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md) | Not applicable |
 
 ### Flow Topologies
 
@@ -164,10 +164,10 @@ happens after a split:
 
 | Topology | Split | Merge | Use case |
 |:---|:---|:---|:---|
-| Permanent arms | [`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md) / [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md) | None | CONSORT, STROBE |
-| Source convergence | [`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md) | [`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md) | PRISMA, MOOSE |
-| Split-and-recombine | [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md) | [`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md) | Screening validation, exposure classification |
-| Factorial (nested split) | [`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md) / [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md), twice | Optional [`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md) | Factorial trials, cross-classified cohorts |
+| Permanent arms | [`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md) / [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md) | None | CONSORT, STROBE |
+| Source convergence | [`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md) | [`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md) | PRISMA, MOOSE |
+| Split-and-recombine | [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md) | [`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md) | Screening validation, exposure classification |
+| Factorial (nested split) | [`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md) / [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md), twice | Optional [`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md) | Factorial trials, cross-classified cohorts |
 
 ### Visual Customization
 
@@ -233,7 +233,7 @@ distinction:
 _(✓ Full support \| ◐ Partial support \| — Not available)
 
 A detailed feature comparison is available in the [package
-documentation](https://phmcc.codeberg.page/selecta/articles/feature_comparison.html).
+documentation](https://phmcc.codefloe.page/selecta/articles/feature_comparison.html).
 
 ## Illustrative Example
 
@@ -260,12 +260,12 @@ data("selectaex2")
 
 Use a pipe-based workflow to sequentially string together the various
 elements of the flowchart, from top to bottom. The
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 function pares down the dataset based on the condition supplied to the
 `criterion` parameter, whereas
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)/[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)/[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 sets arms. Export the output using the
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 function.
 
 ``` r
@@ -306,7 +306,7 @@ drug_a <- cohort(flow, arm = "Drug A")
 ```
 
 Moreover, every intermediate stage is accessible via
-[`cohorts()`](https://phmcc.codeberg.page/selecta/reference/cohorts.md),
+[`cohorts()`](https://phmcc.codefloe.page/selecta/reference/cohorts.md),
 enabling inspection of participants removed at each step:
 
 ``` r
@@ -324,14 +324,14 @@ stages[["Failed eligibility"]]$included
 ### Repository
 
 - **Primary development**:
-  [codeberg.org/phmcc/selecta](https://codeberg.org/phmcc/selecta)
+  [codefloe.com/phmcc/selecta](https://codefloe.com/phmcc/selecta)
 - **GitHub releases**:
   [github.com/phmcc/selecta](https://github.com/phmcc/selecta)
 
 ### Contributing
 
 Bug reports and feature requests may be submitted via the issue tracker
-([Codeberg](https://codeberg.org/phmcc/selecta/issues) or
+([Codefloe](https://codefloe.com/phmcc/selecta/issues) or
 [GitHub](https://github.com/phmcc/selecta/issues)). Contributions are
 welcome; prospective contributors are directed to the contributing
 guidelines prior to submitting pull requests.
@@ -361,7 +361,7 @@ To cite selecta in publications, use:
 
   McClelland PH (2026). _selecta: EQUATOR-Style Enrollment Diagrams
   for Clinical Studies_. R package version 0.6.1,
-  <https://phmcc.codeberg.page/selecta/>.
+  <https://phmcc.codefloe.page/selecta/>.
 
 A BibTeX entry for LaTeX users is
 
@@ -370,19 +370,19 @@ A BibTeX entry for LaTeX users is
     author = {Paul Hsin-ti McClelland},
     year = {2026},
     note = {R package version 0.6.1},
-    url = {https://phmcc.codeberg.page/selecta/},
+    url = {https://phmcc.codefloe.page/selecta/},
   }
 ```
 
 ## Further Resources
 
 - **Function documentation**: `?function_name` or the [reference
-  index](https://phmcc.codeberg.page/selecta/reference/index.html)
+  index](https://phmcc.codefloe.page/selecta/reference/index.html)
 - **Companion package**:
-  [`summata`](https://phmcc.codeberg.page/summata/) for
+  [`summata`](https://phmcc.codefloe.page/summata/) for
   publication-ready summary tables
-- **Issue tracker**: [Codeberg
-  Issues](https://codeberg.org/phmcc/selecta/issues), [GitHub
+- **Issue tracker**: [Codefloe
+  Issues](https://codefloe.com/phmcc/selecta/issues), [GitHub
   Issues](https://github.com/phmcc/selecta/issues)
 
 ------------------------------------------------------------------------

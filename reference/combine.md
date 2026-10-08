@@ -2,7 +2,7 @@
 
 Converges all active parallel streams into a single flow. Used to handle
 either source convergence or split-and-recombine topologies. After
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md),
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md),
 recombines strata that were characterized independently back into a
 unified downstream flow.
 
@@ -17,9 +17,9 @@ combine(.flow, label, sublabel = NULL, n = NULL, reasons = NULL)
 - .flow:
 
   A `selecta` object with active parallel streams (from
-  [`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+  [`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)
   or
-  [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)).
+  [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)).
 
 - label:
 
@@ -49,11 +49,11 @@ subsequent steps operate on the single merged stream.
 
 `combine()` converges the active parallel streams into one node and is
 the counterpart to both entry splits. After
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md),
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md),
 it pools the identification streams of a systematic review; after
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 (or
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)),
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)),
 it recombines strata that were handled independently, producing a
 split-and-recombine diagram.
 
@@ -69,19 +69,19 @@ merged box, which is convenient for naming the recombined cohort.
 
 ## See also
 
-[`sources`](https://phmcc.codeberg.page/selecta/reference/sources.md)
+[`sources`](https://phmcc.codefloe.page/selecta/reference/sources.md)
 for multi-source entry,
-[`stratify`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 for split-and-recombine flows
 
 Other flow construction functions:
-[`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md),
-[`endpoint()`](https://phmcc.codeberg.page/selecta/reference/endpoint.md),
-[`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md),
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md),
-[`phase()`](https://phmcc.codeberg.page/selecta/reference/phase.md),
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md),
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md),
+[`endpoint()`](https://phmcc.codefloe.page/selecta/reference/endpoint.md),
+[`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md),
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md),
+[`phase()`](https://phmcc.codefloe.page/selecta/reference/phase.md),
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md),
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 
 ## Examples
 

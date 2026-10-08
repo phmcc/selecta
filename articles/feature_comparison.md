@@ -74,7 +74,7 @@ hyperlinks.
 | **Data-driven counts** | Participant counts computed automatically from a dataset |
 | **Manual counts** | Participant counts supplied directly by the analyst |
 | **Multi-arm layouts (3+)** | Support for three or more parallel arms with automatic layout |
-| **Factorial (nested-split) designs** | Cross-classification by two factors via chained [`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)/[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md), with parent boxes centered over their sub-arms |
+| **Factorial (nested-split) designs** | Cross-classification by two factors via chained [`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)/[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md), with parent boxes centered over their sub-arms |
 | **Multi-source convergence** | Parallel identification streams merging into a single screening flow |
 | **Split-and-recombine topology** | Fanning a population into strata for independent characterization, then converging to a single stream before the endpoint |
 | **Phase labels** | Vertical labels (*e.g.,* Enrollment, Allocation, Follow-up, Analysis) |
@@ -100,11 +100,11 @@ Most existing packages target a single EQUATOR guideline—typically
 CONSORT or PRISMA—requiring different tools for different study types.
 `selecta` provides a unified API across five guidelines (CONSORT,
 STROBE, STARD, PRISMA, MOOSE), with guideline-specific functions
-([`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
-vs. [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md),
-[`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md),
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md),
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md))
+([`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
+vs. [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md),
+[`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md),
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md),
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md))
 that share common conventions for exclusions, phases, and rendering.
 
 ``` r
@@ -127,13 +127,13 @@ code self-documenting.
 
 `selecta` renders flow shapes that single-split tools cannot express.
 Two
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 or
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 calls in sequence produce a factorial (nested-split) design,
 cross-classifying each arm by a second factor with parent boxes centered
 over their sub-arms.
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 reconverges parallel streams, supporting both split-and-recombine layout
 (stratify, characterize, recombine) and the stepwise pooling of a
 crossed design; it may be applied more than once to collapse a factorial
@@ -171,7 +171,7 @@ enroll(n = 1000) |>
 ### Cohort Extraction
 
 The specialized
-[`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md)
+[`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md)
 function returns the dataset remaining after all exclusion criteria have
 been applied, enabling a seamless transition from diagram construction
 to statistical analysis.
@@ -199,7 +199,7 @@ completes in under one second for typical clinical trial configurations.
 
 ## Additional Resources
 
-- [Gallery](https://phmcc.codeberg.page/selecta/articles/gallery.md) —
+- [Gallery](https://phmcc.codefloe.page/selecta/articles/gallery.md) —
   Example diagrams across all supported guidelines
 - [consort documentation](https://cran.r-project.org/package=consort)
 - [flowchart

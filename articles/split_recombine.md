@@ -14,9 +14,9 @@ following core functions:
 
 | Function | Purpose |
 |:---|:---|
-| [`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md) | Establish the starting cohort from data or a manual count |
-| [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md) | Divide the flow into parallel strata |
-| [`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md) | Merge strata back into a single downstream flow |
+| [`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md) | Establish the starting cohort from data or a manual count |
+| [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md) | Divide the flow into parallel strata |
+| [`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md) | Merge strata back into a single downstream flow |
 
 Thus, the split-and-recombine pipeline adheres to the following basic
 structure:
@@ -33,25 +33,25 @@ enroll(...) |>
 ```
 
 where
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 fans out to parallel arms and
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 converges arms back together. Between the split and the recombination,
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 calls apply independently within each stratum, producing per-stratum
 side boxes.
 
 > *n.b.:* To ensure correct font rendering and figure sizing, the
 > diagrams below are displayed using a vignette-only helper function
 > (`queue_flow()`) that applies recommended dimensions from
-> [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+> [`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 > via the [`ragg`](https://ragg.r-lib.org/) graphics device, with the
 > standard output function applied afterwards
-> ([`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)).
+> ([`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)).
 > In practice, replace this
-> `queue_flow()`/[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+> `queue_flow()`/[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 > workflow with a call to
-> [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+> [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 > for equivalent printed results:
 >
 > ``` r
@@ -60,7 +60,7 @@ side boxes.
 > ```
 >
 > Using
-> [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+> [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 > ensures that the figure dimensions are always large enough to
 > accommodate the diagram content, and it is the preferred method for
 > saving flow diagram outputs in `selecta`.
@@ -116,15 +116,15 @@ flowchart(example1)
 ![](split_recombine_files/figure-html/unnamed-chunk-6-1.png)
 
 The
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 function creates the downward split, and
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 draws converging arrows from each stratum back to a single node. Between
 the two,
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 is called once with a vector of per-stratum counts (`n = c(44, 66)`),
 producing one side box per column. In
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md),
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md),
 the `sublabel` parameter writes a descriptive second line below the main
 heading inside the recombined node, and the flow continues as a single
 stream with standard exclusion steps.
@@ -135,7 +135,7 @@ When per-stratum attrition has distinct causes, the `reasons` argument
 accepts a list of named vectors (one per stratum). Reason ordering is
 harmonized across strata using global totals, consistent with the
 behavior of per-arm reasons after
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md):
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md):
 
 ``` r
 example2 <- enroll(n = 5000, label = "Patients in registry") |>
@@ -173,11 +173,11 @@ flowchart(example2, count_first = TRUE)
 ## Data-Driven Flow
 
 In data mode,
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 accepts a column name rather than explicit labels and counts. The
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 function recombines the per-stratum datasets internally, and
-[`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md)
+[`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md)
 returns the unified post-recombination dataset.
 
 ### **Example 3:** Data-Driven Split and Recombine
@@ -215,13 +215,13 @@ flowchart(example3)
 ## Cohort Extraction
 
 The
-[`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md)
+[`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md)
 and
-[`cohorts()`](https://phmcc.codeberg.page/selecta/reference/cohorts.md)
+[`cohorts()`](https://phmcc.codefloe.page/selecta/reference/cohorts.md)
 functions work with split-and-recombine flows. After a
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 step,
-[`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md)
+[`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md)
 returns the unified recombined dataset rather than a per-arm list:
 
 ``` r
@@ -231,7 +231,7 @@ dim(final)
 ```
 
 The
-[`cohorts()`](https://phmcc.codeberg.page/selecta/reference/cohorts.md)
+[`cohorts()`](https://phmcc.codefloe.page/selecta/reference/cohorts.md)
 function captures snapshots at every stage, including the combine point.
 Each snapshot records the remaining and excluded datasets:
 
@@ -273,9 +273,9 @@ for downstream analysis.
 A flow may be split, recombined, and then split again. This arises in
 adaptive designs where patients are first characterized by a baseline
 variable, recombined, and then randomized. The
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 function permits a second split after
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 has closed the first:
 
 ### **Example 4:** Risk Stratification Followed by Randomization
@@ -316,11 +316,11 @@ flowchart(example4)
 The layout engine scopes each split-combine span independently, so the
 converge arrows from the first split do not interfere with the second
 split’s arm positions. The second split may use either
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 (for observational grouping) or
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 (for randomization); both are permitted after a prior
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md).
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md).
 
 ------------------------------------------------------------------------
 
@@ -339,7 +339,7 @@ control over the layout.
 ## Saving to File
 
 The
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 function saves the diagram to a file (PDF, PNG, SVG, or TIFF) with
 auto-computed dimensions:
 
@@ -355,9 +355,9 @@ flowsave(example1, "screening_validation.pdf", width = 10, height = 12)
 ```
 
 All visual parameters accepted by
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 are also accepted by
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md):
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md):
 
 ``` r
 flowsave(example1, "screening_validation_cf.pdf",
@@ -369,14 +369,14 @@ flowsave(example1, "screening_validation_cf.pdf",
 ## Further Reading
 
 - [Enrollment
-  Diagrams](https://phmcc.codeberg.page/selecta/articles/enrollment_diagrams.md):
+  Diagrams](https://phmcc.codefloe.page/selecta/articles/enrollment_diagrams.md):
   CONSORT, STROBE, and STARD diagrams with permanent parallel arms
 - [Systematic
-  Reviews](https://phmcc.codeberg.page/selecta/articles/systematic_reviews.md):
+  Reviews](https://phmcc.codefloe.page/selecta/articles/systematic_reviews.md):
   PRISMA and MOOSE diagrams with top-level source convergence
 - [Advanced
-  Workflows](https://phmcc.codeberg.page/selecta/articles/advanced_workflows.md):
+  Workflows](https://phmcc.codefloe.page/selecta/articles/advanced_workflows.md):
   Factorial (nested-split) designs and hierarchical exclusion reasons
 - [Graphviz
-  Export](https://phmcc.codeberg.page/selecta/articles/graphviz_export.md):
+  Export](https://phmcc.codefloe.page/selecta/articles/graphviz_export.md):
   DOT output for Graphviz/DiagrammeR rendering

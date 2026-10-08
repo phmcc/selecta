@@ -22,7 +22,7 @@ fmt_n(n, marks = NULL)
 - marks:
 
   List with `big.mark` and `decimal.mark` as returned by
-  [`resolve_number_marks()`](https://phmcc.codeberg.page/selecta/reference/resolve_number_marks.md).
+  [`resolve_number_marks()`](https://phmcc.codefloe.page/selecta/reference/resolve_number_marks.md).
   May be `NULL`, in which case the current global setting is resolved
   automatically. `decimal.mark` is forwarded to
   [`format()`](https://rdrr.io/r/base/format.html) so that locales whose

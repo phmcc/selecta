@@ -2,7 +2,7 @@
 
 Returns the dataset remaining after all exclusion criteria have been
 applied. When arms are defined via
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md),
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md),
 the result is either a single combined `data.table` or a named list of
 per-arm `data.table` objects. Data mode only.
 
@@ -17,7 +17,7 @@ cohort(.flow, split = FALSE, arm = NULL)
 - .flow:
 
   A `selecta` object created in data mode (`data` supplied to
-  [`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md)).
+  [`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md)).
 
 - split:
 
@@ -42,26 +42,26 @@ arm). When `arm` is specified, a single-arm `data.table`.
 the original dataset and returns the rows that survive to the end, so
 the analyst can pass the exact analyzed population to downstream
 modeling. It requires a flow created by supplying `data` to
-[`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md);
+[`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md);
 manual-mode flows carry only counts and therefore raise an error. For an
 unsplit flow the result is a single `data.table`; after
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 or
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md),
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md),
 `split = TRUE` returns one table per arm and `arm` extracts a single
 named arm. To inspect the cohort at every intermediate step rather than
 only the end, use
-[`cohorts()`](https://phmcc.codeberg.page/selecta/reference/cohorts.md).
+[`cohorts()`](https://phmcc.codefloe.page/selecta/reference/cohorts.md).
 
 ## See also
 
-[`cohorts`](https://phmcc.codeberg.page/selecta/reference/cohorts.md)
+[`cohorts`](https://phmcc.codefloe.page/selecta/reference/cohorts.md)
 for stage-by-stage snapshots,
-[`enroll`](https://phmcc.codeberg.page/selecta/reference/enroll.md) for
+[`enroll`](https://phmcc.codefloe.page/selecta/reference/enroll.md) for
 initializing a data-mode flow
 
 Other cohort extraction functions:
-[`cohorts()`](https://phmcc.codeberg.page/selecta/reference/cohorts.md)
+[`cohorts()`](https://phmcc.codefloe.page/selecta/reference/cohorts.md)
 
 ## Examples
 

@@ -3,9 +3,9 @@
 Computes all layout in inches using physical text measurements, then
 renders the diagram within a fixed-margin viewport. Intended to be
 called by
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md)
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md)
 or
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
 rather than directly.
 
 ## Usage
@@ -43,7 +43,7 @@ export_grid(
 - graph:
 
   A laid-out graph (output of
-  [`layout_nodes()`](https://phmcc.codeberg.page/selecta/reference/layout_nodes.md)).
+  [`layout_nodes()`](https://phmcc.codefloe.page/selecta/reference/layout_nodes.md)).
 
 - cex:
 
@@ -161,7 +161,7 @@ export_grid(
   Logical. When `TRUE`, the function computes the layout and canvas
   dimensions but returns before issuing any drawing primitives, so no
   graphics output is produced. Used internally by
-  [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+  [`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
   to size the canvas without the cost of rendering. Defaults to `FALSE`.
 
 ## Value

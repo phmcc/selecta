@@ -5,17 +5,17 @@
 CRAN release: 2026-08-22
 
 - Add `quiet` argument to
-  [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+  [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
   to suppress the message reporting the file written and the dimensions
   used.
 - Add `units` argument to
-  [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+  [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
   and
-  [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md),
+  [`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md),
   accepting “in” (default), “cm”, and “mm”; graphics devices are driven
   in inches internally.
 - Edited
-  [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+  [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
   to report the file written and the dimensions used, as well as whether
   those dimensions were computed or supplied, matching the reporting
   convention of
@@ -23,12 +23,12 @@ CRAN release: 2026-08-22
   Previously, the message was emitted only when a dimension was left
   unspecified.
 - Changed
-  [`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md)
+  [`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md)
   argument order: `units` follows `height` and `quiet` follows
   `sans_serif`. Calls passing `dpi` or `sans_serif` positionally require
   updating.
 - Edited
-  [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+  [`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
   records the units on its result as a “units” attribute.
 - Removed `side_gap_in` argument in the DOT engine exporter; redundant
   with `node_sep`.
@@ -51,16 +51,16 @@ CRAN release: 2026-06-24
   automatically (data mode). Compatible with both `grid` and DOT
   outputs.
 - Rename the `criteria` parameter of
-  [`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+  [`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
   and
-  [`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md)
+  [`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md)
   to `criterion`. The singular reflects that each step defines one
   accountable exclusion with a single reason breakdown; compound
   conditions (`&`, `|`, `!`) remain supported.
 - Expand arithmetic checks.
-  [`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+  [`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
   and
-  [`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md)
+  [`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md)
   now warn when a reason column has no value for some removed rows—such
   rows are grouped under “Other”. Like the manual-flow arithmetic
   checks, this is advisory and toggleable via
@@ -70,11 +70,11 @@ CRAN release: 2026-06-24
 ## *selecta* 0.5.0 (2026-06-01)
 
 - Remove `classify()`. STARD diagrams now use
-  [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+  [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
   on the index-test result with a per-arm `endpoint(breakdown = ...)`
   for the target-condition breakdown, matching the standard STARD
   layout.
-- [`cohorts()`](https://phmcc.codeberg.page/selecta/reference/cohorts.md)
+- [`cohorts()`](https://phmcc.codefloe.page/selecta/reference/cohorts.md)
   snapshot fields renamed: `remaining` to `included` and `n_remaining`
   to `n_included`, mirroring `excluded`/`n_excluded`.
 - Complete CRAN-compliant documentation for all exported functions,
@@ -88,7 +88,7 @@ CRAN release: 2026-06-24
   sub-reason totals; checks remain toggleable via
   `options(selecta.check_arithmetic)`.
 - Performance:
-  [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+  [`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
   no longer issues drawing primitives when only measuring dimensions,
   and data-mode exclusions avoid materializing the excluded subset.
 - Expand vignettes and gallery.
@@ -101,16 +101,16 @@ CRAN release: 2026-06-24
 - Add regional number formatting: US, EU, SI/ISO 31-0 standard, custom.
 - Refine vignette workflows and documentation.
 - Rename `suggest_size()` function to
-  [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md).
+  [`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md).
 - Add logo.
 
 ## *selecta* 0.3.0 (2026-03-14)
 
 - Add “split-and-recombine” topology, accessible through use of
   successive
-  [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+  [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
   and
-  [`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+  [`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
   calls.
 - Add exclusion box formatting edits.
 - Make enhancements to `classify()` to ensure proper alignment.
@@ -128,22 +128,22 @@ CRAN release: 2026-06-24
 - Improve rendering consistency and add specializations for “split”
   diagrams (CONSORT, STROBE).
 - New functions:
-  [`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md),
-  [`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md),
-  [`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md),
+  [`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md),
+  [`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md),
+  [`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md),
   `classify()`,
-  [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)/[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md),
+  [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)/[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md),
   `suggest_size()`, `autoflow()`.
 - Multiple pipeline enhancements for
-  [`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md),
-  [`endpoint()`](https://phmcc.codeberg.page/selecta/reference/endpoint.md),
+  [`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md),
+  [`endpoint()`](https://phmcc.codefloe.page/selecta/reference/endpoint.md),
   and
-  [`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)/[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md).
+  [`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)/[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md).
 - Add font-scaled line spacing.
 - Add count-first display mode.
 - Add comprehensive `testthat` suite.
 - `export_diagram()` renamed to `autodiagram()`.
-- [`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+- [`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
   default for `show_count` changed from `TRUE` to `FALSE`.
 - Add vectorization where possible for performance enhancements.
 

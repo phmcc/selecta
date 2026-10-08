@@ -26,7 +26,7 @@ default:
 
   Default vertical padding between rows, in inches, used by the grid
   engine and by
-  [`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md).
+  [`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md).
   Defaults to `0.25`.
 
 - `selecta.check_arithmetic`:
@@ -34,7 +34,7 @@ default:
   Whether manual-mode count consistency checks emit advisory warnings
   (arm counts not summing to the split total, an exclusion exceeding the
   available count, sub-reasons not summing to their total, or a manual
-  [`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+  [`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
   disagreeing with its streams). The counts are never altered. Defaults
   to `TRUE`.
 
@@ -50,9 +50,9 @@ default:
 
 Useful links:
 
-- <https://phmcc.codeberg.page/selecta>
+- <https://phmcc.codefloe.page/selecta>
 
-- <https://codeberg.org/phmcc/selecta>
+- <https://codefloe.com/phmcc/selecta>
 
 - <https://github.com/phmcc/selecta>
 

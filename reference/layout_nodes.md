@@ -2,9 +2,9 @@
 
 Assigns row (vertical position) and preliminary x (horizontal) positions
 to all nodes. Handles multi-source streams (from
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md)),
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md)),
 arm splits (from
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)),
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)),
 and classification grids.
 
 ## Usage
@@ -18,7 +18,7 @@ layout_nodes(graph)
 - graph:
 
   List from
-  [`compute()`](https://phmcc.codeberg.page/selecta/reference/compute.md).
+  [`compute()`](https://phmcc.codefloe.page/selecta/reference/compute.md).
 
 ## Value
 

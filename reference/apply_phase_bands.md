@@ -4,7 +4,7 @@ Given nodes already positioned in content NPC and a per-phase deficit
 vector, grows each phase band by its own deficit, rigidly translates
 every later phase downward by the cumulative deficit above it, and
 vertically recenters the whole (taller) diagram. Band geometry mirrors
-[`phase_band_deficits()`](https://phmcc.codeberg.page/selecta/reference/phase_band_deficits.md):
+[`phase_band_deficits()`](https://phmcc.codefloe.page/selecta/reference/phase_band_deficits.md):
 the two terminal phases overhang the outermost node by `vpad/4`, and
 adjacent strips are separated by `ph_gap`. Within a band the content is
 placed by:
@@ -49,7 +49,7 @@ apply_phase_bands(
 
   Edge `data.table` (`edge_type`, `from`, `to`); currently unused for
   placement but kept for signature stability with
-  [`phase_band_deficits()`](https://phmcc.codeberg.page/selecta/reference/phase_band_deficits.md).
+  [`phase_band_deficits()`](https://phmcc.codefloe.page/selecta/reference/phase_band_deficits.md).
 
 - phases:
 
@@ -58,7 +58,7 @@ apply_phase_bands(
 - deficit_in:
 
   Numeric per-phase deficit (inches) from
-  [`phase_band_deficits()`](https://phmcc.codeberg.page/selecta/reference/phase_band_deficits.md).
+  [`phase_band_deficits()`](https://phmcc.codefloe.page/selecta/reference/phase_band_deficits.md).
 
 - to_npc_h, to_npc_w:
 

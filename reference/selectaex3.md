@@ -2,7 +2,7 @@
 
 A synthetic dataset of 2,400 patients in a three-arm randomized
 controlled trial. Structure matches
-[`selectaex2`](https://phmcc.codeberg.page/selecta/reference/selectaex2.md)
+[`selectaex2`](https://phmcc.codefloe.page/selecta/reference/selectaex2.md)
 with an additional treatment arm.
 
 ## Usage
@@ -14,7 +14,7 @@ selectaex3
 ## Format
 
 A `data.table` with 2,400 rows. See
-[`selectaex2`](https://phmcc.codeberg.page/selecta/reference/selectaex2.md)
+[`selectaex2`](https://phmcc.codefloe.page/selecta/reference/selectaex2.md)
 for column descriptions.
 
 ## Examples

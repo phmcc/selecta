@@ -15,7 +15,7 @@ cohorts(.flow)
 - .flow:
 
   A `selecta` object created in data mode (`data` supplied to
-  [`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md)).
+  [`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md)).
 
 ## Value
 
@@ -48,24 +48,24 @@ the initial cohort). Each snapshot exposes both the `included` and the
 validating a diagram against the data, auditing why particular
 participants were dropped, or extracting an intermediate population.
 After a
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 or
-[`allocate()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`allocate()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 split, the `included` and `excluded` elements of a per-arm step are
 themselves named lists with one entry per arm; after a factorial
 (two-level) split the entries are the cells, keyed
 `"<parent>: <child>"`. A manual-mode flow has no underlying data and
 therefore raises an error. To obtain only the final analyzed population,
 use
-[`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md).
+[`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md).
 
 ## See also
 
-[`cohort`](https://phmcc.codeberg.page/selecta/reference/cohort.md) for
+[`cohort`](https://phmcc.codefloe.page/selecta/reference/cohort.md) for
 extracting only the final cohort
 
 Other cohort extraction functions:
-[`cohort()`](https://phmcc.codeberg.page/selecta/reference/cohort.md)
+[`cohort()`](https://phmcc.codefloe.page/selecta/reference/cohort.md)
 
 ## Examples
 

@@ -8,16 +8,16 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://codeberg.org/phmcc/selecta/tree/main/inst/CITATION)
+[`inst/CITATION`](https://codefloe.com/phmcc/selecta/tree/main/inst/CITATION)
 
 McClelland PH (2026). *selecta: EQUATOR-Style Enrollment Diagrams for
 Clinical Studies*. R package version 0.6.1,
-<https://phmcc.codeberg.page/selecta/>.
+<https://phmcc.codefloe.page/selecta/>.
 
     @Manual{,
       title = {selecta: EQUATOR-Style Enrollment Diagrams for Clinical Studies},
       author = {Paul Hsin-ti McClelland},
       year = {2026},
       note = {R package version 0.6.1},
-      url = {https://phmcc.codeberg.page/selecta/},
+      url = {https://phmcc.codefloe.page/selecta/},
     }

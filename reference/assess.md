@@ -58,7 +58,7 @@ The updated `selecta` object with an assessment step appended.
 `assess()` models a test or procedure that only part of the cohort
 undergoes, the recurring motif of STARD diagnostic-accuracy diagrams. It
 is implemented as an
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 step with inverted label semantics: the side box reads “Did not receive
 *label*” and the continuing box reads “Received *label*”, so the main
 flow carries those who *were* assessed. In data mode, `criterion` is an
@@ -66,25 +66,25 @@ unquoted logical expression that is `TRUE` for participants who did
 **not** receive the test; in manual mode, `not_received` gives that
 count and `reasons` an optional named breakdown. Chained `assess()`
 steps commonly precede a
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 split on the index-test result, with each terminal box reporting its
 target-condition breakdown.
 
 ## See also
 
-[`exclude`](https://phmcc.codeberg.page/selecta/reference/exclude.md)
+[`exclude`](https://phmcc.codefloe.page/selecta/reference/exclude.md)
 for general exclusion steps,
-[`endpoint`](https://phmcc.codeberg.page/selecta/reference/endpoint.md)
+[`endpoint`](https://phmcc.codefloe.page/selecta/reference/endpoint.md)
 for the terminal diagnosis boxes (STARD)
 
 Other flow construction functions:
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md),
-[`endpoint()`](https://phmcc.codeberg.page/selecta/reference/endpoint.md),
-[`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md),
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md),
-[`phase()`](https://phmcc.codeberg.page/selecta/reference/phase.md),
-[`sources()`](https://phmcc.codeberg.page/selecta/reference/sources.md),
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md),
+[`endpoint()`](https://phmcc.codefloe.page/selecta/reference/endpoint.md),
+[`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md),
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md),
+[`phase()`](https://phmcc.codefloe.page/selecta/reference/phase.md),
+[`sources()`](https://phmcc.codefloe.page/selecta/reference/sources.md),
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 
 ## Examples
 

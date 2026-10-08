@@ -18,7 +18,7 @@ Features expected in near-term releases:
 
 | Feature | Description | Reference |
 |:---|:---|:---|
-| R Markdown / Quarto integration | Native chunk output for [`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md) without the `queue_flow()` workaround | `flowchart`, `consort` |
+| R Markdown / Quarto integration | Native chunk output for [`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md) without the `queue_flow()` workaround | `flowchart`, `consort` |
 | Interactive SVG / HTML output | Optional per-node `tooltip=` / `URL=` attributes in the `dot` engine, so the Graphviz SVG and the [`DiagrammeR::grViz()`](https://rich-iannone.github.io/DiagrammeR/reference/grViz.html) widget carry hover text and clickable hyperlinks (*e.g.,* linking nodes to methods sections) | `PRISMA2020` |
 | ggplot2 rendering engine | Optional `engine = "ggplot"` for compatibility with `patchwork`, `cowplot`, and journal theme systems | `ggconsort`, `flowchart` |
 
@@ -49,22 +49,22 @@ Features under consideration for future releases:
 Contributions to `selecta` are welcome. Prospective contributors
 interested in implementing a roadmap feature or proposing a new one are
 directed to the contributing guidelines in the [package
-repository](https://codeberg.org/phmcc/selecta).
+repository](https://codefloe.com/phmcc/selecta).
 
 ### Bug Reports
 
 Bug reports and feature requests may be submitted via the issue tracker,
-either on [Codeberg](https://codeberg.org/phmcc/selecta/issues) or
+either on [Codefloe](https://codefloe.com/phmcc/selecta/issues) or
 [GitHub](https://github.com/phmcc/selecta/issues).
 
 A report concerning diagram layout—cropping, spacing, phase-label
 wrapping, or figure dimensions—is most useful when accompanied by the
 package’s layout trace. Setting `options(selecta.debug_layout = TRUE)`
 before calling
-[`flowchart()`](https://phmcc.codeberg.page/selecta/reference/flowchart.md),
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md),
+[`flowchart()`](https://phmcc.codefloe.page/selecta/reference/flowchart.md),
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md),
 or
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 causes the computation and rendering functions to print the resolved
 node and edge tables, the computed positions, the recommended
 dimensions, the per-phase band heights, and the generated DOT source.
@@ -77,7 +77,7 @@ round trip.
 ### Development Repository
 
 - **Primary development**:
-  [codeberg.org/phmcc/selecta](https://codeberg.org/phmcc/selecta)
+  [codefloe.com/phmcc/selecta](https://codefloe.com/phmcc/selecta)
 - **GitHub mirror**:
   [github.com/phmcc/selecta](https://github.com/phmcc/selecta)
 
@@ -86,7 +86,7 @@ round trip.
 ## Version History
 
 See the
-[Changelog](https://phmcc.codeberg.page/selecta/articles/news/index.md)
+[Changelog](https://phmcc.codefloe.page/selecta/articles/news/index.md)
 for a detailed history of changes in each release.
 
 ------------------------------------------------------------------------
@@ -94,9 +94,9 @@ for a detailed history of changes in each release.
 ## Additional Resources
 
 - [Feature
-  Comparison](https://phmcc.codeberg.page/selecta/articles/feature_comparison.md):
+  Comparison](https://phmcc.codefloe.page/selecta/articles/feature_comparison.md):
   Comparison with related packages
-- [Gallery](https://phmcc.codeberg.page/selecta/articles/gallery.md):
+- [Gallery](https://phmcc.codefloe.page/selecta/articles/gallery.md):
   Example diagrams across all supported guidelines
 - [consort documentation](https://cran.r-project.org/package=consort)
 - [flowchart

@@ -1,9 +1,9 @@
 # Convert a Length Between Measurement Units
 
 Converts a numeric length between the units accepted by
-[`recdims()`](https://phmcc.codeberg.page/selecta/reference/recdims.md)
+[`recdims()`](https://phmcc.codefloe.page/selecta/reference/recdims.md)
 and
-[`flowsave()`](https://phmcc.codeberg.page/selecta/reference/flowsave.md).
+[`flowsave()`](https://phmcc.codefloe.page/selecta/reference/flowsave.md).
 Inches are the package's internal representation, so conversion is
 routed through inches in both directions.
 

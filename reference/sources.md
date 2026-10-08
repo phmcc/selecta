@@ -43,27 +43,27 @@ supplied as named numeric values; passing named vectors instead of
 scalars groups the sources into labeled columns, and at most three
 groups are supported, matching the standard PRISMA layout. A `sources()`
 flow is operated in manual mode and is normally followed by
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md)
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md)
 to merge the streams into a single downstream node. For a conventional
 single-entry study, use
-[`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md)
+[`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md)
 instead.
 
 ## See also
 
-[`enroll`](https://phmcc.codeberg.page/selecta/reference/enroll.md) for
+[`enroll`](https://phmcc.codefloe.page/selecta/reference/enroll.md) for
 single-source entry,
-[`combine`](https://phmcc.codeberg.page/selecta/reference/combine.md) to
+[`combine`](https://phmcc.codefloe.page/selecta/reference/combine.md) to
 merge parallel streams into a single flow
 
 Other flow construction functions:
-[`assess()`](https://phmcc.codeberg.page/selecta/reference/assess.md),
-[`combine()`](https://phmcc.codeberg.page/selecta/reference/combine.md),
-[`endpoint()`](https://phmcc.codeberg.page/selecta/reference/endpoint.md),
-[`enroll()`](https://phmcc.codeberg.page/selecta/reference/enroll.md),
-[`exclude()`](https://phmcc.codeberg.page/selecta/reference/exclude.md),
-[`phase()`](https://phmcc.codeberg.page/selecta/reference/phase.md),
-[`stratify()`](https://phmcc.codeberg.page/selecta/reference/stratify.md)
+[`assess()`](https://phmcc.codefloe.page/selecta/reference/assess.md),
+[`combine()`](https://phmcc.codefloe.page/selecta/reference/combine.md),
+[`endpoint()`](https://phmcc.codefloe.page/selecta/reference/endpoint.md),
+[`enroll()`](https://phmcc.codefloe.page/selecta/reference/enroll.md),
+[`exclude()`](https://phmcc.codefloe.page/selecta/reference/exclude.md),
+[`phase()`](https://phmcc.codefloe.page/selecta/reference/phase.md),
+[`stratify()`](https://phmcc.codefloe.page/selecta/reference/stratify.md)
 
 ## Examples
 
